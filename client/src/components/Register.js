@@ -10,10 +10,13 @@ const Register = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        const resultAction = await dispatch(register({ username, email, password })); // Wait for the result
+        console.log("Registering with:", { username, email, password, firstName, lastName });
+        const resultAction = await dispatch(register({ username, email, password, firstName, lastName })); // Wait for the result
         if (resultAction.success) { // Check if registration was successful
             navigate('/home'); // Navigate only on success
         } else {
@@ -29,6 +32,22 @@ const Register = () => {
             <div className="w-full max-w-md bg-white p-8 rounded shadow-lg">
                 <h2 className="text-3xl font-bold text-center mb-6">Register</h2>
                 <form onSubmit={handleRegister} className="flex flex-col space-y-4">
+                    <input
+                        type="text"
+                        placeholder="First Name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
+                        required
+                    />
+                    <input
+                        type="text"
+                        placeholder="Last Name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
+                        required
+                    />
                     <input
                         type="text"
                         placeholder="Username"

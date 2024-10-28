@@ -42,9 +42,15 @@ export const login = (username, password) => async (dispatch) => {
 
 
 // Async action to handle registration
-export const register = ({ username, email, password }) => async (dispatch) => {
+export const register = ({ username, email, password, firstName, lastName }) => async (dispatch) => {
   try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', { username, email, password });
+      const response = await axios.post('http://localhost:5000/api/auth/register', {           
+        username, 
+        email, 
+        password, 
+        firstName, 
+        lastName
+      });
       dispatch(registerSuccess(response.data));  // Dispatch success with user data
       return { success: true, data: response.data }; // Return success indication
   } catch (error) {

@@ -17,11 +17,11 @@ router.post('/register', async (req, res) => {
         return res.status(500).send("Database connection error");
     }
 
-    const { username, email, password } = req.body;
+    const { username, email, password, firstName, lastName } = req.body;
 
     // Validation
-    if (!username || !email || !password) {
-        return res.status(400).json({ message: "All fields (username, email, password) are required" });
+    if (!username || !email || !password || !firstName || !lastName) {
+        return res.status(400).json({ message: "All fields (username, email, password, firstName, lastName) are required" });
     }
 
     try {
@@ -29,8 +29,10 @@ router.post('/register', async (req, res) => {
         console.log("Password hashed successfully");
 
         const newUser = await pool.query(
-            "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *",
-            [username, email, hashedPassword]
+            `INSERT INTO users (username, email, password, FirstName, LastName, RoleID, PaymentStatus)
+             VALUES ($1, $2, $3, $4, $5, (SELECT RoleID FROM roles WHERE RoleName = 'member'), FALSE)
+             RETURNING *`,
+            [username, email, hashedPassword, firstName, lastName]
         );
 
         console.log("User inserted into the database:", newUser.rows[0]);
@@ -53,8 +55,12 @@ router.post('/login', async (req, res) => {
         if (user.rows.length > 0) {
             const isMatch = await bcrypt.compare(password, user.rows[0].password);
             if (isMatch) {
-                const token = jwt.sign({ id: user.rows[0].id }, 'your_jwt_secret', { expiresIn: '1h' });
-                res.json({ token });
+                const token = jwt.sign(
+                    { id: user.rows[0].id, role: user.rows[0].roleid, paymentStatus: user.rows[0].paymentstatus },
+                    'your_jwt_secret',
+                    { expiresIn: '1h' }
+                );
+                res.json({ token, user: { username: user.rows[0].username, role: user.rows[0].roleid, paymentStatus: user.rows[0].paymentstatus } });
             } else {
                 res.status(400).send("Invalid credentials");
             }
