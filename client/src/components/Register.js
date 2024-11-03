@@ -16,20 +16,18 @@ const Register = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
         console.log("Registering with:", { username, email, password, firstName, lastName });
-        const resultAction = await dispatch(register({ username, email, password, firstName, lastName })); // Wait for the result
-        if (resultAction.success) { // Check if registration was successful
-            navigate('/home'); // Navigate only on success
+        const resultAction = await dispatch(register({ username, email, password, firstName, lastName }));
+        if (resultAction.success) {
+            navigate('/home');
         } else {
-            // Handle unsuccessful registration (e.g., show an error message)
-            console.error(resultAction.error); // Log error to console for debugging
-            alert("Registration failed: " + resultAction.error); // Show error message to user
+            console.error(resultAction.error);
+            alert("Registration failed: " + resultAction.error);
         }
     };
     
-
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md bg-white p-8 rounded shadow-lg">
+        <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-ucfBlack to-ucfGold text-white">
+            <div className="w-full max-w-md bg-ucfDarkGray bg-opacity-70 p-8 rounded-lg shadow-lg">
                 <h2 className="text-3xl font-bold text-center mb-6">Register</h2>
                 <form onSubmit={handleRegister} className="flex flex-col space-y-4">
                     <input
@@ -37,7 +35,7 @@ const Register = () => {
                         placeholder="First Name"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
+                        className="border border-gray-400 bg-black bg-opacity-40 text-white rounded p-3 focus:outline-none focus:border-ucfGold"
                         required
                     />
                     <input
@@ -45,7 +43,7 @@ const Register = () => {
                         placeholder="Last Name"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
+                        className="border border-gray-400 bg-black bg-opacity-40 text-white rounded p-3 focus:outline-none focus:border-ucfGold"
                         required
                     />
                     <input
@@ -53,7 +51,7 @@ const Register = () => {
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
+                        className="border border-gray-400 bg-black bg-opacity-40 text-white rounded p-3 focus:outline-none focus:border-ucfGold"
                         required
                     />
                     <input
@@ -61,7 +59,7 @@ const Register = () => {
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
+                        className="border border-gray-400 bg-black bg-opacity-40 text-white rounded p-3 focus:outline-none focus:border-ucfGold"
                         required
                     />
                     <input
@@ -69,10 +67,10 @@ const Register = () => {
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
+                        className="border border-gray-400 bg-black bg-opacity-40 text-white rounded p-3 focus:outline-none focus:border-ucfGold"
                         required
                     />
-                    <button type="submit" className="bg-blue-500 text-white font-semibold py-3 rounded hover:bg-blue-600 transition">
+                    <button type="submit" className="bg-ucfGold text-ucfBlack font-semibold py-3 rounded hover:bg-opacity-80 transition">
                         Register
                     </button>
                 </form>

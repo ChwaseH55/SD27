@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../reducers/userReducer';
-import { useNavigate } from 'react-router-dom'; // Change here
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const dispatch = useDispatch();
-    const navigate = useNavigate(); // Change here
+    const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -15,25 +15,27 @@ const Login = () => {
         e.preventDefault();
         const result = await dispatch(login(username, password));
         if (result.error) {
-            setErrorMessage(result.error.message); // Show error if login fails
+            setErrorMessage(result.error.message);
         } else {
-            navigate('/home'); // Use navigate for redirection
+            navigate('/home');
         }
     };
-    
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md bg-white p-8 rounded shadow-lg">
-                <h2 className="text-3xl font-bold text-center mb-6">Login</h2>
-                {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-                <form onSubmit={handleLogin} className="flex flex-col space-y-4">
+        <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-blue-100 to-blue-200">
+            <div className="w-full max-w-lg bg-white p-10 rounded-lg shadow-xl mt-20">
+                <h2 className="text-4xl font-semibold text-center mb-4 text-blue-700">Welcome Back</h2>
+                <p className="text-center text-gray-500 mb-6">
+                    Log in to continue to your dashboard
+                </p>
+                {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
+                <form onSubmit={handleLogin} className="flex flex-col space-y-5">
                     <input
                         type="text"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
+                        className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring focus:ring-blue-300 transition"
                         required
                     />
                     <input
@@ -41,11 +43,14 @@ const Login = () => {
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="border border-gray-300 rounded p-3 focus:outline-none focus:border-blue-500"
+                        className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring focus:ring-blue-300 transition"
                         required
                     />
-                    <button type="submit" className="bg-blue-500 text-white font-semibold py-3 rounded hover:bg-blue-600 transition">
-                        Login
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition"
+                    >
+                        Log In
                     </button>
                 </form>
             </div>
