@@ -60,7 +60,18 @@ router.post('/login', async (req, res) => {
                     'your_jwt_secret',
                     { expiresIn: '1h' }
                 );
-                res.json({ token, user: { username: user.rows[0].username, role: user.rows[0].roleid, paymentStatus: user.rows[0].paymentstatus } });
+                res.json({
+                    token,
+                    user: {
+                        id: user.rows[0].id,
+                        username: user.rows[0].username,
+                        email: user.rows[0].email,
+                        firstName: user.rows[0].firstname,
+                        lastName: user.rows[0].lastname,
+                        role: user.rows[0].roleid,
+                        paymentStatus: user.rows[0].paymentstatus,
+                    }
+                });
             } else {
                 res.status(400).send("Invalid credentials");
             }

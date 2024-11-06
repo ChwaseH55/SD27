@@ -1,0 +1,47 @@
+# Node modules
+node_modules/
+
+# Cache directories for various tools
+**/.cache/
+**/dist/
+**/build/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Environment variable files
+.env
+.env.*    # For cases where you have multiple environment files (e.g., .env.production)
+
+# Editor or IDE settings
+.vscode/
+.idea/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Coverage files for testing
+coverage/
+
+# Miscellaneous
+*.log               # Any other log files
+*.bak               # Backup files
+*.swp               # Swap files for Vim users
+*.tmp               # Temporary files
+
+# Dependency directories or generated files (frontend and backend)
+client/node_modules/
+client/dist/
+client/build/
+server/node_modules/
+server/dist/
+server/build/
