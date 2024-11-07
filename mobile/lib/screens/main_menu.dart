@@ -1,154 +1,71 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
 class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
 
-  void handleClick(String value) {
-    switch (value) {
-      case 'Thing1':
-        break;
-      case 'Thing2':
-        break;
-    }
-}
-
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: const DrawerExample(),
-    );
-  }
-}
-
-class DrawerExample extends StatefulWidget {
-  const DrawerExample({super.key});
-
-  @override
-  State<DrawerExample> createState() => _DrawerExampleState();
-}
-
-class _DrawerExampleState extends State<DrawerExample> {
-  String selectedPage = '';
-
-  @override
-  Widget build(BuildContext context) {
-    const appTitle = 'UCF';
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
           title: const Text(
-            appTitle,
+            'UCF',
             style: TextStyle(fontWeight: FontWeight.w900),
           ),
           centerTitle: true,
           backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
         ),
-      drawer: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.65,
-        height: MediaQuery.of(context).size.height * 1,
-        child: Drawer(
+        drawer: Drawer(
           child: ListView(
+            // Important: Remove any padding from the ListView.
             padding: EdgeInsets.zero,
-            children: <Widget>[
-              const SizedBox(
-                height: 120,
-                child:  DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                  ),
-                  child: Text(
-                    'UCF',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                    ),
-                     textAlign: TextAlign.center,
-                  ),
-                )
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                ),
+                child: Text(
+                  'UCF',
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                  textAlign: TextAlign.center,
+                ),
               ),
               ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text('Profile'),
+                leading: const Icon(
+                  Icons.home,
+                ),
+                title: const Text('Disscussion Forum'),
                 onTap: () {
-                  setState(() {
-                    selectedPage = 'Profile';
-                  });
+                  Navigator.pushNamed(context, '/dis');
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.message),
-                title: const Text('Discussion Form'),
+                leading: const Icon(
+                  Icons.train,
+                ),
+                title: const Text('Announcements'),
                 onTap: () {
-                  setState(() {
-                    selectedPage = 'Discussion Form';
-                  });
+                  Navigator.pushNamed(context, '/anc');
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.set_meal),
-                title: const Text('Payments'),
-                onTap: () {
-                  setState(() {
-                    selectedPage = 'Payments';
-                  });
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.calendar_month),
-                title: const Text('Calendar'),
-                onTap: () {
-                  setState(() {
-                    selectedPage = 'Calendar';
-                  });
-                },
-              ),
-               ListTile(
-                leading: const Icon(Icons.videogame_asset),
+                leading: const Icon(
+                  Icons.train,
+                ),
                 title: const Text('Tournaments'),
                 onTap: () {
-                  setState(() {
-                    selectedPage = 'Tournaments';
-                  });
-                },
-              ),
-               ListTile(
-                leading: const Icon(Icons.align_vertical_bottom_rounded),
-                title: const Text('Scores'),
-                onTap: () {
-                  setState(() {
-                    selectedPage = 'Scores';
-                  });
+                  Navigator.pop(context);
                 },
               ),
             ],
           ),
         ),
-      ),
-    );
+        body: const HomePage());
   }
 }
 
-class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({super.key});
-
-  @override
-  State<MyCustomForm> createState() => _MyCustomFormState();
-}
-
-// This class holds the data related to the Form.
-class _MyCustomFormState extends State<MyCustomForm> {
-  // Create a text controller and use it to retrieve the current value
-  // of the TextField.
-  final userController = TextEditingController();
-  final passController = TextEditingController();
-
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    userController.dispose();
-    passController.dispose();
-    super.dispose();
-  }
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -157,30 +74,70 @@ class _MyCustomFormState extends State<MyCustomForm> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         // Login Btn
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(35),
-          ),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/mainMenu');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(12), // Change this value as needed
+        CarouselSlider(
+          items: [
+            Container(
+              margin: const EdgeInsets.all(6.0),
+              decoration: const BoxDecoration(
+                color: Colors.red,
               ),
             ),
-            child: const Text(
-              'Login',
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.black,
+            //1st Image of Slider
+            Container(
+              margin: const EdgeInsets.all(6.0),
+              decoration: BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.circular(8.0),
+                image: const DecorationImage(
+                  image: AssetImage(
+                      "assets/images/dog.jpeg"), // Use your asset image path
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
+            Image.network(
+                "https://appmaking.co/wp-content/uploads/2021/08/appmaking-logo-colored.png"),
+
+            //2nd Image of Slider
+            Container(
+              margin: const EdgeInsets.all(6.0),
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(8.0),
+                image: const DecorationImage(
+                  image: NetworkImage("ADD IMAGE URL HERE"),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+
+            Container(
+              margin: const EdgeInsets.all(6.0),
+              decoration: BoxDecoration(
+                color: Colors.orange,
+                borderRadius: BorderRadius.circular(8.0),
+                image: const DecorationImage(
+                  image: NetworkImage("ADD IMAGE URL HERE"),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ],
+
+          //Slider Container properties
+          options: CarouselOptions(
+            height: 180.0,
+            enlargeCenterPage: true,
+            autoPlay: true,
+            aspectRatio: 16 / 9,
+            autoPlayCurve: Curves.fastOutSlowIn,
+            enableInfiniteScroll: true,
+            autoPlayAnimationDuration: const Duration(milliseconds: 800),
+            viewportFraction: 0.8,
           ),
         ),
+
+    
       ],
     );
   }

@@ -1,4 +1,3 @@
-import 'package:coffee_card/screens/main_menu.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -116,7 +115,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
 
         //Sign up btn
         TextButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, '/reg');
+          },
           child: const Text(
             "Sign Up",
             style: TextStyle(fontSize: 15, color: Colors.black),
