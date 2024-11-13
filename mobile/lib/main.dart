@@ -6,19 +6,20 @@ import 'package:coffee_card/screens/tournament_list.dart';
 import 'package:coffee_card/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() => runApp(MaterialApp(
    title: 'Named Routes Demo',
    
   // Start the app with the "/" named route. In this case, the app starts
   // on the LoginScreen widget.
-  initialRoute: '/',
+  initialRoute: '/mainMenu',
   routes: {
     // When navigating to the "/" route, build the FirstScreen widget.
     '/': (context) => const LoginScreen(),
     '/reg': (context) => const RegisterScreen(),
     '/mainMenu': (context) => const MainMenu(),
     '/dis': (context) => const DiscussionForum(),
-    '/tor': (context) => const AnnouncementList(),
-    '/anc': (context) => const TournamentList(),
+    '/tou': (context) => const TournamentList(),
+    '/annc': (context) => const AnnouncementList(),
   }
 ));

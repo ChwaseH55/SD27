@@ -1,5 +1,5 @@
 name: coffee_card
-description: "A new Flutter project."
+description: "Mobile applicaiton for golf."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  http: ^0.13.5
   carousel_slider: 
   flutter:
     sdk: flutter  
@@ -60,7 +61,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:   
-    - assets/images/
+    - assets/images/dog.jpg
 
 
   # To add assets to your application, add an assets section, like this:
