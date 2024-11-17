@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:coffee_card/widgets/announcement_widget.dart';
+import 'package:coffee_card/widgets/forum_widget.dart';
 
-class AnnouncementList extends StatelessWidget {
-  const AnnouncementList({super.key});
+class DiscussionForum extends StatelessWidget {
+  const DiscussionForum({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'UCF Announcement',
+          'UCF Discussion',
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: const AnnouncementListForm(),
+      body: const DiscussionForumForm(),
     );
   }
 }
 
-class AnnouncementListForm extends StatefulWidget {
-  const AnnouncementListForm({super.key});
+class DiscussionForumForm extends StatefulWidget {
+  const DiscussionForumForm({super.key});
 
   @override
-  State<AnnouncementListForm> createState() => _AnnouncementListForm();
+  State<DiscussionForumForm> createState() => _DiscussionForumForm();
 }
 
 // This class holds the data related to the Form.
-class _AnnouncementListForm extends State<AnnouncementListForm> {
+class _DiscussionForumForm extends State<DiscussionForumForm> {
   final searchController = TextEditingController();
   
   @override
@@ -43,7 +43,7 @@ class _AnnouncementListForm extends State<AnnouncementListForm> {
     return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          
+
           // Search input
           Padding(
             padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
@@ -59,12 +59,9 @@ class _AnnouncementListForm extends State<AnnouncementListForm> {
             ),
           ),
 
-          //Adds announcement
-          const AnnouncementWidget(
-            title: 'New Gear',
-            date: '11/13/24',
-            role: 'All',
-            message: 'Come get new gear',
+          const ForumWidget(
+            forumName: 'Name',
+            forumNumber: 89,
           ),
           
         ]);

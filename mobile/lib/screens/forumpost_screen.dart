@@ -1,40 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:coffee_card/widgets/announcement_widget.dart';
+import 'package:coffee_card/widgets/post_widget.dart';
 
-class AnnouncementList extends StatelessWidget {
-  const AnnouncementList({super.key});
+class ForumpostScreen extends StatelessWidget {
+  const ForumpostScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'UCF Announcement',
+          'UCF Post',
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: const AnnouncementListForm(),
+      body: const MyCustomForm(),
     );
   }
 }
 
-class AnnouncementListForm extends StatefulWidget {
-  const AnnouncementListForm({super.key});
+class MyCustomForm extends StatefulWidget {
+  const MyCustomForm({super.key});
 
   @override
-  State<AnnouncementListForm> createState() => _AnnouncementListForm();
+  State<MyCustomForm> createState() => _MyCustomFormState();
 }
 
 // This class holds the data related to the Form.
-class _AnnouncementListForm extends State<AnnouncementListForm> {
-  final searchController = TextEditingController();
-  
+class _MyCustomFormState extends State<MyCustomForm> {
+  // Create a text controller and use it to retrieve the current value
+  // of the TextField.
+  final userController = TextEditingController();
+  final passController = TextEditingController();
+
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    searchController.dispose();
+    userController.dispose();
+    passController.dispose();
     super.dispose();
   }
 
@@ -43,14 +47,13 @@ class _AnnouncementListForm extends State<AnnouncementListForm> {
     return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          
-          // Search input
+          // Username input
           Padding(
             padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
               child: TextField(
-                controller: searchController,
+                controller: userController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Search',
@@ -59,12 +62,10 @@ class _AnnouncementListForm extends State<AnnouncementListForm> {
             ),
           ),
 
-          //Adds announcement
-          const AnnouncementWidget(
-            title: 'New Gear',
-            date: '11/13/24',
-            role: 'All',
-            message: 'Come get new gear',
+          const PostWidget(
+            postName: 'Name',
+            postNumber: 89,
+            likeNumber: 90,
           ),
           
         ]);
