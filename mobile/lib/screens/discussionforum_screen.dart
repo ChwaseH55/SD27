@@ -82,46 +82,7 @@ class _DiscussionForumForm extends State<DiscussionForumForm> {
               forumName: 'Name',
               postNumber: 89,
             ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
-            const ForumWidget(
-              forumName: 'Name',
-              postNumber: 89,
-            ),
+            
               
           ])
     );

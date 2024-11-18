@@ -48,6 +48,18 @@ class _LoginForm extends State<LoginForm> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
+        // Container(
+        //   margin: const EdgeInsets.all(6.0),
+        //   decoration: BoxDecoration(
+        //     color: Colors.green,
+        //     borderRadius: BorderRadius.circular(8.0),
+        //     image: const DecorationImage(
+        //       image: AssetImage(
+        //           "assets/images/dog.jpg"), // Use your asset image path
+        //       fit: BoxFit.cover,
+        //     ),
+        //   ),
+        // ),
         // Username input
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),

@@ -18,7 +18,7 @@ class ForumWidget extends StatelessWidget {
         decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(color: Colors.black),
-            bottom: BorderSide(color: Colors.black),
+            
           ),
         ),
         child: Padding(

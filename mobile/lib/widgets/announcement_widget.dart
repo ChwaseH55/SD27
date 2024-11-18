@@ -26,12 +26,12 @@ class AnnouncementWidget extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.only(left: 20, right: 8, bottom: 10),
+          padding: const EdgeInsets.only(left: 20, right: 8, bottom: 10, top: 5),
           child: Column(
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Text(title),
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700,),),
                   const Spacer(),
                   Text(date),
                 ],

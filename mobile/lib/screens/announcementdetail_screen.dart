@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:coffee_card/widgets/announcementdetails_widget.dart';
 
 class AnnouncementdetailScreen extends StatelessWidget {
   const AnnouncementdetailScreen({super.key});
@@ -14,35 +15,14 @@ class AnnouncementdetailScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: const MainBody(),
+      body: const AnnouncementdetailsWidget(
+        posterName: 'Nathan',
+        posterRole: 'Role',
+        anncDate:'Date/Date/Date' ,
+        anncTitle: 'Title',
+        anncMessage: 'Message',
+      ),
     );
   }
 }
 
-class MainBody extends StatelessWidget {
-  const MainBody({super.key});
-  
-void handleClick(int item) {
-  switch (item) {
-    case 0:
-      break;
-    case 1:
-      break;
-  }
-}
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      Row(children: [const Text('sss'), const Spacer(), PopupMenuButton<int>(
-          onSelected: (item) => handleClick(item),
-          itemBuilder: (context) => [
-            const PopupMenuItem<int>(value: 0, child: Text('One')),
-            const PopupMenuItem<int>(value: 1, child: Text('Two')),
-          ],
-        ),],),
-      const Row(children: [Text('sss', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 30, color: Colors.black, ), )],),
-      const Row(children: [Text('sss', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: Colors.black),)],),
-      const Row(children: [Text('sss', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 45, color: Colors.black),)],)
-    ],);
-  }
-}
