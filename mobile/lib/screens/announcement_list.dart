@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/announcement_widget.dart';
+import 'package:coffee_card/widgets/creationformplus.dart';
 
 class AnnouncementList extends StatelessWidget {
   const AnnouncementList({super.key});
@@ -16,6 +17,7 @@ class AnnouncementList extends StatelessWidget {
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
       body: const AnnouncementListForm(),
+      floatingActionButton: const FloatingBtn(),
     );
   }
 }
@@ -25,6 +27,16 @@ class AnnouncementListForm extends StatefulWidget {
 
   @override
   State<AnnouncementListForm> createState() => _AnnouncementListForm();
+}
+
+class FloatingBtn extends StatelessWidget {
+  const FloatingBtn({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+        alignment: Alignment.bottomRight, child: FormAddWidget());
+  }
 }
 
 // This class holds the data related to the Form.

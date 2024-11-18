@@ -15,20 +15,20 @@ class LoginScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: const MyCustomForm(),
+      body: const LoginForm(),
     );
   }
 }
 
-class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({super.key});
+class LoginForm extends StatefulWidget {
+  const LoginForm({super.key});
 
   @override
-  State<MyCustomForm> createState() => _MyCustomFormState();
+  State<LoginForm> createState() => _LoginForm();
 }
 
 // This class holds the data related to the Form.
-class _MyCustomFormState extends State<MyCustomForm> {
+class _LoginForm extends State<LoginForm> {
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
   final userController = TextEditingController();

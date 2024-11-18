@@ -15,20 +15,20 @@ class RegisterScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: const MyCustomForm(),
+      body: const RegisterForm(),
     );
   }
 }
 
-class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({super.key});
+class RegisterForm extends StatefulWidget {
+  const RegisterForm({super.key});
 
   @override
-  State<MyCustomForm> createState() => _MyCustomFormState();
+  State<RegisterForm> createState() => _RegisterForm();
 }
 
 // This class holds the data related to the Form.
-class _MyCustomFormState extends State<MyCustomForm> {
+class _RegisterForm extends State<RegisterForm> {
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
   final fNameController = TextEditingController();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/post_widget.dart';
+import 'package:coffee_card/widgets/creationformplus.dart';
 
 class ForumpostScreen extends StatelessWidget {
   const ForumpostScreen({super.key});
@@ -15,30 +16,37 @@ class ForumpostScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: const MyCustomForm(),
+      body: const ForumPostForm(),
+      floatingActionButton: const FloatingBtn(),
     );
   }
 }
 
-class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({super.key});
+class ForumPostForm extends StatefulWidget {
+  const ForumPostForm({super.key});
 
   @override
-  State<MyCustomForm> createState() => _MyCustomFormState();
+  State<ForumPostForm> createState() => _ForumPostForm();
+}
+
+class FloatingBtn extends StatelessWidget {
+  const FloatingBtn({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+        alignment: Alignment.bottomRight, child: FormAddWidget());
+  }
 }
 
 // This class holds the data related to the Form.
-class _MyCustomFormState extends State<MyCustomForm> {
-  // Create a text controller and use it to retrieve the current value
-  // of the TextField.
-  final userController = TextEditingController();
-  final passController = TextEditingController();
-
+class _ForumPostForm extends State<ForumPostForm> {
+  final searchController = TextEditingController();
+  
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    userController.dispose();
-    passController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -53,7 +61,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
               child: TextField(
-                controller: userController,
+                controller: searchController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Search',

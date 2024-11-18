@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/forum_widget.dart';
+import 'package:coffee_card/widgets/creationformplus.dart';
 
 class DiscussionForum extends StatelessWidget {
   const DiscussionForum({super.key});
@@ -16,6 +17,7 @@ class DiscussionForum extends StatelessWidget {
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
       body: const DiscussionForumForm(),
+      floatingActionButton: const FloatingBtn(),
     );
   }
 }
@@ -27,10 +29,20 @@ class DiscussionForumForm extends StatefulWidget {
   State<DiscussionForumForm> createState() => _DiscussionForumForm();
 }
 
+class FloatingBtn extends StatelessWidget {
+  const FloatingBtn({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+        alignment: Alignment.bottomRight, child: FormAddWidget());
+  }
+}
+
 // This class holds the data related to the Form.
 class _DiscussionForumForm extends State<DiscussionForumForm> {
   final searchController = TextEditingController();
-  
+
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
@@ -40,30 +52,78 @@ class _DiscussionForumForm extends State<DiscussionForumForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-
-          // Search input
-          Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextField(
-                controller: searchController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Search',
+    return SingleChildScrollView(
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            // Search input
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextField(
+                  controller: searchController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Search',
+                  ),
                 ),
               ),
             ),
-          ),
-
-          const ForumWidget(
-            forumName: 'Name',
-            forumNumber: 89,
-          ),
-          
-        ]);
+              const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+              const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+              const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+              
+          ])
+    );
   }
 }

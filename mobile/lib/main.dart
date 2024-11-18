@@ -6,6 +6,7 @@ import 'package:coffee_card/screens/announcement_list.dart';
 import 'package:coffee_card/screens/tournament_list.dart';
 import 'package:coffee_card/screens/register_screen.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
+import 'package:coffee_card/screens/announcementdetail_screen.dart';
 import 'package:flutter/material.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -14,7 +15,7 @@ void main() => runApp(MaterialApp(
    
   // Start the app with the "/" named route. In this case, the app starts
   // on the LoginScreen widget.
-  initialRoute: '/pos',
+  initialRoute: '/mainMenu',
   routes: {
     // When navigating to the "/" route, build the FirstScreen widget.
     '/': (context) => const LoginScreen(),
@@ -25,5 +26,6 @@ void main() => runApp(MaterialApp(
     '/tou': (context) => const TournamentList(),
     '/annc': (context) => const AnnouncementList(),
     '/anncCrea': (context) => const AnnouncementCreationScreen(),
+    '/anncDetail': (context) => const AnnouncementdetailScreen(),
   }
 ));
