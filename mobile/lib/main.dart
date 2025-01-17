@@ -15,7 +15,7 @@ void main() => runApp(MaterialApp(
    
   // Start the app with the "/" named route. In this case, the app starts
   // on the LoginScreen widget.
-  initialRoute: '/',
+  initialRoute: '/mainMenu',
   routes: {
     // When navigating to the "/" route, build the FirstScreen widget.
     '/': (context) => const LoginScreen(),

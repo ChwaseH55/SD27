@@ -1,5 +1,6 @@
+import 'package:coffee_card/widgets/forumcreation_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:coffee_card/widgets/post_widget.dart';
+import 'package:coffee_card/widgets/post_discussion_widget.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
 
 class ForumpostScreen extends StatelessWidget {
@@ -42,13 +43,6 @@ class FloatingBtn extends StatelessWidget {
 // This class holds the data related to the Form.
 class _ForumPostForm extends State<ForumPostForm> {
   final searchController = TextEditingController();
-  
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +65,12 @@ class _ForumPostForm extends State<ForumPostForm> {
           ),
 
           const PostWidget(
+            postName: 'Name',
+            postNumber: 89,
+            likeNumber: 90,
+          ),
+
+           const ForumCreationWidget(
             postName: 'Name',
             postNumber: 89,
             likeNumber: 90,

@@ -100,8 +100,8 @@ class _LoginForm extends State<LoginForm> {
             onPressed: () {
               loginUser(
                 context: context,
-                username: 'exampleUser',
-                password: 'examplePass',
+                username: userController.text,
+                password: passController.text,
               );
             },
             style: ElevatedButton.styleFrom(

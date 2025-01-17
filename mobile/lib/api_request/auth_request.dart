@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:coffee_card/main.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+String urlAddress = "http://10.0.2.2:5000";
 
 Future<void> registerUser({
   required BuildContext context,
@@ -12,49 +13,64 @@ Future<void> registerUser({
   required String firstName,
   required String lastName,
 }) async {
-  final url = Uri.parse('http://localhost:5000/api/auth/register');
+  try {
+    final url = Uri.parse('$urlAddress/api/auth/register');
 
-  final response = await http.post(
-    url,
-    headers: {"Content-Type": "application/json"},
-    body: jsonEncode({
-      "username": username,
-      "email": email,
-      "password": password,
-      "firstName": firstName,
-      "lastName": lastName,
-    }),
-  );
+    final response = await post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        "username": username,
+        "email": email,
+        "password": password,
+        "firstName": firstName,
+        "lastName": lastName,
+      }),
+    );
 
-  if (response.statusCode == 200) {
-    // Navigate to home screen on success
-    navigatorKey.currentState?.pushNamed('/mainMenu');
-  } else {
-   log('Error with register');
+    if (response.statusCode == 200) {
+      // Navigate to home screen on success
+      navigatorKey.currentState?.pushNamed('/mainMenu');
+      log('Register successfully');
+    } else {
+      log('Error with register');
+    }
+  } catch (e) {
+    log(e.toString());
   }
 }
 
 Future<void> loginUser({
-  required BuildContext context,
   required String username,
   required String password,
+  required BuildContext context,
 }) async {
-  final url = Uri.parse('http://10.0.2.2:5000/api/auth/login');
+  try {
+    final url = Uri.parse('$urlAddress/api/auth/login');
+    final response = await post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        "username": username,
+        "password": password,
+      }),
+    );
 
-  final response = await http.post(
-    url,
-    headers: {"Content-Type": "application/json"},
-    body: jsonEncode({
-      "username": username,
-      "password": password,
-    }),
-  );
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body.toString());
 
-  if (response.statusCode == 200) {
-    // Navigate to home screen on success
-   if (context.mounted) Navigator.pushNamed(context, '/mainMenu');
-  } else {
-   log('Error with login');
+      log(data['token']);
+      log('Login successfully');
+      if(context.mounted) Navigator.pushNamed(context, '/mainMenu');
+    } else {
+      log('failed');
+    }
+  } catch (e) {
+    log(e.toString());
+    
   }
 }
-

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:coffee_card/widgets/forum_widget.dart';
+import 'package:coffee_card/widgets/forum_discussion_widget.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
 
 class DiscussionForum extends StatelessWidget {
@@ -79,6 +79,34 @@ class _DiscussionForumForm extends State<DiscussionForumForm> {
               postNumber: 89,
             ),
               const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
+              forumName: 'Name',
+              postNumber: 89,
+            ),
+            const ForumWidget(
               forumName: 'Name',
               postNumber: 89,
             ),
