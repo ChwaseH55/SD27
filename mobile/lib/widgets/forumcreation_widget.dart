@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ForumCreationWidget extends StatelessWidget {
-  final String postName;
-  final int postNumber;
-  final int likeNumber;
 
   const ForumCreationWidget(
-      {super.key,
-      required this.postName,
-      required this.postNumber,
-      required this.likeNumber});
+      {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +17,14 @@ class ForumCreationWidget extends StatelessWidget {
                     borderRadius: const BorderRadius.all(Radius.circular(20))),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[Text('Create New Forum'), MyCustomForm()],
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 5),
+                      child: Text('Create New Forum',
+                          style: TextStyle(fontWeight: FontWeight.bold))
+                    ),
+                    MyCustomForm()
+                  ],
                 ))));
   }
 }
@@ -56,57 +57,72 @@ class _MyCustomFormState extends State<MyCustomForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(children: <Widget>[
+        padding: const EdgeInsets.only(top: 5,left: 10,right: 10,bottom: 10),
+        child: Column(
+        children: <Widget>[const Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: EdgeInsets.only(left: 34),
+            child: Text('Name',
+                            style: TextStyle(fontWeight: FontWeight.bold))
+          )
+        ),
+                        
           Padding(
               padding: const EdgeInsets.only(bottom: 20),
               child: SizedBox(
-                width: 300,
+                  width: 300,
                   child: TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 10.0,
-                    horizontal: 5.0,
-                  ),
-                  border: OutlineInputBorder(),
-                  hintText: 'name',
-                ),
-              ))),
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 10.0,
+                        horizontal: 5.0,
+                      ),
+                      border: OutlineInputBorder(),
+                      hintText: 'name',
+                    ),
+                  ))),
+                  const Align(
+          alignment: Alignment.centerLeft,
+          child: Text('Description',
+                          style: TextStyle(fontWeight: FontWeight.bold))
+        ),
           SingleChildScrollView(
             child: SizedBox(
                 child: Align(
-                  alignment: Alignment.topLeft,
-                  child: TextField(
-                    textAlign: TextAlign.justify,
-                              controller: descriptionController,
-                              decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 50.0,
-                    horizontal: 10.0,
-                  ),
-                  border: OutlineInputBorder(),
-                  hintText: 'description',
-                              ),
-                            ))
-                ),
+                    alignment: Alignment.topLeft,
+                    child: TextField(
+                      maxLines: 3, // Allow the text box to have multiple lines
+                      textAlignVertical: TextAlignVertical.top,
+                      controller: descriptionController,
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.only(
+                            top: 10, bottom: 30, left: 5, right: 5),
+                        border: OutlineInputBorder(),
+                        hintText: 'description',
+                      ),
+                    ))),
           ),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(12), // Change this value as needed
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(12), // Change this value as needed
+                ),
               ),
-            ),
-            child: const Text(
-              'Create',
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.black,
+              child: const Text(
+                'Create',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.black,
+                ),
               ),
-            ),
+            )
           )
         ]));
   }

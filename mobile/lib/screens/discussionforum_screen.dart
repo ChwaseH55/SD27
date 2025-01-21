@@ -15,6 +15,15 @@ class DiscussionForum extends StatelessWidget {
         ),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+        actions: [
+          TextButton(
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+            ),
+            onPressed: () {Navigator.pushNamed(context, '/createFor');},
+            child: const Text('+ Create Forum'),
+          )
+        ],
       ),
       body: const DiscussionForumForm(),
       floatingActionButton: const FloatingBtn(),

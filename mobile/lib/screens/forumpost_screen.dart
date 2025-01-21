@@ -69,13 +69,6 @@ class _ForumPostForm extends State<ForumPostForm> {
             postNumber: 89,
             likeNumber: 90,
           ),
-
-           const ForumCreationWidget(
-            postName: 'Name',
-            postNumber: 89,
-            likeNumber: 90,
-          ),
-          
         ]);
   }
 }

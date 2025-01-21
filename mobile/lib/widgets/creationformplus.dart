@@ -5,9 +5,31 @@ class FormAddWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return const DisplayCreation();
+  }
+}
+
+class DisplayCreation extends StatefulWidget {
+  const DisplayCreation({super.key});
+
+  @override
+  State<DisplayCreation> createState() => _DisplayCreationState();
+}
+
+class _DisplayCreationState extends State<DisplayCreation> {
+  bool _isVisible = false; // State to track visibility
+
+  void _toggleWidgetVisibility() {
+    setState(() {
+      _isVisible = !_isVisible; // Toggle the visibility state
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // handle button press
+        _toggleWidgetVisibility();
       },
       child: Container(
         width: 56,
@@ -21,7 +43,7 @@ class FormAddWidget extends StatelessWidget {
           color: Colors.black,
           size: 42,
         ),
-      ),
+     ),
     );
   }
 }
