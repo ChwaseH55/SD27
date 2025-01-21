@@ -1,0 +1,82 @@
+$primary-color: #f4b400;
+$secondary-color: #4285f4;
+$background-gradient: linear-gradient(180deg, #222222, $primary-color);
+$text-color-light: #ffffff;
+$text-color-dark: #333333;
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: $background-gradient;
+  color: $text-color-light;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 400px;
+  background: #121212;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: $text-color-light;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+
+  input {
+    margin: 0.5rem 0;
+    padding: 0.75rem;
+    border: 1px solid $text-color-dark;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: $text-color-dark;
+  }
+
+  button {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: $primary-color;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: $text-color-light;
+    cursor: pointer;
+
+    &:hover {
+      background: darken($primary-color, 10%);
+    }
+  }
+}
+
+.footer {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+
+  a {
+    color: $secondary-color;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.responsive-image {
+  width: 100%;
+  max-width: 100px;
+  height: auto;
+}
