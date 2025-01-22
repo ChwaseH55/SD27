@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const usersRoutes = require('./routes/users'); // If exists
+const eventsRouter = require('./routes/events');
+const forumRouter = require('./routes/forum');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,7 +17,9 @@ app.get('/api/test', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-if (usersRoutes) app.use('/api/users', usersRoutes); // Only if user routes exist
+app.use('/api/users', usersRoutes); 
+app.use('/api/events', eventsRouter);
+app.use('/api/forum', forumRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
