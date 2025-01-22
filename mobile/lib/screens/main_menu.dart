@@ -14,6 +14,18 @@ class MainMenu extends StatelessWidget {
           ),
           centerTitle: true,
           backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+          actions: <Widget>[
+    IconButton(
+      icon: const Icon(
+        Icons.account_circle_rounded,
+        color: Colors.white,
+      ),
+      onPressed: () {
+        Navigator.pushNamed(context, '/pro');
+      },
+    )
+  ],
+
         ),
         drawer: Drawer(
           child: ListView(

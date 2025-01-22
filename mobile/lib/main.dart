@@ -9,6 +9,7 @@ import 'package:coffee_card/screens/announcement_creation.dart';
 import 'package:coffee_card/screens/announcementdetail_screen.dart';
 import 'package:coffee_card/screens/forumcreation_screen.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
+import 'package:coffee_card/screens/userprofile_screen.dart';
 import 'package:flutter/material.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -31,6 +32,7 @@ void main() => runApp(MaterialApp(
     '/anncCrea': (context) => const AnnouncementCreationScreen(),
     '/anncDetail': (context) => const AnnouncementdetailScreen(),
     '/tes': (context) => const DisscusisonpostInfoScreen(),
+    '/pro': (context) => const UserProfileScreen(),
     PostsScreenInfo.routeName: (context) =>
         const PostsScreenInfo(),
   }
