@@ -1,48 +1,50 @@
-class PostModelRows {
-  final PostModelWithReply? post;
+class PostResponse {
+  final PostModelReplies? post;
+  final List<ReplyModel>? replies;
 
-  const PostModelRows({required this.post});
+  const PostResponse({
+    required this.post,
+    required this.replies,
+  });
 
-  factory PostModelRows.fromJson(Map<dynamic, dynamic> json) {
-    return PostModelRows(
-      post: json['post'] != null
-          ? PostModelWithReply.fromJson(json['post'])
-          : null, // Map 'post' field to PostModelWithReply
+  factory PostResponse.fromJson(Map<String, dynamic> json) {
+    var repliesList = json['replies'] as List? ?? [];
+    List<ReplyModel> replyItems = repliesList.map((i) => ReplyModel.fromJson(i)).toList();
+
+    return PostResponse(
+      post: PostModelReplies.fromJson(json['post']),
+      replies: replyItems,
     );
   }
+
 }
 
-class PostModelWithReply {
+class PostModelReplies {
   final int? postid;
   final int? userid;
   final String? title;
   final String? content;
   final String? createddate;
   final String? updatedate;
-  final List<ReplyModel>? replies;
 
-  const PostModelWithReply(
-      {required this.postid,
-      required this.userid,
-      required this.title,
-      required this.content,
-      required this.createddate,
-      required this.updatedate,
-      required this.replies});
+  const PostModelReplies({
+    required this.postid,
+    required this.userid,
+    required this.title,
+    required this.content,
+    required this.createddate,
+    required this.updatedate,
+  });
 
-  factory PostModelWithReply.fromJson(Map<dynamic, dynamic> json) {
-    var list = json['replies'] as List? ?? [];
-    List<ReplyModel> replyList =
-        list.map((i) => ReplyModel.fromJson(i)).toList();
-
-    return PostModelWithReply(
-        postid: json['postid'],
-        userid: json['userid'],
-        title: json['title'],
-        content: json['content'],
-        createddate: json['createddate'],
-        updatedate: json['updatedate'],
-        replies: replyList);
+  factory PostModelReplies.fromJson(Map<String, dynamic> json) {
+    return PostModelReplies(
+      postid: json['postid'],
+      userid: json['userid'],
+      title: json['title'],
+      content: json['content'],
+      createddate: json['createddate'],
+      updatedate: json['updatedate'],
+    );
   }
 }
 

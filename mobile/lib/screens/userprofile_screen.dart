@@ -38,9 +38,9 @@ class UserProfileScreen extends StatelessWidget {
                             child: Column(
                               children: <Widget>[
                                 Row(
-                                  children: <Widget>[Text('Name:', style: TextStyle(fontWeight: FontWeight.w900)), Text('asd')],
+                                  children: <Widget>[Text('Name:', style: TextStyle(fontWeight: FontWeight.w900), ), Text('asd')],
                                 ),Row(
-                                  children: <Widget>[Text('Email:'), Text('bfff')],
+                                  children: <Widget>[Text('Email:', style: TextStyle(fontWeight: FontWeight.w900)), Text('bfff')],
                                 )
                               ],
                             )

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:coffee_card/models/likes_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:coffee_card/models/post_model.dart';
@@ -55,31 +56,14 @@ Future<List<PostModel>> getAllPosts() async {
   }
 }
 
-void testMapping() {
-  const jsonResponse = '''
-  {
-    "postid": 1,
-    "userid": 2,
-    "title": "Sample Title",
-    "content": "Sample Content",
-    "createddate": "2025-01-01",
-    "updatedate": "2025-01-10",
-    "replies": []
-  }
-  ''';
 
-  final res = PostModelRows.fromJson(jsonDecode(jsonResponse));
-  debugPrint(res.post?.content);// Should print: "Sample Content"
-}
-
-
-Future<PostModelRows> getPostWithReplies({required String postId}) async {
+Future<PostResponse> getPostWithReplies({required String postId}) async {
   try {
     final url = Uri.parse('$urlAddress/api/forum/posts/$postId');
     final response = await get(url);
-testMapping();
+
     if (response.statusCode == 200) {
-       final res = PostModelRows.fromJson(json.decode(response.body));
+       final res = PostResponse.fromJson(json.decode(response.body));
       return res;
     } else {
       throw Exception('Failed to fetch posts: ${response.statusCode}');
@@ -202,12 +186,12 @@ Future<void> deleteReply({required String replyId}) async {
 }
 
 Future<void> addLike({
-  String? postId,
-  String? replyId,
+  required String postId,
+  required String replyId,
   required String userId,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/likes');
+    final url = Uri.parse('$urlAddress/api/forum/likes');
     final response = await post(
       url,
       headers: <String, String>{
@@ -229,6 +213,26 @@ Future<void> addLike({
     log(e.toString());
   }
 }
+
+Future<List<LikesModel>> getLikes(String postid) async {
+  try {
+    final url = Uri.parse('$urlAddress/api/forum/likes?postid=$postid');
+    final response = await get(url);
+
+    if (response.statusCode == 200) {
+      // Parse JSON response
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      // Map JSON list to a list of Post objects
+      return jsonList.map((json) => LikesModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch posts: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error fetching posts: $e');
+  }
+}
+
+
 
 Future<void> deleteLike({required String likeId}) async {
   try {

@@ -1,7 +1,7 @@
 import 'package:coffee_card/screens/login_screen.dart';
 import 'package:coffee_card/screens/main_menu.dart';
-import 'package:coffee_card/screens/discussionforum_screen.dart';
-import 'package:coffee_card/screens/forumpost_screen.dart';
+import 'package:coffee_card/screens/listofforums_screen.dart';
+import 'package:coffee_card/screens/listofpostsinforum_screen.dart';
 import 'package:coffee_card/screens/announcement_list.dart';
 import 'package:coffee_card/screens/tournament_list.dart';
 import 'package:coffee_card/screens/register_screen.dart';
