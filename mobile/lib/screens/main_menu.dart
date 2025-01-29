@@ -69,6 +69,15 @@ class MainMenu extends StatelessWidget {
                   Navigator.pushNamed(context, '/tou');
                 },
               ),
+              ListTile(
+                leading: const Icon(
+                  Icons.train,
+                ),
+                title: const Text('calendar'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/calendar');
+                },
+              )
             ],
           ),
         ),

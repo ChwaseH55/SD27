@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:coffee_card/widgets/likebutton_widget.dart';
 
 class PostWidget extends StatelessWidget {
   final String postName;
-  
   final int likeNumber;
+  final String postId;
+  final String replyId;
+  final String userId;
 
   const PostWidget(
-      {super.key,
-      required this.postName,
-      
-      required this.likeNumber});
+      {super.key, required this.postName, required this.likeNumber, required this.postId, required this.replyId, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -38,26 +38,8 @@ class PostWidget extends StatelessWidget {
                 Align(
                     alignment: Alignment.centerLeft,
                     child: Row(children: <Widget>[
-                      SizedBox(
-                          width: 60,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              border: Border.all(color: Colors.black, width: 2),
-                              borderRadius: const BorderRadius.all(
-                                  Radius.elliptical(90, 100)),
-                            ),
-                            child: Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: Row(
-                                  children: <Widget>[
-                                    const Icon(
-                                      Icons.thumb_up_alt,
-                                    ),
-                                    Text(likeNumber.toString())
-                                  ],
-                                )),
-                          ))
+                       LikeButton(likeNumber: likeNumber, postId: postId, replyId: replyId, userId: userId,),
+                          
                     ])),
               ],
             ),
@@ -65,3 +47,4 @@ class PostWidget extends StatelessWidget {
         ));
   }
 }
+

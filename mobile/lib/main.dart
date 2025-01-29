@@ -1,3 +1,4 @@
+import 'package:coffee_card/screens/calendar_screen.dart';
 import 'package:coffee_card/screens/login_screen.dart';
 import 'package:coffee_card/screens/main_menu.dart';
 import 'package:coffee_card/screens/listofforums_screen.dart';
@@ -33,6 +34,7 @@ void main() => runApp(MaterialApp(
     '/anncDetail': (context) => const AnnouncementdetailScreen(),
     '/tes': (context) => const DisscusisonpostInfoScreen(),
     '/pro': (context) => const UserProfileScreen(),
+    '/calendar': (context) => const TableBasicsExample(),
     PostsScreenInfo.routeName: (context) =>
         const PostsScreenInfo(),
   }

@@ -61,27 +61,30 @@ class PostsScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final post = posts[index];
                   return FutureBuilder<List<LikesModel>>(
-                    future: getLikes(post.postid.toString()),
+                    future: getLikesWithPostId(post.postid.toString()),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else {
-                        final replies = snapshot.data!;
+                        final likes = snapshot.data!;
                         return GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(
                                 context,
                                 PostsScreenInfo.routeName,
-                                arguments:  PostArguments(3),
+                                arguments:  PostArguments(post.postid),
                               );
                             },
                             child: Padding(
                                 padding: const EdgeInsets.only(top: 5),
                                 child: PostWidget(
                                   postName: post.title,
-                                  likeNumber: replies.length,
+                                  likeNumber: likes.length,
+                                  postId: '12',
+                                  replyId: '213',
+                                  userId: '34',
                                 )));
                       }
                     },
