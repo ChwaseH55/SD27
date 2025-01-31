@@ -7,8 +7,13 @@ import Register from './components/Register';
 import Login from './components/Login';
 import Landing from './components/Landing';
 import Home from './components/Home';
-import Account from './components/Account';
 import Nav from './components/Nav';
+import Account from './components/Account';
+import Forum from './components/Forum';
+import AdminDash from './components/AdminDash';
+import EventsPage from './components/Events';
+import ScoresPage from './components/Scores';
+import Store from './components/Store'; // Ensure this import exists
 import { logout } from './reducers/userReducer';
 
 function App() {
@@ -18,16 +23,15 @@ function App() {
   const dispatch = useDispatch();
 
   const isLandingPage = location.pathname === '/';
-  const { user } = useSelector((state) => state.user); // Get user state from Redux
+  const { user } = useSelector((state) => state.user);
 
-  // Fetch data from the backend on load
   useEffect(() => {
-    axios.get('http://localhost:5000/api/test')
-      .then(response => setData(response.data.message))
-      .catch(error => console.error(error));
+    axios
+      .get('http://localhost:5000/api/test')
+      .then((response) => setData(response.data.message))
+      .catch((error) => console.error(error));
   }, []);
 
-  // Logout function to clear user session
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
@@ -36,15 +40,19 @@ function App() {
   return (
     <div>
       {!isLandingPage && <Nav onLogout={handleLogout} isLoggedIn={!!user} />}
-      <div className="flex items-center justify-center min-h-screen bg-gray-200">
+      <div className="flex flex-col min-h-screen">
         <Routes>
-          <Route path="/account" element={<Account />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/home" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Landing />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/forum" element={<Forum />} />
+          <Route path="/admin" element={<AdminDash />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/scores" element={<ScoresPage />} />
+          <Route path="/store" element={<Store />} /> {/* Correct route */}
         </Routes>
-        {/* Display server data for testing */}
         {data && (
           <p className="absolute bottom-4 text-center w-full text-sm text-gray-600">
             Server Message: {data}
