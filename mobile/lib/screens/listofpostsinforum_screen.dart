@@ -1,6 +1,5 @@
 import 'package:coffee_card/models/likes_model.dart';
 import 'package:coffee_card/models/post_model.dart';
-import 'package:coffee_card/widgets/forumcreation_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/post_discussion_widget.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
@@ -21,7 +20,17 @@ class ForumpostScreen extends StatelessWidget {
         ),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+        actions: [
+          TextButton(
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+            ),
+            onPressed: () {Navigator.pushNamed(context, '/createPost');},
+            child: const Text('+ Create Post'),
+          )
+        ],
       ),
+      
       body: const PostsScreen(),
       floatingActionButton: const FloatingBtn(),
     );
@@ -61,7 +70,7 @@ class PostsScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final post = posts[index];
                   return FutureBuilder<List<LikesModel>>(
-                    future: getLikesWithPostId(post.postid.toString()),
+                    future: getLikesWithPostId(postId: post.postid.toString(),),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());

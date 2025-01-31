@@ -2,14 +2,12 @@ import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:flutter/material.dart';
 
 class AddCommentSheet extends StatefulWidget {
-  final String replyId;
   final String postId;
   final String userId;
   final bool isUpdate;
 
   const AddCommentSheet(
       {super.key,
-      required this.replyId,
       required this.postId,
       required this.userId,
       required this.isUpdate});
@@ -49,8 +47,8 @@ class _AddCommentSheet extends State<AddCommentSheet> {
           const SizedBox(height: 10),
           TextField(
             controller: widget.isUpdate
-                ? commentController
-                : TextEditingController(text: 'test'),
+                ? TextEditingController(text: 'test')
+                : commentController,
             decoration: const InputDecoration(
               hintText: "Enter your comment here",
               border: OutlineInputBorder(),

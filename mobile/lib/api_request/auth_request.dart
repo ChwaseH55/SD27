@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:coffee_card/main.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+
 String urlAddress = "http://10.0.2.2:5000";
 
 Future<void> registerUser({
@@ -62,15 +63,14 @@ Future<void> loginUser({
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body.toString());
-
       log(data['token']);
       log('Login successfully');
-      if(context.mounted) Navigator.pushNamed(context, '/mainMenu');
+
+      if (context.mounted) Navigator.pushNamed(context, '/mainMenu');
     } else {
       log('failed');
     }
   } catch (e) {
     log(e.toString());
-    
   }
 }

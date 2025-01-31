@@ -4,6 +4,7 @@ import 'package:coffee_card/screens/main_menu.dart';
 import 'package:coffee_card/screens/listofforums_screen.dart';
 import 'package:coffee_card/screens/listofpostsinforum_screen.dart';
 import 'package:coffee_card/screens/announcement_list.dart';
+import 'package:coffee_card/screens/postcreation_screen.dart';
 import 'package:coffee_card/screens/tournament_list.dart';
 import 'package:coffee_card/screens/register_screen.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
@@ -34,7 +35,8 @@ void main() => runApp(MaterialApp(
     '/anncDetail': (context) => const AnnouncementdetailScreen(),
     '/tes': (context) => const DisscusisonpostInfoScreen(),
     '/pro': (context) => const UserProfileScreen(),
-    '/calendar': (context) => const TableBasicsExample(),
+    '/calendar': (context) => const TableComplexExample(),
+    '/createPost' : (context) => const CreatePost(),
     PostsScreenInfo.routeName: (context) =>
         const PostsScreenInfo(),
   }

@@ -5,9 +5,15 @@ class PostinfoWidget extends StatelessWidget {
   final String? username;
   final String? posttitle;
   final String? postContent;
+  final String? postId;
+  final String? userId;
+  final int? likeNumber;
 
   const PostinfoWidget({
     super.key,
+    required this.postId,
+    required this.userId,
+    required this.likeNumber,
     required this.username,
     required this.posttitle,
     required this.postContent,
@@ -81,11 +87,11 @@ class PostinfoWidget extends StatelessWidget {
                             fontSize: 28,
                           )),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 35),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 35),
                       child:  Align(
                         alignment: Alignment.centerLeft,
-                        child:  LikeButtonForPost(likeNumber: 22, postId: 'temp', userId: 'temp',)
+                        child:  LikeButtonForPost(likeNumber: likeNumber, postId: postId, userId: userId,)
                       )
                     )
                   ],
@@ -117,9 +123,9 @@ class LikeButton extends StatelessWidget {
 }
 
 class LikeButtonForPost extends StatefulWidget {
-  final int likeNumber;
-  final String postId;
-  final String userId;
+  final int? likeNumber;
+  final String? postId;
+  final String? userId;
 
   const LikeButtonForPost({super.key, required this.likeNumber, required this.postId,  required this.userId});
 
@@ -135,7 +141,7 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
     return GestureDetector(
         onTap: () {
           setState(() {
-            // Toggle light when tapped.
+            
             isLiked = !isLiked;
           });
         },

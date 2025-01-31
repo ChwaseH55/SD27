@@ -9,13 +9,12 @@ import 'package:coffee_card/models/postwithreplies_model.dart';
 String urlAddress = "http://10.0.2.2:5000";
 
 Future<void> createPost({
-  required BuildContext context,
   required String title,
   required String content,
   required String userId,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/posts');
+    final url = Uri.parse('$urlAddress/api/forum/posts');
     final response = await post(
       url,
       headers: <String, String>{
@@ -214,9 +213,9 @@ Future<void> addLike({
   }
 }
 
-Future<List<LikesModel>> getLikesWithPostId(String postid) async {
+Future<List<LikesModel>> getLikesWithPostId({required String postId}) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/likes?postid=$postid');
+    final url = Uri.parse('$urlAddress/api/forum/likes?postid=$postId');
     final response = await get(url);
 
     if (response.statusCode == 200) {

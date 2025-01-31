@@ -15,17 +15,16 @@ class MainMenu extends StatelessWidget {
           centerTitle: true,
           backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
           actions: <Widget>[
-    IconButton(
-      icon: const Icon(
-        Icons.account_circle_rounded,
-        color: Colors.white,
-      ),
-      onPressed: () {
-        Navigator.pushNamed(context, '/pro');
-      },
-    )
-  ],
-
+            IconButton(
+              icon: const Icon(
+                Icons.account_circle_rounded,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, '/pro');
+              },
+            )
+          ],
         ),
         drawer: Drawer(
           child: ListView(
@@ -94,26 +93,17 @@ class HomePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         // Login Btn
+
         CarouselSlider(
           items: [
             Container(
               margin: const EdgeInsets.all(6.0),
-              decoration: const BoxDecoration(
-                color: Colors.red,
-              ),
+              child: const Text('Message'),
             ),
             //1st Image of Slider
             Container(
               margin: const EdgeInsets.all(6.0),
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(8.0),
-                image: const DecorationImage(
-                  image: AssetImage(
-                      "assets/images/dog.jpg"), // Use your asset image path
-                  fit: BoxFit.cover,
-                ),
-              ),
+              child: const Text('Message'),
             ),
           ],
 
@@ -129,8 +119,6 @@ class HomePage extends StatelessWidget {
             viewportFraction: 0.8,
           ),
         ),
-
-    
       ],
     );
   }

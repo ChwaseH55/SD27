@@ -1,3 +1,4 @@
+import 'package:coffee_card/widgets/commentchange_widget.dart';
 import 'package:coffee_card/widgets/likebutton_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -5,8 +6,8 @@ class ReplyWidget extends StatelessWidget {
   final String userName;
   final String? createDate;
   final String? content;
-  final int postId;
   final int replyId;
+  final int postId;
   final int userId;
   final int likeNumber;
 
@@ -15,8 +16,8 @@ class ReplyWidget extends StatelessWidget {
       required this.userName,
       required this.createDate,
       required this.content,
+      required this. replyId,
       required this.postId,
-      required this.replyId,
       required this.userId,
       required this.likeNumber});
 
@@ -68,6 +69,15 @@ class ReplyWidget extends StatelessWidget {
                     PopupMenuItem(
                       child: InkWell(
                         onTap: () {
+                          showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20))),
+                          builder: (context) {
+                            return  AddCommentSheet(postId: postId.toString(), userId: userId.toString(), isUpdate: true,);
+                          });
                           //deleteReply(replyId: replyId.toString());// Close the menu manually
                         },
                         child: const Text("Update Reply"),

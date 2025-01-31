@@ -1,7 +1,7 @@
 import 'package:coffee_card/api_request/user_request.dart';
 import 'package:coffee_card/arguments/postargument.dart';
-import 'package:coffee_card/widgets/postinfo_widget.dart';
 import 'package:coffee_card/widgets/commentchange_widget.dart';
+import 'package:coffee_card/widgets/postinfo_widget.dart';
 import 'package:coffee_card/widgets/reply_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/models/postwithreplies_model.dart';
@@ -39,49 +39,76 @@ class PostsScreenInfo extends StatelessWidget {
         body: FutureBuilder<PostResponse>(
             future: getPostWithReplies(postId: args.id.toString()),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
+              if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (!snapshot.hasData) {
                 return const Center(child: Text('No posts found.'));
               } else {
                 final resPost = snapshot.data!;
                 final replies = resPost.replies;
-                return Column(children: <Widget>[
-                  PostinfoWidget(
-                      username: 'TempUserName',
-                      posttitle: resPost.post?.title,
-                      postContent: resPost.post?.content),
-                  Expanded(child: ListofReplies(replies: replies)),
-                  ElevatedButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(20))),
-                          builder: (context) {
-                            return const AddCommentSheet(postId: 's', replyId: 's', userId: 's', isUpdate: false,);
-                          });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            12), // Change this value as needed
-                      ),
-                    ),
-                    child: const Text(
-                      ' + Add Comment',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ]);
+
+                return FutureBuilder<UserModel>(
+                    future: getUser(userId: resPost.post!.userid.toString()),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (!snapshot.hasData) {
+                        return const Center(child: Text('No posts found.'));
+                      } else {
+                        final userInfo = snapshot.data!;
+                      return FutureBuilder<List<LikesModel>>(
+                    future: getLikesWithPostId(postId: resPost.post!.postid.toString()),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else if (!snapshot.hasData) {
+                        return const Center(child: Text('No posts found.'));
+                      } else {
+                        final likesNum = snapshot.data!.length;
+                      return Column(children: <Widget>[
+                          PostinfoWidget(
+                              username: userInfo.username,
+                              posttitle: resPost.post?.title,
+                              postContent: resPost.post?.content,
+                              likeNumber: likesNum,
+                              postId: resPost.post!.postid.toString(),
+                              userId: userInfo.id.toString(),),
+                          Expanded(child: ListofReplies(replies: replies)),
+                          ElevatedButton(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20))),
+                                  builder: (context) {
+                                    return AddCommentSheet(
+                                      postId: resPost.post!.postid.toString(),
+                                      userId: resPost.post!.userid.toString(),
+                                      isUpdate: false,
+                                    );
+                                  });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color.fromRGBO(186, 155, 55, 1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    12), // Change this value as needed
+                              ),
+                            ),
+                            child: const Text(
+                              ' + Add Comment',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ]);
+                    }});
+                    }});
               }
             }));
   }
@@ -101,9 +128,7 @@ class ListofReplies extends StatelessWidget {
           return FutureBuilder<UserModel>(
               future: getUser(userId: reply!.userid.toString()),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
+                if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData) {
                   return const Center(child: Text('No posts found.'));
@@ -138,4 +163,3 @@ class ListofReplies extends StatelessWidget {
         });
   }
 }
-

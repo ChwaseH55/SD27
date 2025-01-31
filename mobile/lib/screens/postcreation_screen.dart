@@ -1,8 +1,35 @@
+
+import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:flutter/material.dart';
 
-class ForumCreationWidget extends StatelessWidget {
+class CreatePost extends StatelessWidget {
 
-  const ForumCreationWidget(
+  const CreatePost({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    double height = MediaQuery.sizeOf(context).height;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Post Creation',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+      ),
+      body:  Padding(
+        padding: const EdgeInsets.only(top:20),
+        child: SizedBox( height: height*0.4, child: const PostCreationWidget(),)
+      ),
+    );
+  }
+}
+
+class PostCreationWidget extends StatelessWidget {
+
+  const PostCreationWidget(
       {super.key});
 
   @override
@@ -20,7 +47,7 @@ class ForumCreationWidget extends StatelessWidget {
                   children: <Widget>[
                     Padding(
                       padding: EdgeInsets.only(top: 5),
-                      child: Text('Create New Forum',
+                      child: Text('Create New Post',
                           style: TextStyle(fontWeight: FontWeight.bold))
                     ),
                     MyCustomForm()
@@ -42,14 +69,14 @@ class MyCustomForm extends StatefulWidget {
 class _MyCustomFormState extends State<MyCustomForm> {
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
-  final nameController = TextEditingController();
+  final titleController = TextEditingController();
   final descriptionController = TextEditingController();
 
   @override
   void dispose() {
     // Clean up the controller when the widget is removed from the widget tree.
     // This also removes the _printLatestValue listener.
-    nameController.dispose();
+    titleController.dispose();
     descriptionController.dispose();
     super.dispose();
   }
@@ -63,7 +90,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
           alignment: Alignment.centerLeft,
           child: Padding(
             padding: EdgeInsets.only(left: 34),
-            child: Text('Name',
+            child: Text('Post Title',
                             style: TextStyle(fontWeight: FontWeight.bold))
           )
         ),
@@ -73,19 +100,19 @@ class _MyCustomFormState extends State<MyCustomForm> {
               child: SizedBox(
                   width: 300,
                   child: TextField(
-                    controller: nameController,
+                    controller: titleController,
                     decoration: const InputDecoration(
                       contentPadding: EdgeInsets.symmetric(
                         vertical: 10.0,
                         horizontal: 5.0,
                       ),
                       border: OutlineInputBorder(),
-                      hintText: 'name',
+                      hintText: 'title',
                     ),
                   ))),
                   const Align(
           alignment: Alignment.centerLeft,
-          child: Text('Description',
+          child: Text('Post Description',
                           style: TextStyle(fontWeight: FontWeight.bold))
         ),
           SingleChildScrollView(
@@ -107,7 +134,10 @@ class _MyCustomFormState extends State<MyCustomForm> {
           Padding(
             padding: const EdgeInsets.only(top: 5),
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                createPost(title: titleController.text, content: descriptionController.text, userId: '1');
+                Navigator.pushNamed(context, '/pos');
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
                 shape: RoundedRectangleBorder(
@@ -116,7 +146,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 ),
               ),
               child: const Text(
-                'Create',
+                'Create Post',
                 style: TextStyle(
                   fontSize: 15,
                   color: Colors.black,
@@ -127,3 +157,5 @@ class _MyCustomFormState extends State<MyCustomForm> {
         ]));
   }
 }
+
+
