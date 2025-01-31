@@ -2,13 +2,29 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../reducers/userReducer'; // Adjust the path if necessary
 import { useNavigate } from 'react-router-dom';
+import { AccessLevels } from '../utils/constants';
 import Nav from './Nav'; // Import the Nav component
 import clubLogo from '../assets/clublogo.png';
+
+const accessLevelLabels = {
+  [AccessLevels.GUEST]: 'Guest',
+  [AccessLevels.MEMBER]: 'Member (Dues Not Paid)',
+  [AccessLevels.PAID_MEMBER]: 'Member (Dues Paid)',
+  [AccessLevels.COACH]: 'Coach',
+  [AccessLevels.EXECUTIVE_BOARD]: 'Executive Board',
+  [AccessLevels.PRESIDENT]: 'President',
+};
+
 
 const Account = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user.user); // Access the user state from the Redux store
+
+  const user = useSelector((state) => {
+    console.log(state); // Log the entire Redux state
+    return state.user;
+  });
+  //console.log(user.user.username);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -46,9 +62,9 @@ const Account = () => {
               {/* User Information */}
               <div className="text-center">
                 <p className="text-lg font-semibold">
-                  Welcome, {user.username}!
+                  Welcome, {user.user.username}!
                 </p>
-                <p className="text-sm text-gray-500">Email: {user.email}</p>
+                <p className="text-sm text-gray-500">Email: {user.user.email}</p>
               </div>
 
               {/* Edit Account Details */}
@@ -93,7 +109,7 @@ const Account = () => {
 
               {/* Payment Status */}
               <p className="text-center text-gray-500">
-                Status: Member (Dues Paid)
+                Status: {accessLevelLabels[user.user.roleid] || 'Unknown Status'}
               </p>
             </div>
           ) : (

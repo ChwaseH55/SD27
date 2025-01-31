@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux'; // Import useSelector to access Redux state
 import clubLogo from '../assets/clublogo.png';
 
 const Nav = ({ isLoggedIn, onLogout }) => {
   const location = useLocation();
+  const user = useSelector((state) => state.user); // Access user from Redux state
 
   // Utility function to determine if the link is active
   const isActive = (path) => location.pathname === path;
@@ -86,6 +88,20 @@ const Nav = ({ isLoggedIn, onLogout }) => {
                 Shop
               </button>
             </Link>
+            {/* Conditionally render the admin dashboard link */}
+            {user.user.roleid > 2 && (
+              <Link to="/admin">
+                <button
+                  className={`px-4 py-2 border rounded ${
+                    isActive('/admin')
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-transparent border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition'
+                  }`}
+                >
+                  Admin Dashboard
+                </button>
+              </Link>
+            )}
             <button
               onClick={onLogout}
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"

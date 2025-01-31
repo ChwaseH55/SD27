@@ -56,7 +56,7 @@ router.post('/login', async (req, res) => {
             const isMatch = await bcrypt.compare(password, user.rows[0].password);
             if (isMatch) {
                 const token = jwt.sign(
-                    { id: user.rows[0].id, role: user.rows[0].roleid, paymentStatus: user.rows[0].paymentstatus },
+                    { id: user.rows[0].id, roleid: user.rows[0].roleid, paymentStatus: user.rows[0].paymentstatus },
                     'your_jwt_secret',
                     { expiresIn: '1h' }
                 );
@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
                         email: user.rows[0].email,
                         firstName: user.rows[0].firstname,
                         lastName: user.rows[0].lastname,
-                        role: user.rows[0].roleid,
+                        roleid: user.rows[0].roleid,
                         paymentStatus: user.rows[0].paymentstatus,
                     }
                 });
@@ -83,5 +83,25 @@ router.post('/login', async (req, res) => {
         res.status(500).send("Server error");
     }
 });
+
+// Fetch username by userID
+router.get("/users/:userid", async (req, res) => {
+    const { userid } = req.params;
+  
+    try {
+      // Query the database for the username
+      const result = await pool.query("SELECT username FROM users WHERE userid = $1", [userid]);
+  
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      res.json({ username: result.rows[0].username });
+    } catch (error) {
+      console.error("Error fetching username:", error.message);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
 
 module.exports = router;

@@ -1,20 +1,24 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
+import axios from "axios";
 
 const EventsPage = () => {
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      title: "Spring Tournament",
-      date: "2025-03-14",
-      description: "A friendly competition to kick off the season.",
-    },
-    {
-      id: 2,
-      title: "Golf Workshop",
-      date: "2025-02-20",
-      description: "Learn tips and tricks from the pros.",
-    },
-  ]);
+  const [events, setEvents] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch events from the API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await axios.get("/api/events");  // Get all events
+        setEvents(response.data);  // Populate the events state
+      } catch (err) {
+        console.error("Error fetching events:", err);
+      }
+    };
+
+    fetchEvents();
+  }, []); // Only fetch once on mount
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -27,12 +31,12 @@ const EventsPage = () => {
           <ul className="space-y-4 mt-4">
             {events.map((event) => (
               <li
-                key={event.id}
+                key={event.eventid}
                 className="bg-white p-4 shadow rounded-lg border border-gray-200"
               >
-                <h3 className="text-xl font-bold">{event.title}</h3>
-                <p className="text-gray-500">{new Date(event.date).toDateString()}</p>
-                <p className="text-gray-700 mt-2">{event.description}</p>
+                <h3 className="text-xl font-bold">{event.eventname}</h3>
+                <p className="text-gray-500">{new Date(event.eventdate).toDateString()}</p>
+                <p className="text-gray-700 mt-2">{event.eventdescription}</p>
                 <button
                   className="bg-gold text-black px-4 py-2 rounded mt-4"
                   onClick={() => alert("Add to calendar functionality")}

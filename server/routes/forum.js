@@ -59,15 +59,20 @@ router.put('/posts/:id', async(req, res) => {
     }
 });
 
-// Delete post
 router.delete('/posts/:id', async (req, res) => {
     const { id } = req.params;
-    try{
-        await pool.query("DELETE FROM likes WHERE postid = $1 OR replyid IN (SELECT replyid FROM replies WHERE postid = $1)", [id]);
+    try {
+        await pool.query(
+            "DELETE FROM likes WHERE postid = $1 OR replyid IN (SELECT replyid FROM replies WHERE postid = $1)", 
+            [id]
+        );
 
         await pool.query("DELETE FROM replies WHERE postid = $1", [id]);
 
-        const deletedPost = await pool.query("DELETE FROM posts WHERE postid = $1 RETURNING *", [id]);
+        const deletedPost = await pool.query(
+            "DELETE FROM posts WHERE postid = $1 RETURNING *", 
+            [id]
+        );
 
         if (deletedPost.rows.length === 0) {
             return res.status(404).json({ message: "Post not found" });
@@ -75,10 +80,11 @@ router.delete('/posts/:id', async (req, res) => {
 
         res.json({ message: "Post deleted successfully" });
     } catch (err) {
-        console.error (err.message);
-        res.status(500).send("Server error");
+        console.error("Error deleting post:", err); // Log the full error
+        res.status(500).json({ message: "Server error", error: err.message });
     }
 });
+
 
 //add a reply to a post
 router.post('/posts/:id/replies', async (req, res) => {
