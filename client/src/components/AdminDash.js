@@ -71,6 +71,12 @@ const AdminDashboard = () => {
     }
   };
 
+    // Toggle to show the event creation form
+    const handleCreateEventClick = () => {
+      setIsCreatingEvent(true);
+      setIsEditingEvent(null); // Clear editing state if switching to create
+    };
+
   // Update an existing event
   const handleUpdateEvent = async (e) => {
     e.preventDefault();
@@ -119,6 +125,14 @@ const AdminDashboard = () => {
         <h1 className="text-3xl font-bold text-center">Admin Dashboard</h1>
       </header>
       <main className="max-w-4xl mx-auto p-6">
+        {/* Button to Create Event */}
+        <button
+          onClick={() => setIsCreatingEvent(true)}
+          className="w-full bg-blue-500 text-white p-2 rounded mb-4"
+        >
+          Create Event
+        </button>
+  
         {/* Forum Posts Section */}
         <button
           className="w-full bg-gray-300 p-2 rounded mb-2"
@@ -147,7 +161,7 @@ const AdminDashboard = () => {
             </ul>
           </div>
         )}
-
+  
         {/* Users Section */}
         <button
           className="w-full bg-gray-300 p-2 rounded mb-2"
@@ -168,7 +182,7 @@ const AdminDashboard = () => {
             </ul>
           </div>
         )}
-
+  
         {/* Events Section */}
         <button
           className="w-full bg-gray-300 p-2 rounded mb-2"
@@ -216,7 +230,7 @@ const AdminDashboard = () => {
             </ul>
           </div>
         )}
-
+  
         {/* Event Form (Create or Edit Event) */}
         {(isCreatingEvent || isEditingEvent) && (
           <form onSubmit={isEditingEvent ? handleUpdateEvent : handleCreateEvent} className="bg-white p-4 shadow rounded-lg border border-gray-200 mt-6">
@@ -279,6 +293,6 @@ const AdminDashboard = () => {
       </main>
     </div>
   );
-};
+}
 
 export default AdminDashboard;

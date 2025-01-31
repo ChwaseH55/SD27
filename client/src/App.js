@@ -17,6 +17,9 @@ import Store from './components/Store';
 import CalendarPage from './components/Calendar';
 import { logout } from './reducers/userReducer';
 import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe("pk_test_51PzZ4xRs4YZmhcoeiINiWfKCCh0sC5gpVqxfhtT24PzY7OPcUAlZuxyldOm7kKOejlZxi1wIwwbzMPVLVAS2pz2f00zNR0YmWR");
 
 function App() {
   const [data, setData] = useState(null);

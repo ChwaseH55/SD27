@@ -5,7 +5,7 @@ require('dotenv').config({ path: `${__dirname}/../.env` });
 //console.log('Stripe Secret Key:', process.env.STRIPE_SECRET_KEY);
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-const YOUR_DOMAIN = 'http://localhost:4242';
+const YOUR_DOMAIN = 'http://localhost:5000';
 
 //Get all products in stripe
 router.get('/products', async (req, res) => {
