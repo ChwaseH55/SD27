@@ -1,8 +1,8 @@
+// src/components/Login.js
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../reducers/userReducer';
-import { useNavigate, Link } from 'react-router-dom';
-import clubLogo from '../assets/clublogo.png';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const dispatch = useDispatch();
@@ -22,24 +22,20 @@ const Login = () => {
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-800 to-yellow-500 text-white">
-            <div className="w-full max-w-md bg-gray-900 bg-opacity-90 p-8 rounded-lg shadow-2xl">
-                <div className="flex justify-between items-center mb-6">
-                    <img src={clubLogo} alt="UCF Golf Club Logo" className="h-12" />
-                    <Link to="/" className="text-yellow-400 hover:underline text-lg">Home</Link>
-                </div>
-                <h2 className="text-4xl font-extrabold text-center mb-6">Welcome Back</h2>
-                <p className="text-center text-gray-300 mb-6">
+        <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-blue-100 to-blue-200">
+            <div className="w-full max-w-lg bg-white p-10 rounded-lg shadow-xl mt-20">
+                <h2 className="text-4xl font-semibold text-center mb-4 text-blue-700">Welcome Back</h2>
+                <p className="text-center text-gray-500 mb-6">
                     Log in to continue to your dashboard
                 </p>
                 {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
-                <form onSubmit={handleLogin} className="flex flex-col space-y-4">
+                <form onSubmit={handleLogin} className="flex flex-col space-y-5">
                     <input
                         type="text"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="border border-gray-400 bg-gray-800 text-white rounded-lg p-3 focus:outline-none focus:border-yellow-500"
+                        className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring focus:ring-blue-300 transition"
                         required
                     />
                     <input
@@ -47,19 +43,16 @@ const Login = () => {
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="border border-gray-400 bg-gray-800 text-white rounded-lg p-3 focus:outline-none focus:border-yellow-500"
+                        className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring focus:ring-blue-300 transition"
                         required
                     />
                     <button
                         type="submit"
-                        className="bg-yellow-500 text-gray-900 font-semibold py-3 rounded-lg hover:bg-yellow-600 transition"
+                        className="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition"
                     >
                         Log In
                     </button>
                 </form>
-                <p className="text-center mt-4">
-                    Don't have an account? <Link to="/register" className="text-yellow-400 hover:underline">Register</Link>
-                </p>
             </div>
         </div>
     );
