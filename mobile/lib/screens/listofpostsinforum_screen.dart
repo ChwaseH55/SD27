@@ -1,14 +1,29 @@
-import 'package:coffee_card/models/likes_model.dart';
-import 'package:coffee_card/models/post_model.dart';
+import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/post_discussion_widget.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
-import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:coffee_card/arguments/postargument.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
+import 'package:provider/provider.dart';
 
-class ForumpostScreen extends StatelessWidget {
+class ForumpostScreen extends StatefulWidget {
   const ForumpostScreen({super.key});
+
+  @override
+  State<ForumpostScreen> createState() => _ForumpostScreenState();
+}
+
+class _ForumpostScreenState extends State<ForumpostScreen> {
+  late ForumProvider forumProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Fetch latest posts when screen is revisited
+    forumProvider = Provider.of<ForumProvider>(context, listen: false);
+    forumProvider.fetchPosts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +40,22 @@ class ForumpostScreen extends StatelessWidget {
             style: ButtonStyle(
               foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
             ),
-            onPressed: () {Navigator.pushNamed(context, '/createPost');},
+            onPressed: () async {
+              await Navigator.pushNamed(context, '/createPost');
+              // Force refresh after returning from create post screen
+              forumProvider.fetchPosts();
+            },
             child: const Text('+ Create Post'),
-          )
+          ),
         ],
       ),
-      
       body: const PostsScreen(),
       floatingActionButton: const FloatingBtn(),
     );
   }
 }
+
+
 
 class FloatingBtn extends StatelessWidget {
   const FloatingBtn({super.key});
@@ -52,56 +72,53 @@ class PostsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<PostModel>>(
-      future: getAllPosts(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return Consumer<ForumProvider>(
+      builder: (context, forumProvider, child) {
+        if (forumProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        }
+
+        if (forumProvider.posts.isEmpty) {
           return const Center(child: Text('No posts found.'));
-        } else {
-          final posts = snapshot.data!;
-          return Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index];
-                  return FutureBuilder<List<LikesModel>>(
-                    future: getLikesWithPostId(postId: post.postid.toString(),),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else {
-                        final likes = snapshot.data!;
-                        return GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                PostsScreenInfo.routeName,
-                                arguments:  PostArguments(post.postid),
-                              );
-                            },
-                            child: Padding(
-                                padding: const EdgeInsets.only(top: 5),
-                                child: PostWidget(
-                                  postName: post.title,
-                                  likeNumber: likes.length,
-                                  postId: '12',
-                                  replyId: '213',
-                                  userId: '34',
-                                )));
-                      }
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: ListView.builder(
+            itemCount: forumProvider.posts.length,
+            itemBuilder: (context, index) {
+              final post = forumProvider.posts[index];
+
+              return FutureBuilder<int>(
+                future: forumProvider.getLikesCount(post.postid.toString()),
+                builder: (context, snapshot) {
+                  final likeCount = snapshot.data ?? 0;
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        PostsScreenInfo.routeName,
+                        arguments: PostArguments(post.postid),
+                      );
                     },
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: PostWidget(
+                        postName: post.title,
+                        likeNumber: likeCount,
+                        postId: post.postid.toString(),
+                        replyId: '213',
+                        userId: '34',
+                      ),
+                    ),
                   );
                 },
-              ));
-        }
+              );
+            },
+          ),
+        );
       },
     );
   }
 }
+

@@ -54,7 +54,7 @@ class ReplyWidget extends StatelessWidget {
                       decoration: const BoxDecoration(
                           shape: BoxShape.circle, color: Colors.black),
                     )),
-                Text(createDate!),
+                const Text('02-01-2025'),
                 const Spacer(),
                 PopupMenuButton<String>(
                   itemBuilder: (context) => [

@@ -1,5 +1,7 @@
+import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/likebutton_widget.dart';
+
 
 class PostinfoWidget extends StatelessWidget {
   final String? username;
@@ -8,6 +10,7 @@ class PostinfoWidget extends StatelessWidget {
   final String? postId;
   final String? userId;
   final int? likeNumber;
+
 
   const PostinfoWidget({
     super.key,
@@ -18,6 +21,7 @@ class PostinfoWidget extends StatelessWidget {
     required this.posttitle,
     required this.postContent,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +49,7 @@ class PostinfoWidget extends StatelessWidget {
                         alignment: Alignment.topLeft,
                         child: Text(
                           username!,
-                          style: const TextStyle(fontWeight: FontWeight.w900),
+                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
                         ),
                       ),
                       const Spacer(),
@@ -105,16 +109,19 @@ class PostinfoWidget extends StatelessWidget {
   }
 }
 
+
 class LikeButton extends StatelessWidget {
   final int likeNumber;
   final String postId;
   final String userId;
 
+
   const LikeButton(
-      {super.key, 
-      required this.likeNumber, 
-      required this.postId, 
+      {super.key,
+      required this.likeNumber,
+      required this.postId,
       required this.userId});
+
 
   @override
   Widget build(BuildContext context) {
@@ -122,30 +129,34 @@ class LikeButton extends StatelessWidget {
   }
 }
 
+
 class LikeButtonForPost extends StatefulWidget {
   final int? likeNumber;
   final String? postId;
   final String? userId;
 
+
   const LikeButtonForPost({super.key, required this.likeNumber, required this.postId,  required this.userId});
+
 
   @override
   State<LikeButtonForPost> createState() => _LikeButtonForPost();
 }
 
+
 class _LikeButtonForPost extends State<LikeButtonForPost> {
   bool isLiked = false;
   @override
   Widget build(BuildContext context) {
-    
+   
     return GestureDetector(
         onTap: () {
+          //addLike(postId: widget.postId, replyId: replyId, userId: userId);
           setState(() {
-            
             isLiked = !isLiked;
           });
         },
-        
+       
         child: SizedBox(
             width: 60,
             child: Container(
@@ -169,6 +180,11 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
             )));
   }
 }
+
+
+
+
+
 
 
 

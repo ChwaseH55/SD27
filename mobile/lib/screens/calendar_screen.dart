@@ -305,7 +305,7 @@ class _TableComplexExampleState extends State<TableComplexExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TableCalendar - Complex'),
+        title: const Text('Golf Club Calendar'),
       ),
       body: Column(
         children: [
