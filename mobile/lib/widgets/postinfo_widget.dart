@@ -9,7 +9,7 @@ class PostinfoWidget extends StatelessWidget {
   final String? postContent;
   final String? postId;
   final String? userId;
-  final int? likeNumber;
+  final int likeNumber;
 
 
   const PostinfoWidget({
@@ -27,6 +27,7 @@ class PostinfoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    
     return SizedBox(
       height: height * 0.3,
       width: width,
@@ -131,7 +132,7 @@ class LikeButton extends StatelessWidget {
 
 
 class LikeButtonForPost extends StatefulWidget {
-  final int? likeNumber;
+  final int likeNumber;
   final String? postId;
   final String? userId;
 
@@ -146,17 +147,30 @@ class LikeButtonForPost extends StatefulWidget {
 
 class _LikeButtonForPost extends State<LikeButtonForPost> {
   bool isLiked = false;
+  late int likeCount; // Mutable variable to store the like count
+
+  @override
+  void initState() {
+    super.initState();
+    likeCount = widget.likeNumber; // Initialize with the given likeNumber
+  }
+
+  void toggleLike() {
+    setState(() {
+      isLiked = !isLiked;
+      if (isLiked) {
+        likeCount += 1;
+      } else {
+        likeCount -= 1;
+      }
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
    
     return GestureDetector(
-        onTap: () {
-          //addLike(postId: widget.postId, replyId: replyId, userId: userId);
-          setState(() {
-            isLiked = !isLiked;
-          });
-        },
-       
+      onTap: toggleLike,
         child: SizedBox(
             width: 60,
             child: Container(
@@ -173,7 +187,7 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
                       Icon(Icons.thumb_up_alt, color: isLiked ? const Color.fromRGBO(186, 155, 55, 1) : Colors.black),
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
-                        child: Text(widget.likeNumber.toString()
+                        child: Text(likeCount.toString()
                       ),)
                     ],
                   )),

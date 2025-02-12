@@ -1,3 +1,4 @@
+import 'package:coffee_card/widgets/events_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/announcement_widget.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
@@ -72,10 +73,10 @@ class _AnnouncementListForm extends State<AnnouncementListForm> {
           ),
 
           //Adds announcement
-          const AnnouncementWidget(
+          const EventsWidgets(
             title: 'New Gear',
             date: '11/13/24',
-            role: 'All',
+        
             message: 'Come get new gear',
           ),
           

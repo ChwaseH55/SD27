@@ -132,7 +132,7 @@ class ListofReplies extends StatelessWidget {
       itemBuilder: (context, index) {
         final reply = replies?[index];
         return ChangeNotifierProvider(
-          create: (_) => ReplyProvider(reply!.replyid.toString()),
+          create: (_) => ReplyProvider(reply!.replyid.toString(), reply.userid.toString()),
           child: Consumer<ReplyProvider>(
             builder: (context, provider, child) {
               if (provider.isLoading) {

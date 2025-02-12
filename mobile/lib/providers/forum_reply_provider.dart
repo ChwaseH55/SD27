@@ -13,22 +13,19 @@ class ReplyProvider extends ChangeNotifier {
   int get likesCount => _likesCount;
   bool get isLoading => _isLoading;
 
-  ReplyProvider(String replyId) {
-    fetchReplyDetails(replyId);
+  ReplyProvider(String replyId, String userId) {
+    fetchReplyDetails(replyId, userId);
   }
 
-  Future<void> fetchReplyDetails(String replyId) async {
+  Future<void> fetchReplyDetails(String replyId, String userId) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       final likes = await getLikesWithReplyId(replyId);
       _likesCount = likes.length;
-
-      final userId = likes.isNotEmpty ? likes.first.userid.toString() : "0";
-      if (userId != "0") {
-        _user = await getUser(userId: userId);
-      }
+      _user = await getUser(userId: userId);
+      
     } catch (e) {
       _user = null;
       _likesCount = 0;

@@ -1,6 +1,10 @@
+import 'package:coffee_card/providers/events_info_provider.dart';
+import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/screens/calendar_screen.dart';
+import 'package:coffee_card/screens/eventCreation.dart';
+import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/screens/login_screen.dart';
 import 'package:coffee_card/screens/main_menu.dart';
 import 'package:coffee_card/screens/listofforums_screen.dart';
@@ -13,6 +17,7 @@ import 'package:coffee_card/screens/announcement_creation.dart';
 import 'package:coffee_card/screens/announcementdetail_screen.dart';
 import 'package:coffee_card/screens/forumcreation_screen.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
+import 'package:coffee_card/screens/listofevents_screen.dart';
 import 'package:coffee_card/screens/userprofile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +29,8 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => ForumProvider()..fetchPosts()),
         ChangeNotifierProvider(create: (_) => PostProvider()),
+        ChangeNotifierProvider(create: (_) => EventsProvider()..fetchEvents()),
+        ChangeNotifierProvider(create: (_) => EventsInfoProvider()),
         // Add more providers here if needed
       ],
       child: const MyApp(),
@@ -52,9 +59,12 @@ class MyApp extends StatelessWidget {
         '/anncDetail': (context) => const AnnouncementdetailScreen(),
         '/tes': (context) => const DisscusisonpostInfoScreen(),
         '/pro': (context) => const UserProfileScreen(),
-        '/calendar': (context) => const TableComplexExample(),
+        '/calendar': (context) => const TableEventsExample(),
         '/createPost': (context) => const CreatePost(),
+        '/events': (context) => const EventsListScreen(),
+        '/createEvent': (context) => CreateEvent(),
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
+        EventInfo.routeName: (context) => const EventInfo(),
       },
     );
   }

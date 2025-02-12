@@ -1,6 +1,7 @@
 import 'package:coffee_card/widgets/commentchange_widget.dart';
 import 'package:coffee_card/widgets/likebutton_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ReplyWidget extends StatelessWidget {
   final String userName;
@@ -23,6 +24,7 @@ class ReplyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String formattedDate = DateFormat('MMM d, yyyy').format(DateTime.parse(createDate!));
     return GestureDetector(
         // onTap: () {
         //   Navigator.pushNamed(context, '/anncDetail');
@@ -54,7 +56,7 @@ class ReplyWidget extends StatelessWidget {
                       decoration: const BoxDecoration(
                           shape: BoxShape.circle, color: Colors.black),
                     )),
-                const Text('02-01-2025'),
+                 Text(formattedDate),
                 const Spacer(),
                 PopupMenuButton<String>(
                   itemBuilder: (context) => [

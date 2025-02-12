@@ -72,9 +72,18 @@ class MainMenu extends StatelessWidget {
                 leading: const Icon(
                   Icons.train,
                 ),
-                title: const Text('calendar'),
+                title: const Text('Calendar'),
                 onTap: () {
                   Navigator.pushNamed(context, '/calendar');
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.train,
+                ),
+                title: const Text('Events'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/events');
                 },
               )
             ],

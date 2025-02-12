@@ -5,6 +5,7 @@ import 'package:coffee_card/widgets/creationformplus.dart';
 import 'package:coffee_card/arguments/postargument.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer';
 
 class ForumpostScreen extends StatefulWidget {
   const ForumpostScreen({super.key});
@@ -95,6 +96,7 @@ class PostsScreen extends StatelessWidget {
                   final likeCount = snapshot.data ?? 0;
                   return GestureDetector(
                     onTap: () {
+                      log('ent5ered');
                       Navigator.pushNamed(
                         context,
                         PostsScreenInfo.routeName,
