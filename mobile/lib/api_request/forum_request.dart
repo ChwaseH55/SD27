@@ -11,7 +11,7 @@ String urlAddress = "http://10.0.2.2:5000";
 Future<void> createPost({
   required String title,
   required String content,
-  required String userId,
+  required String? userId,
 }) async {
   try {
     final url = Uri.parse('$urlAddress/api/forum/posts');

@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Named Routes Demo',
-      initialRoute: '/mainMenu',
+      initialRoute: '/',
       routes: {
         '/': (context) => const LoginScreen(),
         '/reg': (context) => const RegisterScreen(),

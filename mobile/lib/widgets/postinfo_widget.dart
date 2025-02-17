@@ -1,10 +1,9 @@
-import 'package:coffee_card/arguments/postargument.dart';
+import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:coffee_card/arguments/postcreateargument.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
-import 'package:coffee_card/screens/disscusisonpost_info.dart';
+import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:coffee_card/widgets/likebutton_widget.dart';
 import 'package:provider/provider.dart';
 
 class PostinfoWidget extends StatelessWidget {
@@ -63,15 +62,28 @@ class PostinfoWidget extends StatelessWidget {
                       // Handle menu actions
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                       PopupMenuItem(
                         value: "delete",
-                        child: Text("Delete Post"),
+                        child: InkWell(
+                          onTap: () async {
+                            final forumProvider = Provider.of<PostProvider>(
+                                context,
+                                listen: false);
+                            await deletePost(postId: postId!);
+                            if (context.mounted) Navigator.pushNamed(context, '/pos');
+                            await forumProvider.fetchPostDetails(postId!);
+                          },
+                          child: const Text("Delete Post"),
+                        ),
                       ),
                       PopupMenuItem(
                         value: "update",
                         child: InkWell(
                           onTap: () async {
-                            final forumProvider = Provider.of<PostProvider>(
+                            final forumInfoProvider = Provider.of<PostProvider>(
+                                context,
+                                listen: false);
+                                final forumListProvider = Provider.of<ForumProvider>(
                                 context,
                                 listen: false);
                             await Navigator.pushNamed(
@@ -79,7 +91,9 @@ class PostinfoWidget extends StatelessWidget {
                               PostCreationForm.routeName,
                               arguments: CreateArgument(true, int.parse(postId!), posttitle!, postContent!),
                             );
-                            await forumProvider.fetchPostDetails(postId!);
+                            if (context.mounted) Navigator.of(context).pop(); 
+                              forumInfoProvider.fetchPostDetails(postId!);
+                              forumListProvider.fetchPosts();
                           },
                           child: const Text("Update Post"),
                         ),

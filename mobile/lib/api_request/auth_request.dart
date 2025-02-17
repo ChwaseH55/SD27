@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:coffee_card/main.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 String urlAddress = "http://10.0.2.2:5000";
 
@@ -63,14 +64,32 @@ Future<void> loginUser({
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body.toString());
-      log(data['token']);
+      String userId =
+          data['user']['id'].toString(); // Assuming 'userID' exists in response
+
+      // Save userID to shared preferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userID', userId);
+
+      log('User ID cached: $userId');
       log('Login successfully');
 
       if (context.mounted) Navigator.pushNamed(context, '/mainMenu');
     } else {
-      log('failed');
+      log('Login failed');
     }
   } catch (e) {
     log(e.toString());
   }
+}
+
+Future<String?> getUserID() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('userID');
+}
+
+Future<void> logoutUser() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('userID');
+  log('User logged out, ID removed');
 }

@@ -1,3 +1,4 @@
+import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:coffee_card/arguments/postcreateargument.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +86,7 @@ class _PostForm extends State<PostForm> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     // Retrieve arguments only once
     final CreateArgument? receivedArgs =
         ModalRoute.of(context)?.settings.arguments as CreateArgument?;
@@ -145,19 +146,21 @@ class _PostForm extends State<PostForm> {
         const SizedBox(height: 20),
         Center(
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (args!.isUpdate) {
-                updatePost(
+                await updatePost(
                     postId: args!.postId.toString(),
                     title: titleController.text,
                     content: descriptionController.text);
+                if (context.mounted) Navigator.of(context).pop();
               } else {
-                createPost(
+                String? id = await getUserID();
+                await createPost(
                     title: titleController.text,
                     content: descriptionController.text,
-                    userId: '2');
+                    userId: id);
+               if (context.mounted) Navigator.pushNamed(context, '/pos');
               }
-              Navigator.pushNamed(context, '/pos');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
