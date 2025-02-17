@@ -1,4 +1,6 @@
+import 'package:coffee_card/arguments/postcreateargument.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
+import 'package:coffee_card/screens/postcreation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/post_discussion_widget.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
@@ -42,7 +44,11 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
               foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
             ),
             onPressed: () async {
-              await Navigator.pushNamed(context, '/createPost');
+              await Navigator.pushNamed(
+                        context,
+                        PostCreationForm.routeName,
+                        arguments: CreateArgument(false, -1, '',''),
+                      );
               // Force refresh after returning from create post screen
               forumProvider.fetchPosts();
             },

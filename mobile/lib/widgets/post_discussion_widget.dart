@@ -8,8 +8,14 @@ class PostWidget extends StatelessWidget {
   final String replyId;
   final String userId;
 
-  const PostWidget(
-      {super.key, required this.postName, required this.likeNumber, required this.postId, required this.replyId, required this.userId});
+  const PostWidget({
+    super.key,
+    required this.postName,
+    required this.likeNumber,
+    required this.postId,
+    required this.replyId,
+    required this.userId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,16 +41,25 @@ class PostWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Row(children: <Widget>[
-                       LikeButton(likeNumber: likeNumber, postId: postId, replyId: replyId, userId: userId,),
-                          
-                    ])),
-              ],
-            ),
+              ),
+              const SizedBox(height: 12),
+
+              /// **Like Button & Actions Row**
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  LikeButton(
+                    likeNumber: likeNumber,
+                    postId: postId,
+                    replyId: replyId,
+                    userId: userId,
+                  ),
+                ],
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
-

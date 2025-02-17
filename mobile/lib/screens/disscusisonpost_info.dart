@@ -82,7 +82,7 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
                 postId: resPost.post!.postid.toString(),
                 userId: userInfo.id.toString(),
               ),
-              Expanded(child: ListofReplies(replies: replies)),
+              Expanded(child: ListofReplies(postId: resPost.post!.postid, replies: replies)),
               ElevatedButton(
                 onPressed: () {
                   showModalBottomSheet(
@@ -94,8 +94,10 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
                     ),
                     builder: (context) {
                       return AddCommentSheet(
+                        replyId: '',
                         postId: resPost.post!.postid.toString(),
                         userId: resPost.post!.userid.toString(),
+                        content: '',
                         isUpdate: false,
                       );
                     },
@@ -122,8 +124,9 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
 
 class ListofReplies extends StatelessWidget {
   final List<ReplyModel>? replies;
+    final int? postId;
 
-  const ListofReplies({super.key, required this.replies});
+  const ListofReplies({super.key, required this.replies, required this.postId});
 
   @override
   Widget build(BuildContext context) {
@@ -143,9 +146,9 @@ class ListofReplies extends StatelessWidget {
                 userName: provider.user?.username ?? "Unknown",
                 createDate: reply?.createddate,
                 content: reply?.content,
-                postId: 1,
-                userId: 2,
-                replyId: 3,
+                postId: postId!,
+                userId: provider.user!.id,
+                replyId: reply?.replyid,
                 likeNumber: provider.likesCount,
               );
             },

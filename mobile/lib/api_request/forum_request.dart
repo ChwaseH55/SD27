@@ -78,7 +78,7 @@ Future<void> updatePost({
   required String content,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/posts/$postId');
+    final url = Uri.parse('$urlAddress/api/forum/posts/$postId');
     final response = await put(
       url,
       headers: <String, String>{
@@ -102,7 +102,7 @@ Future<void> updatePost({
 
 Future<void> deletePost({required String postId}) async {
   try {
-    final url = Uri.parse('$urlAddress/api/posts/$postId');
+    final url = Uri.parse('$urlAddress/api/forum/posts/$postId');
     final response = await delete(url);
 
     if (response.statusCode == 200) {
@@ -148,7 +148,7 @@ Future<void> updateReply({
   required String content,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/replies/$replyId');
+    final url = Uri.parse('$urlAddress/api/forum/replies/$replyId');
     final response = await put(
       url,
       headers: <String, String>{
@@ -169,7 +169,7 @@ Future<void> updateReply({
   }
 }
 
-Future<void> deleteReply({required String replyId}) async {
+Future<void> deleteReply( {required String replyId}) async {
   try {
     final url = Uri.parse('$urlAddress/api/forum/replies/$replyId');
     final response = await delete(url);

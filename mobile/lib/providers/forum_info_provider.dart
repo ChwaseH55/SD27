@@ -36,4 +36,11 @@ class PostProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  Future<void> deleteReplyAndRefresh(String replyId, String postId) async {
+    await deleteReply(replyId: replyId) ;// Ensure delete completes before fetching
+    await fetchPostDetails(postId);  // Refresh the post data
+    notifyListeners();  // Force UI update
+  }
+
 }

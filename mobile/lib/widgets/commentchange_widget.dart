@@ -1,13 +1,21 @@
+import 'dart:developer';
+
 import 'package:coffee_card/api_request/forum_request.dart';
+import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AddCommentSheet extends StatefulWidget {
   final String postId;
   final String userId;
   final bool isUpdate;
+  final String content;
+  final String replyId;
 
   const AddCommentSheet(
       {super.key,
+      required this.replyId,
+      required this.content,
       required this.postId,
       required this.userId,
       required this.isUpdate});
@@ -17,11 +25,17 @@ class AddCommentSheet extends StatefulWidget {
 }
 
 class _AddCommentSheet extends State<AddCommentSheet> {
-  final commentController = TextEditingController();
+  late TextEditingController commentController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controller with existing content if updating
+    commentController = TextEditingController(text: widget.isUpdate ? widget.content : '');
+  }
 
   @override
   void dispose() {
-    // Clean up the controller when the widget is disposed.
     commentController.dispose();
     super.dispose();
   }
@@ -33,12 +47,10 @@ class _AddCommentSheet extends State<AddCommentSheet> {
         top: 16,
         left: 16,
         right: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom +
-            16, // Adjust for keyboard
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
       ),
       child: Column(
-        mainAxisSize: MainAxisSize
-            .min, // Ensures the sheet doesn't take up the full screen
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
             "Add a Comment",
@@ -46,9 +58,7 @@ class _AddCommentSheet extends State<AddCommentSheet> {
           ),
           const SizedBox(height: 10),
           TextField(
-            controller: widget.isUpdate
-                ? TextEditingController(text: 'test')
-                : commentController,
+            controller: commentController,  // Always use the initialized controller
             decoration: const InputDecoration(
               hintText: "Enter your comment here",
               border: OutlineInputBorder(),
@@ -57,18 +67,29 @@ class _AddCommentSheet extends State<AddCommentSheet> {
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              final forumProvider =
+                  Provider.of<PostProvider>(context, listen: false);
+              
               if (widget.isUpdate) {
-                //updateReply(replyId: widget.replyId, content: commentController.text);
+                updateReply(replyId: widget.replyId, content: commentController.text);
               } else {
-                // addReply(
-                //     postId: widget.postId,
-                //     content: commentController.text,
-                //     userId: widget.userId);
+                if (commentController.text.trim().isEmpty) {
+                  return;
+                }
+                addReply(
+                    postId: widget.postId,
+                    content: commentController.text,
+                    userId: widget.userId);
               }
 
-              // Handle comment submission
-              Navigator.pop(context); // Close the bottom sheet
+              // Fetch updated replies
+              await forumProvider.fetchPostDetails(widget.postId);
+
+              // Close the bottom sheet
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
             },
             child: const Text("Submit"),
           ),

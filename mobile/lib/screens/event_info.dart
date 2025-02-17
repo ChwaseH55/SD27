@@ -16,7 +16,7 @@ class EventInfoScreen extends StatelessWidget {
 class EventInfo extends StatefulWidget {
   const EventInfo({super.key});
 
-  static const routeName = '/extractId';
+  static const routeName = '/extractIdEvent';
 
   @override
   State<EventInfo> createState() => _EventInfo();

@@ -1,7 +1,11 @@
-import 'package:coffee_card/api_request/forum_request.dart';
+import 'package:coffee_card/arguments/postargument.dart';
+import 'package:coffee_card/arguments/postcreateargument.dart';
+import 'package:coffee_card/providers/forum_info_provider.dart';
+import 'package:coffee_card/screens/disscusisonpost_info.dart';
+import 'package:coffee_card/screens/postcreation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/likebutton_widget.dart';
-
+import 'package:provider/provider.dart';
 
 class PostinfoWidget extends StatelessWidget {
   final String? username;
@@ -10,7 +14,6 @@ class PostinfoWidget extends StatelessWidget {
   final String? postId;
   final String? userId;
   final int likeNumber;
-
 
   const PostinfoWidget({
     super.key,
@@ -22,85 +25,102 @@ class PostinfoWidget extends StatelessWidget {
     required this.postContent,
   });
 
-
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
-    
-    return SizedBox(
-      height: height * 0.3,
-      width: width,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.black, width: 1.5),
-          ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(width: 3, color: Colors.black),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Column(
-            // Removed const here
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(left: 5, right: 5, top: 6),
-                child: Column(
-                  children: [
-                    Row(children: <Widget>[
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          username!,
-                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
-                        ),
-                      ),
-                      const Spacer(),
-                      PopupMenuButton<String>(
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            child: InkWell(
-                              onTap: () {
-                                //deleteReply(replyId: replyId.toString());// Close the menu manually
-                              },
-                              child: const Text("Delete Post"),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            child: InkWell(
-                              onTap: () {
-                                //deleteReply(replyId: replyId.toString());// Close the menu manually
-                              },
-                              child: const Text("Update Post"),
-                            ),
-                          ),
-                        ],
-                      )
-                    ]),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        posttitle!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 20,
-                        ),
+              /// **User Info & Menu**
+              Row(
+                children: <Widget>[
+                  const CircleAvatar(
+                    backgroundColor: Colors.grey,
+                    child: Icon(Icons.person, color: Colors.white),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      username!,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Text(postContent!,
-                          style: const TextStyle(
-                            fontSize: 28,
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 35),
-                      child:  Align(
-                        alignment: Alignment.centerLeft,
-                        child:  LikeButtonForPost(likeNumber: likeNumber, postId: postId, userId: userId,)
-                      )
-                    )
-                  ],
+                  ),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (value) {
+                      // Handle menu actions
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: "delete",
+                        child: Text("Delete Post"),
+                      ),
+                      PopupMenuItem(
+                        value: "update",
+                        child: InkWell(
+                          onTap: () async {
+                            final forumProvider = Provider.of<PostProvider>(
+                                context,
+                                listen: false);
+                            await Navigator.pushNamed(
+                              context,
+                              PostCreationForm.routeName,
+                              arguments: CreateArgument(true, int.parse(postId!), posttitle!, postContent!),
+                            );
+                            await forumProvider.fetchPostDetails(postId!);
+                          },
+                          child: const Text("Update Post"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              /// **Post Title**
+              Text(
+                posttitle!,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 22,
                 ),
+              ),
+
+              const SizedBox(height: 8),
+
+              /// **Post Content**
+              Text(
+                postContent!,
+                style: const TextStyle(fontSize: 16, height: 1.5),
+                textAlign: TextAlign.justify,
+              ),
+
+              const SizedBox(height: 16),
+
+              /// **Like Button**
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  LikeButtonForPost(
+                    likeNumber: likeNumber,
+                    postId: postId,
+                    userId: userId,
+                  ),
+                ],
               ),
             ],
           ),
@@ -110,12 +130,10 @@ class PostinfoWidget extends StatelessWidget {
   }
 }
 
-
 class LikeButton extends StatelessWidget {
   final int likeNumber;
   final String postId;
   final String userId;
-
 
   const LikeButton(
       {super.key,
@@ -123,27 +141,27 @@ class LikeButton extends StatelessWidget {
       required this.postId,
       required this.userId});
 
-
   @override
   Widget build(BuildContext context) {
-    return LikeButtonForPost(likeNumber: likeNumber, postId: postId, userId: userId);
+    return LikeButtonForPost(
+        likeNumber: likeNumber, postId: postId, userId: userId);
   }
 }
-
 
 class LikeButtonForPost extends StatefulWidget {
   final int likeNumber;
   final String? postId;
   final String? userId;
 
-
-  const LikeButtonForPost({super.key, required this.likeNumber, required this.postId,  required this.userId});
-
+  const LikeButtonForPost(
+      {super.key,
+      required this.likeNumber,
+      required this.postId,
+      required this.userId});
 
   @override
   State<LikeButtonForPost> createState() => _LikeButtonForPost();
 }
-
 
 class _LikeButtonForPost extends State<LikeButtonForPost> {
   bool isLiked = false;
@@ -165,18 +183,21 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
       }
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
-   
     return GestureDetector(
-      onTap: toggleLike,
+        onTap: toggleLike,
         child: SizedBox(
             width: 60,
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.transparent,
-                border: Border.all(color: isLiked ? const Color.fromRGBO(186, 155, 55, 1) : Colors.black, width: 2),
+                border: Border.all(
+                    color: isLiked
+                        ? const Color.fromRGBO(186, 155, 55, 1)
+                        : Colors.black,
+                    width: 2),
                 borderRadius:
                     const BorderRadius.all(Radius.elliptical(90, 100)),
               ),
@@ -184,21 +205,16 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
                   padding: const EdgeInsets.only(left: 5),
                   child: Row(
                     children: <Widget>[
-                      Icon(Icons.thumb_up_alt, color: isLiked ? const Color.fromRGBO(186, 155, 55, 1) : Colors.black),
+                      Icon(Icons.thumb_up_alt,
+                          color: isLiked
+                              ? const Color.fromRGBO(186, 155, 55, 1)
+                              : Colors.black),
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
-                        child: Text(likeCount.toString()
-                      ),)
+                        child: Text(likeCount.toString()),
+                      )
                     ],
                   )),
             )));
   }
 }
-
-
-
-
-
-
-
-

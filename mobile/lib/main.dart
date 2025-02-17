@@ -60,11 +60,11 @@ class MyApp extends StatelessWidget {
         '/tes': (context) => const DisscusisonpostInfoScreen(),
         '/pro': (context) => const UserProfileScreen(),
         '/calendar': (context) => const TableEventsExample(),
-        '/createPost': (context) => const CreatePost(),
         '/events': (context) => const EventsListScreen(),
-        '/createEvent': (context) => CreateEvent(),
+        '/createEvent': (context) => const CreateEvent(),
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
         EventInfo.routeName: (context) => const EventInfo(),
+        PostCreationForm.routeName: (context) => const PostCreationForm(),
       },
     );
   }
