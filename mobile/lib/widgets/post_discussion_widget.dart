@@ -20,26 +20,24 @@ class PostWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.only(bottom: 8, left: 5, right: 5),
-        child: Container(
-          decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 1.5),
-              borderRadius: const BorderRadius.all(Radius.circular(20))),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 20, right: 8, bottom: 10),
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, bottom: 5),
-                  child: Row(
-                    children: <Widget>[
-                      Text(
-                        postName,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 20),
-                      ),
-                    ],
-                  ),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(width: 3.0, color: Colors.black),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              /// **Post Title**
+              Text(
+                postName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 12),
