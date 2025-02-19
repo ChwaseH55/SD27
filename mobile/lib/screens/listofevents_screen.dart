@@ -46,8 +46,8 @@ class _EventsListScreen extends State<EventsListScreen> {
               foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
             ),
             onPressed: () async {
-              Navigator.pushNamed(context, '/createEvent');
-           
+              await Navigator.pushNamed(context, '/createEvent');
+              eventsProvider.fetchEvents();
             },
             child: const Text('+ Create Event'),
           ),
@@ -102,7 +102,8 @@ class PostsScreen extends StatelessWidget {
                     child: EventsWidgets(
                         title: event.eventname,
                         date: event.eventdate,
-                        message: event.eventdescription));
+                        message: event.eventdescription,
+                        id: event.eventid,));
               },
             ));
       },

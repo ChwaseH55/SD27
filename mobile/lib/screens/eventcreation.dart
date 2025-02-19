@@ -1,3 +1,5 @@
+import 'package:coffee_card/api_request/auth_request.dart';
+import 'package:coffee_card/api_request/events_request.dart';
 import 'package:flutter/material.dart';
 
 class CreateEvent extends StatelessWidget {
@@ -33,14 +35,17 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController eventTypeController = TextEditingController();
   DateTime? selectedDate;
   String selectedEventType = "Conference"; // Default event type
+  bool requiresRegistration = false; // Checkbox state
 
   @override
   void dispose() {
     titleController.dispose();
     locationController.dispose();
     descriptionController.dispose();
+    eventTypeController.dispose();
     super.dispose();
   }
 
@@ -122,7 +127,7 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
             const Text('Event Type', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             TextField(
-              controller: locationController,
+              controller: eventTypeController,
               decoration: _inputDecoration('Enter event type'),
             ),
             const SizedBox(height: 15),
@@ -135,14 +140,37 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
               maxLines: 4,
               decoration: _inputDecoration('Enter event description'),
             ),
-            const SizedBox(height: 20),
+            
+
+            // Registration Checkbox
+            CheckboxListTile(
+              title: const Text('Requires Registration'),
+              value: requiresRegistration,
+              onChanged: (bool? value) {
+                setState(() {
+                  requiresRegistration = value ?? false;
+                });
+              },
+              controlAffinity: ListTileControlAffinity.leading,
+              activeColor: const Color.fromRGBO(186, 155, 55, 1),
+            ),
+            
 
             // Create Event Button
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle event creation logic
-                  Navigator.pop(context);
+                onPressed: () async {
+                  String? id = await getUserID();
+                  await createEvent(
+                    titleController.text,
+                    selectedDate.toString(),
+                    locationController.text,
+                    eventTypeController.text,
+                    requiresRegistration, 
+                    int.parse(id!),
+                    descriptionController.text,
+                  );
+                  if (context.mounted) Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(186, 155, 55, 1),

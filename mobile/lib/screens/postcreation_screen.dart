@@ -152,14 +152,16 @@ class _PostForm extends State<PostForm> {
                     postId: args!.postId.toString(),
                     title: titleController.text,
                     content: descriptionController.text);
-                if (context.mounted) Navigator.of(context).pop();
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
               } else {
                 String? id = await getUserID();
                 await createPost(
                     title: titleController.text,
                     content: descriptionController.text,
                     userId: id);
-               if (context.mounted) Navigator.pushNamed(context, '/pos');
+                if (context.mounted) Navigator.of(context).pop();
               }
             },
             style: ElevatedButton.styleFrom(

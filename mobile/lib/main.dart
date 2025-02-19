@@ -19,6 +19,7 @@ import 'package:coffee_card/screens/forumcreation_screen.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
 import 'package:coffee_card/screens/listofevents_screen.dart';
 import 'package:coffee_card/screens/userprofile_screen.dart';
+import 'package:coffee_card/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +32,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => PostProvider()),
         ChangeNotifierProvider(create: (_) => EventsProvider()..fetchEvents()),
         ChangeNotifierProvider(create: (_) => EventsInfoProvider()),
+        ChangeNotifierProvider(create: (_) => EventProvider()),
         // Add more providers here if needed
       ],
       child: const MyApp(),

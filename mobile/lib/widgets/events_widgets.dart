@@ -1,7 +1,10 @@
+import 'package:coffee_card/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class EventsWidgets extends StatelessWidget {
+  final int? id;
   final String? title;
   final String? date;
   final String? message;
@@ -11,6 +14,7 @@ class EventsWidgets extends StatelessWidget {
     required this.title,
     required this.date,
     required this.message,
+    required this.id
   });
 
   @override
@@ -58,6 +62,32 @@ class EventsWidgets extends StatelessWidget {
                 message!,
                 style: const TextStyle(fontSize: 16, height: 1.4),
                 textAlign: TextAlign.justify,
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 30,
+                child: ElevatedButton(
+                  onPressed: () {
+                    EventProvider provider = Provider.of<EventProvider>(context, listen: false);
+                    DateTime eventDate =
+                        DateTime.parse(date!); // Convert date to DateTime
+                    provider.addEvent(eventDate, title!, id!); // Add event to kEvents
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Event added to calendar!")),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Add to Calendar',
+                    style: TextStyle(fontSize: 12, color: Colors.black),
+                  ),
+                ),
               ),
             ],
           ),

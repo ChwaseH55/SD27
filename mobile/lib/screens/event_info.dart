@@ -1,5 +1,7 @@
+import 'package:coffee_card/api_request/events_request.dart';
 import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/providers/events_info_provider.dart';
+import 'package:coffee_card/providers/events_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -89,6 +91,7 @@ class EventInfoWidget extends StatelessWidget {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     String formattedDate = DateFormat('MMM d, yyyy').format(DateTime.parse(eventDate!));
+    final args = ModalRoute.of(context)!.settings.arguments as EventsArgument;
 
     return SizedBox(
       height: height * 0.3,
@@ -117,8 +120,13 @@ class EventInfoWidget extends StatelessWidget {
                       itemBuilder: (context) => [
                         PopupMenuItem(
                           child: InkWell(
-                            onTap: () {
-                              //deleteReply(replyId: replyId.toString());// Close the menu manually
+                            onTap: () async {
+                              final eventProvider = Provider.of<EventsProvider>(
+                                context,
+                                listen: false);
+                            await deleteEvent(args.id);
+                            if (context.mounted) Navigator.pushNamed(context, '/events');
+                            await eventProvider.fetchEvents();
                             },
                             child: const Text("Delete Event"),
                           ),
@@ -136,10 +144,11 @@ class EventInfoWidget extends StatelessWidget {
                   ]),
                   Align(
                     alignment: Alignment.bottomLeft,
-                    child: Text(formattedDate!,
+                    child: Row(children: <Widget>[const Text('Event Date: ',
+                        style: TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w800)),Text(formattedDate,
                         style: const TextStyle(
-                          fontSize: 20,
-                        )),
+                          fontSize: 20,))],),
                   ),
                   Align(
                     alignment: Alignment.bottomCenter,

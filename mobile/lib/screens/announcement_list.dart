@@ -73,12 +73,12 @@ class _AnnouncementListForm extends State<AnnouncementListForm> {
           ),
 
           //Adds announcement
-          const EventsWidgets(
-            title: 'New Gear',
-            date: '11/13/24',
+          // const EventsWidgets(
+          //   title: 'New Gear',
+          //   date: '11/13/24',
         
-            message: 'Come get new gear',
-          ),
+          //   message: 'Come get new gear',
+          // ),
           
         ]);
   }
