@@ -14,18 +14,28 @@ class Event {
 }
 
 class EventProvider extends ChangeNotifier {
-  final LinkedHashMap<DateTime, List<Event>> _events = LinkedHashMap<DateTime, List<Event>>(
+  final LinkedHashMap<DateTime, List<Event>> _events =
+      LinkedHashMap<DateTime, List<Event>>(
     equals: isSameDay,
     hashCode: getHashCode,
   );
 
-  UnmodifiableMapView<DateTime, List<Event>> get events => UnmodifiableMapView(_events);
+  UnmodifiableMapView<DateTime, List<Event>> get events =>
+      UnmodifiableMapView(_events);
 
   void addEvent(DateTime date, String title, int id) {
     if (!_events.containsKey(date)) {
       _events[date] = [];
     }
-    _events[date]!.add(Event(title,id));
+    _events[date]!.add(Event(title, id));
+    notifyListeners(); // Notify listeners to rebuild UI
+  }
+
+  void removEvent(DateTime date, int id) {
+    if (!_events.containsKey(date)) {
+      _events[date] = [];
+    }
+    _events[date]!.removeWhere((event) => event.id == id);
     notifyListeners(); // Notify listeners to rebuild UI
   }
 

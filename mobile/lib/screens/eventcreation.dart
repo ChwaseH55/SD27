@@ -1,9 +1,12 @@
 import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:coffee_card/api_request/events_request.dart';
+import 'package:coffee_card/arguments/eventcreateargument.dart';
 import 'package:flutter/material.dart';
 
 class CreateEvent extends StatelessWidget {
   const CreateEvent({super.key});
+
+  static const routeName = '/extractEventInfo';
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +40,27 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController eventTypeController = TextEditingController();
   DateTime? selectedDate;
-  String selectedEventType = "Conference"; // Default event type
   bool requiresRegistration = false; // Checkbox state
+  EventCreateArgument? args; // Store argument for use in initState
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Retrieve arguments only once
+    final EventCreateArgument? receivedArgs =
+        ModalRoute.of(context)?.settings.arguments as EventCreateArgument?;
+    if (receivedArgs != null) {
+      args = receivedArgs;
+      titleController.text = args!.isUpdate ? args!.title : "";
+      descriptionController.text = args!.isUpdate ? args!.content : "";
+      locationController.text = args!.isUpdate ? args!.location : "";
+      eventTypeController.text = args!.isUpdate ? args!.type : "";
+      if (args!.isUpdate) {
+        selectedDate = DateTime.parse(args!.date);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -65,6 +87,8 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as EventCreateArgument;
     return SingleChildScrollView(
       child: Container(
         padding: const EdgeInsets.all(16.0),
@@ -83,16 +107,18 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
+            Center(
               child: Text(
-                'Create New Event',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                args.isUpdate ? 'Update Event' : 'Create New Event',
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 20),
 
             // Event Title
-            const Text('Event Title', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Event Title',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             TextField(
               controller: titleController,
@@ -101,7 +127,8 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
             const SizedBox(height: 15),
 
             // Event Location
-            const Text('Event Location', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Event Location',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             TextField(
               controller: locationController,
@@ -110,7 +137,8 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
             const SizedBox(height: 15),
 
             // Event Date Picker
-            const Text('Event Date', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Event Date',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             GestureDetector(
               onTap: () => _selectDate(context),
@@ -124,7 +152,8 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
             ),
             const SizedBox(height: 15),
 
-            const Text('Event Type', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Event Type',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             TextField(
               controller: eventTypeController,
@@ -133,14 +162,14 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
             const SizedBox(height: 15),
 
             // Event Description
-            const Text('Event Description', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text('Event Description',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             TextField(
               controller: descriptionController,
               maxLines: 4,
               decoration: _inputDecoration('Enter event description'),
             ),
-            
 
             // Registration Checkbox
             CheckboxListTile(
@@ -154,7 +183,6 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
               controlAffinity: ListTileControlAffinity.leading,
               activeColor: const Color.fromRGBO(186, 155, 55, 1),
             ),
-            
 
             // Create Event Button
             Center(
@@ -166,7 +194,7 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
                     selectedDate.toString(),
                     locationController.text,
                     eventTypeController.text,
-                    requiresRegistration, 
+                    requiresRegistration,
                     int.parse(id!),
                     descriptionController.text,
                   );
@@ -174,14 +202,15 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  'Create Event',
-                  style: TextStyle(fontSize: 16, color: Colors.black),
+                child: Text(
+                  args.isUpdate ? 'Update Event' : 'Create Event',
+                  style: const TextStyle(fontSize: 16, color: Colors.black),
                 ),
               ),
             ),

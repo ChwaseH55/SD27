@@ -38,7 +38,14 @@ class _TableEventsExampleState extends State<TableEventsExample> {
     final eventProvider = Provider.of<EventProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('UCF Golf Calendar')),
+      appBar: AppBar(
+        title: const Text(
+          'UCF Golf Calendar',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+      ),
       body: Column(
         children: [
           TableCalendar<Event>(
@@ -51,22 +58,21 @@ class _TableEventsExampleState extends State<TableEventsExample> {
             onDaySelected: _onDaySelected,
             onPageChanged: (focusedDay) {
               _focusedDay = focusedDay;
-              CalendarBuilders(
-                dowBuilder: (context, day) {
-                  if (day.weekday == DateTime.sunday) {
-                    final text = DateFormat.E().format(day);
-
-                    return Center(
-                      child: Text(
-                        text,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    );
-                  }
-                  return null;
-                },
-              );
             },
+            availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+            calendarStyle: const CalendarStyle(
+              selectedDecoration: BoxDecoration(
+                color: Color.fromRGBO(
+                    186, 155, 55, 1), // Change this to any color you prefer
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: Colors.black, // Change today's highlight color if needed
+                shape: BoxShape.circle,
+              ),
+              selectedTextStyle: TextStyle(
+                  color: Colors.black), // Change text color of selected day
+            ),
           ),
           const SizedBox(height: 8.0),
           Expanded(
@@ -89,13 +95,33 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                           vertical: 4.0,
                         ),
                         decoration: BoxDecoration(
+                          color: const Color.fromRGBO(186, 155, 55, 1),
                           border: Border.all(),
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                         child: ListTile(
-                          title: Text(eventProvider
-                              .getEventsForDay(_selectedDay!)[index]
-                              .title),
+                          title: Text(
+                            eventProvider
+                                .getEventsForDay(_selectedDay!)[index]
+                                .title,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.black,
+                            ),
+                            onPressed: () {
+                              EventProvider provider =
+                                  Provider.of<EventProvider>(context,
+                                      listen: false);
+                              provider.removEvent(
+                                  _selectedDay!,
+                                  eventProvider
+                                      .getEventsForDay(_selectedDay!)[index]
+                                      .id);
+                            },
+                          ),
                         )));
               },
             ),

@@ -47,7 +47,7 @@ class MainMenu extends StatelessWidget {
                 ),
                 title: const Text('Disscussion Forum'),
                 onTap: () {
-                  Navigator.pushNamed(context, '/dis');
+                  Navigator.pushNamed(context, '/pos');
                 },
               ),
               ListTile(

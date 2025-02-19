@@ -83,7 +83,7 @@ class PostinfoWidget extends StatelessWidget {
                             final forumInfoProvider = Provider.of<PostProvider>(
                                 context,
                                 listen: false);
-                                final forumListProvider = Provider.of<ForumProvider>(
+                            final forumListProvider = Provider.of<ForumProvider>(
                                 context,
                                 listen: false);
                             await Navigator.pushNamed(

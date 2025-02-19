@@ -67,6 +67,7 @@ class MyApp extends StatelessWidget {
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
         EventInfo.routeName: (context) => const EventInfo(),
         PostCreationForm.routeName: (context) => const PostCreationForm(),
+        //CreateEvent.routeName: (context) => const CreateEvent(),
       },
     );
   }

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class PostCreationForm extends StatefulWidget {
   const PostCreationForm({super.key});
 
-  static const routeName = '/extractIsUpdate';
+  static const routeName = '/extractUpdateInfo';
 
   @override
   State<PostCreationForm> createState() => _PostCreationForm();
