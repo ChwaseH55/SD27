@@ -126,10 +126,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
               },
             ),
           ),
-          ElevatedButton(
-            onPressed: () {},
-            child: const Text("Add Event"),
-          ),
+          
         ],
       ),
     );

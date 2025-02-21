@@ -29,7 +29,7 @@ class _DisplayCreationState extends State<DisplayCreation> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        _toggleWidgetVisibility();
+        Navigator.pushNamed(context, '/calendar');
       },
       child: Container(
         width: 56,
@@ -39,7 +39,7 @@ class _DisplayCreationState extends State<DisplayCreation> {
           color:  Color.fromRGBO(186, 155, 55, 1),
         ),
         child: const Icon(
-          Icons.add,
+          Icons.calendar_month,
           color: Colors.black,
           size: 42,
         ),

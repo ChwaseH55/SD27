@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "936807451927",
+    "project_id": "flutter-ucf-golf-club",
+    "storage_bucket": "flutter-ucf-golf-club.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936807451927:android:864d645c2e5867ab3a7b52",
+        "android_client_info": {
+          "package_name": "com.example.coffee_card"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvp7mreXy5Vw2ThNwY9tryiZI0r7SGGTs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -7,6 +7,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           'UCF',
@@ -44,27 +45,22 @@ class _LoginForm extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.sizeOf(context).height;
+    double width = MediaQuery.sizeOf(context).width;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        // Container(
-        //   margin: const EdgeInsets.all(6.0),
-        //   decoration: BoxDecoration(
-        //     color: Colors.green,
-        //     borderRadius: BorderRadius.circular(8.0),
-        //     image: const DecorationImage(
-        //       image: AssetImage(
-        //           "assets/images/dog.jpg"), // Use your asset image path
-        //       fit: BoxFit.cover,
-        //     ),
-        //   ),
-        // ),
+        SizedBox(
+            height: height * 0.45,
+            width: width * 0.45,
+            child:
+                const Image(image: AssetImage('assets/images/golf_logo.jpg'))),
         // Username input
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: TextField(
               controller: userController,
               decoration: const InputDecoration(
@@ -121,25 +117,25 @@ class _LoginForm extends State<LoginForm> {
           ),
         ),
 
-        //Password Forget btn
-        TextButton(
-          onPressed: () {},
-          child: const Text(
-            "Forget Password",
-            style: TextStyle(fontSize: 15, color: Colors.black),
-          ),
-        ),
+        // //Password Forget btn
+        // TextButton(
+        //   onPressed: () {},
+        //   child: const Text(
+        //     "Forget Password",
+        //     style: TextStyle(fontSize: 15, color: Colors.black),
+        //   ),
+        // ),
 
-        //Sign up btn
-        TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/reg');
-          },
-          child: const Text(
-            "Sign Up",
-            style: TextStyle(fontSize: 15, color: Colors.black),
-          ),
-        ),
+        // //Sign up btn
+        // TextButton(
+        //   onPressed: () {
+        //     Navigator.pushNamed(context, '/reg');
+        //   },
+        //   child: const Text(
+        //     "Sign Up",
+        //     style: TextStyle(fontSize: 15, color: Colors.black),
+        //   ),
+        // ),
       ],
     );
   }

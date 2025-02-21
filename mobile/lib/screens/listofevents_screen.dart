@@ -2,6 +2,7 @@ import 'package:coffee_card/arguments/eventcreateargument.dart';
 import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
+import 'package:coffee_card/providers/user_provider.dart';
 import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/screens/eventcreation.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';

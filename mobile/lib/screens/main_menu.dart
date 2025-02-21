@@ -7,11 +7,13 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text(
             'UCF',
             style: TextStyle(fontWeight: FontWeight.w900),
           ),
+          
           centerTitle: true,
           backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
           actions: <Widget>[
@@ -43,9 +45,9 @@ class MainMenu extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(
-                  Icons.home,
+                  Icons.forum_rounded,
                 ),
-                title: const Text('Disscussion Forum'),
+                title: const Text('Disscussions'),
                 onTap: () {
                   Navigator.pushNamed(context, '/pos');
                 },
@@ -63,23 +65,14 @@ class MainMenu extends StatelessWidget {
                 leading: const Icon(
                   Icons.train,
                 ),
-                title: const Text('Tournaments'),
+                title: const Text('Scores'),
                 onTap: () {
-                  Navigator.pushNamed(context, '/tou');
+                  Navigator.pushNamed(context, '/scores');
                 },
               ),
               ListTile(
                 leading: const Icon(
-                  Icons.train,
-                ),
-                title: const Text('Calendar'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/calendar');
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.train,
+                  Icons.list_alt,
                 ),
                 title: const Text('Events'),
                 onTap: () {
@@ -98,37 +91,61 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        // Login Btn
+    double height = MediaQuery.sizeOf(context).height;
+    double width = MediaQuery.sizeOf(context).width;
 
-        CarouselSlider(
-          items: [
-            Container(
-              margin: const EdgeInsets.all(6.0),
-              child: const Text('Message'),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Keeps the content centered
+          children: <Widget>[
+            // Golf Logo
+            SizedBox(
+              height: height * 0.3,
+              width: width * 0.6,
+              child: const Image(
+                image: AssetImage('assets/images/golf_logo.jpg'),
+                fit: BoxFit.contain,
+              ),
             ),
-            //1st Image of Slider
-            Container(
-              margin: const EdgeInsets.all(6.0),
-              child: const Text('Message'),
+            const SizedBox(height: 20), // Spacing between image and text
+            const Text(
+              'Welcome to the UCF Golf App',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
             ),
+
+            // CarouselSlider(
+        //   items: [
+        //     Container(
+        //       margin: const EdgeInsets.all(6.0),
+        //       child: const Text('Message'),
+        //     ),
+        //     //1st Image of Slider
+        //     Container(
+        //       margin: const EdgeInsets.all(6.0),
+        //       child: const Text('Message'),
+        //     ),
+        //   ],
+
+        //   //Slider Container properties
+        //   options: CarouselOptions(
+        //     height: 180.0,
+        //     enlargeCenterPage: true,
+        //     autoPlay: true,
+        //     aspectRatio: 16 / 9,
+        //     autoPlayCurve: Curves.fastOutSlowIn,
+        //     enableInfiniteScroll: true,
+        //     autoPlayAnimationDuration: const Duration(milliseconds: 800),
+        //     viewportFraction: 0.8,
+        //   ),
+        // ),
           ],
-
-          //Slider Container properties
-          options: CarouselOptions(
-            height: 180.0,
-            enlargeCenterPage: true,
-            autoPlay: true,
-            aspectRatio: 16 / 9,
-            autoPlayCurve: Curves.fastOutSlowIn,
-            enableInfiniteScroll: true,
-            autoPlayAnimationDuration: const Duration(milliseconds: 800),
-            viewportFraction: 0.8,
-          ),
         ),
-      ],
+      ),
     );
   }
 }

@@ -18,7 +18,7 @@ class AnnouncementList extends StatelessWidget {
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
       body: const AnnouncementListForm(),
-      floatingActionButton: const FloatingBtn(),
+      
     );
   }
 }

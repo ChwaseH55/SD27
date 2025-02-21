@@ -81,6 +81,7 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
                 likeNumber: likesNum,
                 postId: resPost.post!.postid.toString(),
                 userId: userInfo.id.toString(),
+                createDate: resPost.post!.createddate,
               ),
               Expanded(child: ListofReplies(postId: resPost.post!.postid, replies: replies)),
               ElevatedButton(

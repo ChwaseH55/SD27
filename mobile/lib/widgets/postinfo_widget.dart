@@ -4,6 +4,7 @@ import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class PostinfoWidget extends StatelessWidget {
@@ -13,19 +14,22 @@ class PostinfoWidget extends StatelessWidget {
   final String? postId;
   final String? userId;
   final int likeNumber;
+  final String? createDate;
 
-  const PostinfoWidget({
-    super.key,
-    required this.postId,
-    required this.userId,
-    required this.likeNumber,
-    required this.username,
-    required this.posttitle,
-    required this.postContent,
-  });
+  const PostinfoWidget(
+      {super.key,
+      required this.postId,
+      required this.userId,
+      required this.likeNumber,
+      required this.username,
+      required this.posttitle,
+      required this.postContent,
+      required this.createDate});
 
   @override
   Widget build(BuildContext context) {
+    String formattedDate =
+        DateFormat('MMM d, yyyy').format(DateTime.parse(createDate!));
     return Padding(
       padding: const EdgeInsets.symmetric(),
       child: Card(
@@ -42,27 +46,37 @@ class PostinfoWidget extends StatelessWidget {
               /// **User Info & Menu**
               Row(
                 children: <Widget>[
-                  const CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    child: Icon(Icons.person, color: Colors.white),
+                  
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.grey[300],
+                    child: Text(
+                      username![0].toUpperCase(),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
+                  const SizedBox(width: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
                     child: Text(
                       username!,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                          fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ),
+                  Text(
+                    formattedDate,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  const Spacer(),
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert),
                     onSelected: (value) {
                       // Handle menu actions
                     },
                     itemBuilder: (context) => [
-                       PopupMenuItem(
+                      PopupMenuItem(
                         value: "delete",
                         child: InkWell(
                           onTap: () async {
@@ -70,7 +84,8 @@ class PostinfoWidget extends StatelessWidget {
                                 context,
                                 listen: false);
                             await deletePost(postId: postId!);
-                            if (context.mounted) Navigator.pushNamed(context, '/pos');
+                            if (context.mounted)
+                              Navigator.pushNamed(context, '/pos');
                             await forumProvider.fetchPostDetails(postId!);
                           },
                           child: const Text("Delete Post"),
@@ -83,17 +98,18 @@ class PostinfoWidget extends StatelessWidget {
                             final forumInfoProvider = Provider.of<PostProvider>(
                                 context,
                                 listen: false);
-                            final forumListProvider = Provider.of<ForumProvider>(
-                                context,
-                                listen: false);
+                            final forumListProvider =
+                                Provider.of<ForumProvider>(context,
+                                    listen: false);
                             await Navigator.pushNamed(
                               context,
                               PostCreationForm.routeName,
-                              arguments: CreateArgument(true, int.parse(postId!), posttitle!, postContent!),
+                              arguments: CreateArgument(true,
+                                  int.parse(postId!), posttitle!, postContent!),
                             );
-                            if (context.mounted) Navigator.of(context).pop(); 
-                              forumInfoProvider.fetchPostDetails(postId!);
-                              forumListProvider.fetchPosts();
+                            if (context.mounted) Navigator.of(context).pop();
+                            forumInfoProvider.fetchPostDetails(postId!);
+                            forumListProvider.fetchPosts();
                           },
                           child: const Text("Update Post"),
                         ),

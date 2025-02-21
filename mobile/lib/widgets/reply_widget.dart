@@ -47,11 +47,15 @@ class ReplyWidget extends StatelessWidget {
               /// **User & Date Row**
               Row(
                 children: <Widget>[
-                  const CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Colors.grey,
-                    child: Icon(Icons.person, color: Colors.white, size: 16),
-                  ),
+                  CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Colors.grey[300],
+                      child: Text(
+                        userName[0].toUpperCase(),
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   const SizedBox(width: 8),
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
@@ -137,7 +141,7 @@ class ReplyWidget extends StatelessWidget {
                 textAlign: TextAlign.justify,
               ),
 
-              const SizedBox(height: 1),
+              const SizedBox(height: 6),
 
               /// **Like Button**
               Row(

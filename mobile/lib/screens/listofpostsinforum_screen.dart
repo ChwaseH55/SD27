@@ -57,7 +57,7 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
         ],
       ),
       body: const PostsScreen(),
-      floatingActionButton: const FloatingBtn(),
+      
     );
   }
 }

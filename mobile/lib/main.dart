@@ -11,6 +11,7 @@ import 'package:coffee_card/screens/listofforums_screen.dart';
 import 'package:coffee_card/screens/listofpostsinforum_screen.dart';
 import 'package:coffee_card/screens/announcement_list.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
+import 'package:coffee_card/screens/scores_screen.dart';
 import 'package:coffee_card/screens/tournament_list.dart';
 import 'package:coffee_card/screens/register_screen.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
@@ -64,6 +65,7 @@ class MyApp extends StatelessWidget {
         '/calendar': (context) => const TableEventsExample(),
         '/events': (context) => const EventsListScreen(),
         '/createEvent': (context) => const CreateEvent(),
+        '/scores': (context) => const GolfScoreScreen(),
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
         EventInfo.routeName: (context) => const EventInfo(),
         PostCreationForm.routeName: (context) => const PostCreationForm(),
