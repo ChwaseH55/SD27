@@ -1,51 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 
 // Initialize Stripe with your public key
-const stripePromise = loadStripe("pk_test_51PzZ4xRs4YZmhcoeiINiWfKCCh0sC5gpVqxfhtT24PzY7OPcUAlZuxyldOm7kKOejlZxi1wIwwbzMPVLVAS2pz2f00zNR0YmWR"); // Replace with your actual Stripe public key
+const stripePromise = loadStripe("pk_test_51PzZ4xRs4YZmhcoeiINiWfKCCh0sC5gpVqxfhtT24PzY7OPcUAlZuxyldOm7kKOejlZxi1wIwwbzMPVLVAS2pz2f00zNR0YmWR");
 
 const Store = () => {
   const navigate = useNavigate();
-
-  // Access the logged-in user from Redux state
   const { user } = useSelector((state) => state.user);
 
-  // State for handling the cart
+  // State for cart and products
   const [cartItems, setCartItems] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Redirect to login if the user is not logged in
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) {
       navigate("/login");
     }
   }, [user, navigate]);
 
-  // Product data (for now, this can be static or fetched from your backend)
-  const products = [
-    {
-      id: 1,
-      name: "UCF Golf Hat",
-      price: "$25",
-      image: "/assets/clublogo.png",
-      priceId: "price_1QLzZ0Rs4YZmhcoeVv9jQXbV", // Add actual Stripe price ID here
-    },
-    {
-      id: 2,
-      name: "UCF Golf Polo",
-      price: "$40",
-      image: "/assets/clublogo.png",
-      priceId: "price_1QLzZ0Rs4YZmhcoeVv9jQXbV", // Add actual Stripe price ID here
-    },
-    {
-      id: 3,
-      name: "UCF Golf Club Dues",
-      price: "$100",
-      image: "/assets/clublogo.png",
-      priceId: "price_1QLzZ0Rs4YZmhcoeVv9jQXbV", // Add actual Stripe price ID here
-    },
-  ];
+  // Fetch products from the backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/stripe/productlist");
+        const data = await response.json();
+        setProducts(data);  // Set products once they are fetched
+        setLoading(false);  // Set loading to false once data is loaded
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleCheckout = async () => {
     const lineItems = cartItems.map((item) => ({
@@ -53,21 +45,26 @@ const Store = () => {
       quantity: item.quantity,
     }));
   
-    const stripe = await stripePromise;
-  
-    const { sessionId } = await fetch("http://localhost:5000/api/create-checkout-session", {
+    // Fetch the session URL from your backend
+    const response = await fetch("http://localhost:5000/api/stripe/create-checkout-session", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ cartItems: lineItems }),
-    }).then((res) => res.json());
+    });
   
-    // Redirect to Stripe checkout with the correct sessionId
-    stripe.redirectToCheckout({ sessionId });
+    const data = await response.json();
+  
+    // Check if the URL exists and redirect
+    if (data.url) {
+      window.location.href = data.url;  // Redirect to the Stripe Checkout URL
+    } else {
+      console.error("Error: No URL returned from Stripe session creation.");
+    }
   };
+  
 
-  // Add item to cart
   const addToCart = (product) => {
     const existingItem = cartItems.find((item) => item.id === product.id);
     if (existingItem) {
@@ -101,34 +98,45 @@ const Store = () => {
               <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">
                 Shop Merchandise
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="bg-white shadow-lg rounded-lg overflow-hidden hover:scale-105 transition transform duration-200 ease-in-out"
-                  >
-                    <div className="relative w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="object-contain h-32"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-500 mb-4">{product.price}</p>
-                      <button
-                        onClick={() => addToCart(product)}
-                        className="w-full bg-ucfGold text-white py-3 rounded-lg font-medium hover:bg-ucfGold-dark transition"
+
+              {loading ? (
+                <p className="text-center">Loading products...</p>  // Display loading message
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                  {products.length === 0 ? (
+                    <p className="text-center">No products available.</p>  // Handle empty product list
+                  ) : (
+                    products.map((product) => (
+                      <div
+                        key={product.id}
+                        className="bg-white shadow-lg rounded-lg overflow-hidden hover:scale-105 transition transform duration-200 ease-in-out"
                       >
-                        Add to Cart
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                        <div className="relative w-full h-48 bg-gray-200 flex items-center justify-center">
+                          <img
+                            src={"/assets/clublogo.png"}  // Handle missing images
+                            alt={product.name}
+                            className="object-contain h-32"
+                          />
+                        </div>
+                        <div className="p-6">
+                          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                            {product.name}
+                          </h3>
+                          <p className="text-gray-500 mb-4">
+                            {product.price ? `$${(product.price.unit_amount / 100).toFixed(2)}` : "Price not available"}
+                          </p>
+                          <button
+                            onClick={() => addToCart(product)}
+                            className="w-full bg-ucfGold text-white py-3 rounded-lg font-medium hover:bg-ucfGold-dark transition"
+                          >
+                            Add to Cart
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Cart Section */}
