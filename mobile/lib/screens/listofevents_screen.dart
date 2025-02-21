@@ -1,7 +1,9 @@
+import 'package:coffee_card/arguments/eventcreateargument.dart';
 import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/screens/event_info.dart';
+import 'package:coffee_card/screens/eventcreation.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/post_discussion_widget.dart';
@@ -46,7 +48,9 @@ class _EventsListScreen extends State<EventsListScreen> {
               foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
             ),
             onPressed: () async {
-              await Navigator.pushNamed(context, '/createEvent');
+              await Navigator.pushNamed(context, CreateEvent.routeName,
+                  arguments:
+                      EventCreateArgument(false, 1, '', '', '', '', false, ''));
               eventsProvider.fetchEvents();
             },
             child: const Text('+ Create Event'),
@@ -100,10 +104,9 @@ class PostsScreen extends StatelessWidget {
                       );
                     },
                     child: EventsWidgets(
-                        title: event.eventname,
-                        date: event.eventdate,
-                        message: event.eventdescription,
-                        id: event.eventid,));
+                      event: event,
+                      userId: eventsProvider.userId,
+                    ));
               },
             ));
       },

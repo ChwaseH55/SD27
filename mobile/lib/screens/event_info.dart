@@ -115,6 +115,8 @@ class EventInfoWidget extends StatelessWidget {
                       PopupMenuItem(
                         child: InkWell(
                           onTap: () async {
+                            Navigator.of(context)
+                                .pop();
                             final eventProvider = Provider.of<EventsProvider>(
                                 context,
                                 listen: false);
@@ -122,8 +124,9 @@ class EventInfoWidget extends StatelessWidget {
                                 context,
                                 listen: false);
                             await deleteEvent(args.id);
-                            if (context.mounted)
-                              Navigator.pushNamed(context, '/events');
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                            }
                             await eventProvider.fetchEvents();
                             provider.removEvent(
                                 DateTime.parse(event!.eventdate!), args.id);

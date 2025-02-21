@@ -39,26 +39,35 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
   final TextEditingController locationController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController eventTypeController = TextEditingController();
+  final titleFocusNode = FocusNode();
+  final locationFocusNode = FocusNode();
+  final descriptionFocusNode = FocusNode();
+  final typeFocusNode = FocusNode();
+  final registerFocusNode = FocusNode();
   DateTime? selectedDate;
   bool requiresRegistration = false; // Checkbox state
   EventCreateArgument? args; // Store argument for use in initState
+
+  bool _initialized = false; // Prevents resetting user input
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Retrieve arguments only once
-    final EventCreateArgument? receivedArgs =
-        ModalRoute.of(context)?.settings.arguments as EventCreateArgument?;
-    if (receivedArgs != null) {
-      args = receivedArgs;
-      titleController.text = args!.isUpdate ? args!.title : "";
-      descriptionController.text = args!.isUpdate ? args!.content : "";
-      locationController.text = args!.isUpdate ? args!.location : "";
-      eventTypeController.text = args!.isUpdate ? args!.type : "";
-      if (args!.isUpdate) {
+    if (!_initialized) {
+      // Ensure values are set only once
+      final EventCreateArgument? receivedArgs =
+          ModalRoute.of(context)?.settings.arguments as EventCreateArgument?;
+      if (receivedArgs != null && receivedArgs.isUpdate) {
+        args = receivedArgs;
+        titleController.text = args!.title;
+        descriptionController.text = args!.content;
+        locationController.text = args!.location;
+        eventTypeController.text = args!.type;
+        requiresRegistration = args!.registration;
         selectedDate = DateTime.parse(args!.date);
       }
+      _initialized = true; // Prevent future resets
     }
   }
 
@@ -68,6 +77,10 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
     locationController.dispose();
     descriptionController.dispose();
     eventTypeController.dispose();
+    titleFocusNode.dispose();
+    locationFocusNode.dispose();
+    descriptionFocusNode.dispose();
+    typeFocusNode.dispose();
     super.dispose();
   }
 
@@ -121,6 +134,7 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             TextField(
+              focusNode: titleFocusNode,
               controller: titleController,
               decoration: _inputDecoration('Enter event title'),
             ),
@@ -131,6 +145,7 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             TextField(
+              focusNode: locationFocusNode,
               controller: locationController,
               decoration: _inputDecoration('Enter event location'),
             ),
@@ -156,6 +171,7 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             TextField(
+              focusNode: typeFocusNode,
               controller: eventTypeController,
               decoration: _inputDecoration('Enter event type'),
             ),
@@ -166,6 +182,7 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             TextField(
+              focusNode: descriptionFocusNode,
               controller: descriptionController,
               maxLines: 4,
               decoration: _inputDecoration('Enter event description'),
@@ -173,6 +190,7 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
 
             // Registration Checkbox
             CheckboxListTile(
+              focusNode: registerFocusNode,
               title: const Text('Requires Registration'),
               value: requiresRegistration,
               onChanged: (bool? value) {
@@ -188,16 +206,25 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
             Center(
               child: ElevatedButton(
                 onPressed: () async {
-                  String? id = await getUserID();
-                  await createEvent(
-                    titleController.text,
-                    selectedDate.toString(),
-                    locationController.text,
-                    eventTypeController.text,
-                    requiresRegistration,
-                    int.parse(id!),
-                    descriptionController.text,
-                  );
+                  if (args.isUpdate) {
+                    await updateEvent(
+                        args.eventId,
+                        titleController.text,
+                        descriptionController.text,
+                        selectedDate.toString(),
+                        eventTypeController.text);
+                  } else {
+                    String? id = await getUserID();
+                    await createEvent(
+                      titleController.text,
+                      selectedDate.toString(),
+                      locationController.text,
+                      eventTypeController.text,
+                      requiresRegistration,
+                      int.parse(id!),
+                      descriptionController.text,
+                    );
+                  }
                   if (context.mounted) Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
