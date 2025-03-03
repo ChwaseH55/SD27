@@ -1,14 +1,9 @@
-import 'package:coffee_card/api_request/forum_request.dart';
-import 'package:coffee_card/arguments/postcreateargument.dart';
-import 'package:coffee_card/providers/forum_provider.dart';
-import 'package:coffee_card/screens/postcreation_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:coffee_card/widgets/post_discussion_widget.dart';
-import 'package:coffee_card/widgets/creationformplus.dart';
-import 'package:coffee_card/arguments/postargument.dart';
-import 'package:coffee_card/screens/disscusisonpost_info.dart';
 import 'package:provider/provider.dart';
-import 'dart:developer';
+import 'package:coffee_card/providers/forum_provider.dart';
+import 'package:coffee_card/screens/disscusisonpost_info.dart';
+import 'package:coffee_card/arguments/postargument.dart';
+import 'package:coffee_card/widgets/post_discussion_widget.dart';
 
 class ForumpostScreen extends StatefulWidget {
   const ForumpostScreen({super.key});
@@ -19,12 +14,12 @@ class ForumpostScreen extends StatefulWidget {
 
 class _ForumpostScreenState extends State<ForumpostScreen> {
   late ForumProvider forumProvider;
+  TextEditingController searchController = TextEditingController();
+  String searchQuery = "";
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
-    // Fetch latest posts when screen is revisited
     forumProvider = Provider.of<ForumProvider>(context, listen: false);
     forumProvider.fetchPosts();
   }
@@ -33,100 +28,81 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'UCF Post',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
+        title: const Text('UCF Post', style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-        actions: [
-          TextButton(
-            style: ButtonStyle(
-              foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 13.0,left: 8.0,right: 8.0,bottom: 8.0),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+          
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                labelText: 'Search Posts',
+                labelStyle:
+                    const TextStyle(color: Colors.black),
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
             ),
-            onPressed: () async {
-              await Navigator.pushNamed(
-                        context,
-                        PostCreationForm.routeName,
-                        arguments: CreateArgument(false, -1, '',''),
-                      );
-              // Force refresh after returning from create post screen
-              forumProvider.fetchPosts();
-            },
-            child: const Text('+ Create Post'),
+          ),
+          Expanded(
+            child: Consumer<ForumProvider>(
+              builder: (context, forumProvider, child) {
+                if (forumProvider.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final filteredPosts = forumProvider.posts.where((post) {
+                  return post.title.toLowerCase().contains(searchQuery);
+                }).toList();
+
+                if (filteredPosts.isEmpty) {
+                  return const Center(child: Text('No matching posts found.'));
+                }
+
+                return ListView.builder(
+                  itemCount: filteredPosts.length,
+                  itemBuilder: (context, index) {
+                    final post = filteredPosts[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          PostsScreenInfo.routeName,
+                          arguments: PostArguments(post.postid),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: PostWidget(
+                          postName: post.title,
+                          likeNumber: 1111, // Consider fetching like count dynamically
+                          postId: post.postid.toString(),
+                          replyId: '',
+                          userId: '34',
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
-      body: const PostsScreen(),
-      
     );
   }
 }
-
-
-
-class FloatingBtn extends StatelessWidget {
-  const FloatingBtn({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Align(
-        alignment: Alignment.bottomRight, child: FormAddWidget());
-  }
-}
-
-class PostsScreen extends StatelessWidget {
-  const PostsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ForumProvider>(
-      builder: (context, forumProvider, child) {
-        if (forumProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (forumProvider.posts.isEmpty) {
-          return const Center(child: Text('No posts found.'));
-        }
-
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: ListView.builder(
-            itemCount: forumProvider.posts.length,
-            itemBuilder: (context, index) {
-              final post = forumProvider.posts[index];
-
-              return FutureBuilder<int>(
-                future: forumProvider.getLikesCount('3'),
-                builder: (context, snapshot) {
-                  final likeCount = snapshot.data ?? 0;
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        PostsScreenInfo.routeName,
-                        arguments: PostArguments(post.postid),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: PostWidget(
-                        postName: post.title,
-                        likeNumber: likeCount,
-                        postId: post.postid.toString(),
-                        replyId: '',
-                        userId: '34',
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-}
-

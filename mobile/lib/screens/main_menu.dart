@@ -10,7 +10,7 @@ class MainMenu extends StatelessWidget {
       backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text(
-            'UCF',
+            'UCF Golf Club',
             style: TextStyle(fontWeight: FontWeight.w900),
           ),
           

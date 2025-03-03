@@ -1,34 +1,25 @@
-import 'package:coffee_card/arguments/eventcreateargument.dart';
-import 'package:coffee_card/arguments/eventsargument.dart';
-import 'package:coffee_card/providers/events_provider.dart';
-import 'package:coffee_card/providers/forum_provider.dart';
-import 'package:coffee_card/providers/user_provider.dart';
-import 'package:coffee_card/screens/event_info.dart';
-import 'package:coffee_card/screens/eventcreation.dart';
-import 'package:coffee_card/widgets/events_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:coffee_card/widgets/post_discussion_widget.dart';
-import 'package:coffee_card/widgets/creationformplus.dart';
-import 'package:coffee_card/arguments/postargument.dart';
-import 'package:coffee_card/screens/disscusisonpost_info.dart';
 import 'package:provider/provider.dart';
-import 'dart:developer';
+import 'package:coffee_card/providers/events_provider.dart';
+import 'package:coffee_card/screens/event_info.dart';
+import 'package:coffee_card/arguments/eventsargument.dart';
+import 'package:coffee_card/widgets/events_widgets.dart';
 
 class EventsListScreen extends StatefulWidget {
   const EventsListScreen({super.key});
 
   @override
-  State<EventsListScreen> createState() => _EventsListScreen();
+  State<EventsListScreen> createState() => _EventsListScreenState();
 }
 
-class _EventsListScreen extends State<EventsListScreen> {
+class _EventsListScreenState extends State<EventsListScreen> {
   late EventsProvider eventsProvider;
+  TextEditingController searchController = TextEditingController();
+  String searchQuery = "";
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // Fetch latest posts when screen is revisited
     eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     eventsProvider.fetchEvents();
   }
@@ -37,80 +28,76 @@ class _EventsListScreen extends State<EventsListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'UCF Events',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
+        title: const Text('UCF Events',
+            style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-        actions: [
-          TextButton(
-            style: ButtonStyle(
-              foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+          
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                labelText: 'Search Events',
+                labelStyle:
+                    const TextStyle(color: Colors.black),
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
             ),
-            onPressed: () async {
-              await Navigator.pushNamed(context, CreateEvent.routeName,
-                  arguments:
-                      EventCreateArgument(false, 1, '', '', '', '', false, ''));
-              eventsProvider.fetchEvents();
-            },
-            child: const Text('+ Create Event'),
+          ),
+          Expanded(
+            child: Consumer<EventsProvider>(
+              builder: (context, eventsProvider, child) {
+                if (eventsProvider.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final filteredEvents = eventsProvider.events.where((event) {
+                  return event.eventname!.toLowerCase().contains(searchQuery);
+                }).toList();
+
+                if (filteredEvents.isEmpty) {
+                  return const Center(child: Text('No matching events found.'));
+                }
+
+                return ListView.builder(
+                  itemCount: filteredEvents.length,
+                  itemBuilder: (context, index) {
+                    final event = filteredEvents[index];
+                    return InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          EventInfo.routeName,
+                          arguments: EventsArgument(event.eventid!),
+                        );
+                      },
+                      child: EventsWidgets(
+                        event: event,
+                        userId: eventsProvider.userId,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
-      body: const PostsScreen(),
-      floatingActionButton: const FloatingBtn(),
-    );
-  }
-}
-
-class FloatingBtn extends StatelessWidget {
-  const FloatingBtn({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Align(
-        alignment: Alignment.bottomRight, child: FormAddWidget());
-  }
-}
-
-class PostsScreen extends StatelessWidget {
-  const PostsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<EventsProvider>(
-      builder: (context, eventsProvider, child) {
-        if (eventsProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (eventsProvider.events.isEmpty) {
-          return const Center(child: Text('No events found.'));
-        }
-
-        return Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: ListView.builder(
-              itemCount: eventsProvider.events.length,
-              itemBuilder: (context, index) {
-                final event = eventsProvider.events[index];
-                return InkWell(
-                    onTap: () {
-                      log('enter');
-                      Navigator.pushNamed(
-                        context,
-                        EventInfo.routeName,
-                        arguments: EventsArgument(event.eventid!),
-                      );
-                    },
-                    child: EventsWidgets(
-                      event: event,
-                      userId: eventsProvider.userId,
-                    ));
-              },
-            ));
-      },
     );
   }
 }
