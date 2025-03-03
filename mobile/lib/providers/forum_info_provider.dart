@@ -24,8 +24,8 @@ class PostProvider extends ChangeNotifier {
       if (_postDetails?.post != null) {
         _postUser =
             await getUser(userId: _postDetails!.post!.userid.toString());
-        final likes = await getLikesWithPostId(postId: postId);
-        _likesCount = likes.length;
+        _likesCount = await getLikesWithPostId(postId: postId);
+      
       }
     } catch (e) {
       _postDetails = null;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LikebuttonWidget extends StatelessWidget {
+  final bool isPost;
   final int likeNumber;
   final String postId;
   final String replyId;
@@ -8,6 +9,7 @@ class LikebuttonWidget extends StatelessWidget {
 
   const LikebuttonWidget({
     super.key,
+    required this.isPost,
     required this.likeNumber,
     required this.postId,
     required this.replyId,
@@ -17,6 +19,7 @@ class LikebuttonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LikeButton(
+      isPost: isPost,
       likeNumber: likeNumber,
       postId: postId,
       replyId: replyId,
@@ -26,6 +29,7 @@ class LikebuttonWidget extends StatelessWidget {
 }
 
 class LikeButton extends StatefulWidget {
+  final bool isPost;
   final int likeNumber;
   final String postId;
   final String replyId;
@@ -33,6 +37,7 @@ class LikeButton extends StatefulWidget {
 
   const LikeButton({
     super.key,
+    required this.isPost,
     required this.likeNumber,
     required this.postId,
     required this.replyId,
@@ -57,6 +62,7 @@ class _LikeButton extends State<LikeButton> {
     setState(() {
       isLiked = !isLiked;
       if (isLiked) {
+        
         likeCount += 1;
       } else {
         likeCount -= 1;

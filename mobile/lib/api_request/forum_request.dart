@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:coffee_card/models/likes_model.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:coffee_card/models/post_model.dart';
 import 'package:coffee_card/models/postwithreplies_model.dart';
 
-String urlAddress = "http://10.0.2.2:5000";
+String urlAddress = "http://10.0.2.2:5000/api/forum/";
 
 Future<void> createPost({
   required String title,
@@ -14,7 +13,7 @@ Future<void> createPost({
   required String? userId,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/posts');
+    final url = Uri.parse('$urlAddress/posts');
     final response = await post(
       url,
       headers: <String, String>{
@@ -39,7 +38,7 @@ Future<void> createPost({
 
 Future<List<PostModel>> getAllPosts() async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/posts');
+    final url = Uri.parse('$urlAddress/posts');
     final response = await get(url);
 
     if (response.statusCode == 200) {
@@ -55,14 +54,13 @@ Future<List<PostModel>> getAllPosts() async {
   }
 }
 
-
 Future<PostResponse> getPostWithReplies({required String postId}) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/posts/$postId');
+    final url = Uri.parse('$urlAddress/posts/$postId');
     final response = await get(url);
 
     if (response.statusCode == 200) {
-       final res = PostResponse.fromJson(json.decode(response.body));
+      final res = PostResponse.fromJson(json.decode(response.body));
       return res;
     } else {
       throw Exception('Failed to fetch posts: ${response.statusCode}');
@@ -78,7 +76,7 @@ Future<void> updatePost({
   required String content,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/posts/$postId');
+    final url = Uri.parse('$urlAddress/posts/$postId');
     final response = await put(
       url,
       headers: <String, String>{
@@ -102,7 +100,7 @@ Future<void> updatePost({
 
 Future<void> deletePost({required String postId}) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/posts/$postId');
+    final url = Uri.parse('$urlAddress/posts/$postId');
     final response = await delete(url);
 
     if (response.statusCode == 200) {
@@ -121,7 +119,7 @@ Future<void> addReply({
   required String userId,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/posts/$postId/replies');
+    final url = Uri.parse('$urlAddress/posts/$postId/replies');
     final response = await post(
       url,
       headers: <String, String>{
@@ -148,7 +146,7 @@ Future<void> updateReply({
   required String content,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/replies/$replyId');
+    final url = Uri.parse('$urlAddress/replies/$replyId');
     final response = await put(
       url,
       headers: <String, String>{
@@ -169,9 +167,9 @@ Future<void> updateReply({
   }
 }
 
-Future<void> deleteReply( {required String replyId}) async {
+Future<void> deleteReply({required String replyId}) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/replies/$replyId');
+    final url = Uri.parse('$urlAddress/replies/$replyId');
     final response = await delete(url);
 
     if (response.statusCode == 200) {
@@ -190,7 +188,7 @@ Future<void> addLike({
   required String userId,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/likes');
+    final url = Uri.parse('$urlAddress/likes');
     final response = await post(
       url,
       headers: <String, String>{
@@ -213,16 +211,18 @@ Future<void> addLike({
   }
 }
 
-Future<List<LikesModel>> getLikesWithPostId({required String postId}) async {
+Future<int> getLikesWithPostId({required String postId}) async {
+
   try {
-    final url = Uri.parse('$urlAddress/api/forum/likes?postid=$postId');
+    final url = Uri.parse('$urlAddress/likes?postid=$postId');
     final response = await get(url);
 
     if (response.statusCode == 200) {
+      log(response.statusCode.toString());
       // Parse JSON response
       final List<dynamic> jsonList = jsonDecode(response.body);
       // Map JSON list to a list of Post objects
-      return jsonList.map((json) => LikesModel.fromJson(json)).toList();
+      return jsonList.map((json) => LikesModel.fromJson(json)).toList().length;
     } else {
       throw Exception('Failed to fetch posts: ${response.statusCode}');
     }
@@ -231,16 +231,16 @@ Future<List<LikesModel>> getLikesWithPostId({required String postId}) async {
   }
 }
 
-Future<List<LikesModel>> getLikesWithReplyId(String replyid) async {
+Future<int> getLikesWithReplyId(String replyId) async {
   try {
-    final url = Uri.parse('$urlAddress/api/forum/likes?postid=$replyid');
+    final url = Uri.parse('$urlAddress/likes?postid=$replyId');
     final response = await get(url);
 
     if (response.statusCode == 200) {
       // Parse JSON response
       final List<dynamic> jsonList = jsonDecode(response.body);
       // Map JSON list to a list of Post objects
-      return jsonList.map((json) => LikesModel.fromJson(json)).toList();
+      return jsonList.map((json) => LikesModel.fromJson(json)).toList().length;
     } else {
       throw Exception('Failed to fetch posts: ${response.statusCode}');
     }
@@ -248,8 +248,6 @@ Future<List<LikesModel>> getLikesWithReplyId(String replyid) async {
     throw Exception('Error fetching posts: $e');
   }
 }
-
-
 
 Future<void> deleteLike({required String likeId}) async {
   try {

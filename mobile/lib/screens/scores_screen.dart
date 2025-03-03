@@ -5,7 +5,7 @@ class GolfScoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.sizeOf(context).width;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -27,7 +27,26 @@ class GolfScoreScreen extends StatelessWidget {
         ],
       ),
       backgroundColor: Colors.grey[100], // Light background
-      body: Padding(
+      body: const ScoresForm() 
+    );
+  }
+}
+
+class ScoresForm extends StatefulWidget {
+  const ScoresForm({super.key});
+
+  @override
+  State<ScoresForm> createState() => _ScoresForm();
+}
+
+class _ScoresForm extends State<ScoresForm> {
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    double width = MediaQuery.sizeOf(context).width;
+    return Padding(
         padding: const EdgeInsets.only(top: 70),
         child: Column(
           children: [
@@ -76,10 +95,9 @@ class GolfScoreScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
                         shape: RoundedRectangleBorder(
-                       borderRadius: BorderRadius.circular(15),
-                     ),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                       ),
-                      
                       onPressed: () {},
                       child: const Text(
                         "Submit Score",
@@ -104,7 +122,6 @@ class GolfScoreScreen extends StatelessWidget {
             // ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

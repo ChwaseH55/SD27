@@ -22,8 +22,8 @@ class ReplyProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final likes = await getLikesWithReplyId(replyId);
-      _likesCount = likes.length;
+      _likesCount = await getLikesWithReplyId(replyId);
+      
       _user = await getUser(userId: userId);
       
     } catch (e) {

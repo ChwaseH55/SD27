@@ -1,3 +1,4 @@
+import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:coffee_card/arguments/postcreateargument.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
@@ -97,12 +98,11 @@ class PostsScreen extends StatelessWidget {
               final post = forumProvider.posts[index];
 
               return FutureBuilder<int>(
-                future: forumProvider.getLikesCount(post.postid.toString()),
+                future: forumProvider.getLikesCount('3'),
                 builder: (context, snapshot) {
                   final likeCount = snapshot.data ?? 0;
                   return GestureDetector(
                     onTap: () {
-                      log('ent5ered');
                       Navigator.pushNamed(
                         context,
                         PostsScreenInfo.routeName,
@@ -115,7 +115,7 @@ class PostsScreen extends StatelessWidget {
                         postName: post.title,
                         likeNumber: likeCount,
                         postId: post.postid.toString(),
-                        replyId: '213',
+                        replyId: '',
                         userId: '34',
                       ),
                     ),

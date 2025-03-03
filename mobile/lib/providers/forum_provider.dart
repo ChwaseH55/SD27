@@ -26,7 +26,7 @@ class ForumProvider extends ChangeNotifier {
   Future<int> getLikesCount(String postId) async {
     try {
       final likes = await getLikesWithPostId(postId: postId);
-      return likes.length;
+      return likes;
     } catch (e) {
       return 0;
     }

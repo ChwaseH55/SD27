@@ -148,6 +148,7 @@ class ReplyWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   LikeButton(
+                    isPost: false,
                     likeNumber: likeNumber,
                     postId: postId.toString(),
                     replyId: replyId.toString(),
