@@ -1,24 +1,21 @@
+import 'package:coffee_card/models/announcement_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class AnnouncementWidget extends StatelessWidget {
-  final String title;
-  final String date;
-  final String role;
-  final String message;
+  final AnnouncementModel announcement;
 
   const AnnouncementWidget({
     super.key,
-    required this.title,
-    required this.date,
-    required this.role,
-    required this.message,
+    required this.announcement
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {Navigator.pushNamed(context, '/anncDetail');},
-      child: Container(
+    String formattedDate =
+        DateFormat('MMM d, yyyy').format(DateTime.parse(announcement.createddate!));
+        
+    return Container(
         decoration: const BoxDecoration(
           border: Border(
             top: BorderSide(color: Colors.black),
@@ -31,23 +28,23 @@ class AnnouncementWidget extends StatelessWidget {
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700,),),
+                  Text(announcement.title!, style: const TextStyle(fontWeight: FontWeight.w700,),),
                   const Spacer(),
-                  Text(date),
+                  Text(formattedDate),
                 ],
               ),
-              Row(
-                children: <Widget>[Text(role)],
+              const Row(
+                children: <Widget>[Text("Role")],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[Text(message)],
+                children: <Widget>[Text(announcement.content!)],
               ),
             ],
           ),
         ),
-      )
+      
     );
   }
 }

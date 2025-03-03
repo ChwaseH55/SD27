@@ -1,85 +1,111 @@
+import 'package:coffee_card/arguments/announcementargument.dart';
+import 'package:coffee_card/providers/announcement_provider.dart';
+import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/announcement_widget.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
+import 'package:provider/provider.dart';
 
-class AnnouncementList extends StatelessWidget {
-  const AnnouncementList({super.key});
+class AnnouncementListScreen extends StatefulWidget {
+  const AnnouncementListScreen({super.key});
+
+  @override
+  State<AnnouncementListScreen> createState() => _AnnouncementListScreen();
+}
+
+class _AnnouncementListScreen extends State<AnnouncementListScreen> {
+  late AnnouncementProvider announcementProvider;
+  TextEditingController searchController = TextEditingController();
+  String searchQuery = "";
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    announcementProvider =
+        Provider.of<AnnouncementProvider>(context, listen: false);
+    announcementProvider.fetchAnnouncements();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'UCF Announcement',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
+        title: const Text('UCF Events',
+            style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: const AnnouncementListForm(),
-      
-    );
-  }
-}
-
-class AnnouncementListForm extends StatefulWidget {
-  const AnnouncementListForm({super.key});
-
-  @override
-  State<AnnouncementListForm> createState() => _AnnouncementListForm();
-}
-
-class FloatingBtn extends StatelessWidget {
-  const FloatingBtn({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Align(
-        alignment: Alignment.bottomRight, child: FormAddWidget());
-  }
-}
-
-// This class holds the data related to the Form.
-class _AnnouncementListForm extends State<AnnouncementListForm> {
-  final searchController = TextEditingController();
-  
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    searchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          
-          // Search input
+      body: Column(
+        children: [
           Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextField(
-                controller: searchController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Search',
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+                  borderRadius: BorderRadius.circular(25.0),
                 ),
+                labelText: 'Search Events',
+                labelStyle: const TextStyle(color: Colors.black),
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
               ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
             ),
           ),
+          Expanded(
+            child: Consumer<AnnouncementProvider>(
+              builder: (context, announcementProvider, child) {
+                if (announcementProvider.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          //Adds announcement
-          // const EventsWidgets(
-          //   title: 'New Gear',
-          //   date: '11/13/24',
-        
-          //   message: 'Come get new gear',
-          // ),
-          
-        ]);
+                final filteredAnnouncements =
+                    announcementProvider.announcements.where((announcement) {
+                  return announcement.title!
+                      .toLowerCase()
+                      .contains(searchQuery);
+                }).toList();
+
+                if (filteredAnnouncements.isEmpty) {
+                  return const Center(
+                      child: Text('No matching announcements found.'));
+                }
+
+                return ListView.builder(
+                  itemCount: filteredAnnouncements.length,
+                  itemBuilder: (context, index) {
+                    final announcement = filteredAnnouncements[index];
+                    return InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          AnnouncementInfo.routeName,
+                          arguments: AnnouncementArgument(
+                              announcement.announcementid!),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: AnnouncementWidget(
+                          announcement: announcement,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

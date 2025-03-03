@@ -1,7 +1,10 @@
+import 'package:coffee_card/providers/announcement_info_provider.dart';
+import 'package:coffee_card/providers/announcement_provider.dart';
 import 'package:coffee_card/providers/events_info_provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
+import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/screens/calendar_screen.dart';
 import 'package:coffee_card/screens/eventCreation.dart';
 import 'package:coffee_card/screens/event_info.dart';
@@ -34,6 +37,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => EventsProvider()..fetchEvents()),
         ChangeNotifierProvider(create: (_) => EventsInfoProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
+         ChangeNotifierProvider(create: (_) => AnnouncementProvider()..fetchAnnouncements()),
+         ChangeNotifierProvider(create: (_) => AnnouncementInfoProvider()),
         // Add more providers here if needed
       ],
       child: const MyApp(),
@@ -57,7 +62,7 @@ class MyApp extends StatelessWidget {
         '/createFor': (context) => const CreateForum(),
         '/pos': (context) => const ForumpostScreen(),
         '/tou': (context) => const TournamentList(),
-        '/annc': (context) => const AnnouncementList(),
+        '/annc': (context) => const AnnouncementListScreen(),
         '/anncCrea': (context) => const AnnouncementCreationScreen(),
         '/anncDetail': (context) => const AnnouncementdetailScreen(),
         '/tes': (context) => const DisscusisonpostInfoScreen(),
@@ -70,6 +75,7 @@ class MyApp extends StatelessWidget {
         EventInfo.routeName: (context) => const EventInfo(),
         PostCreationForm.routeName: (context) => const PostCreationForm(),
         CreateEvent.routeName: (context) => const CreateEvent(),
+        AnnouncementInfo.routeName: (context) => const AnnouncementInfo(),
       },
     );
   }
