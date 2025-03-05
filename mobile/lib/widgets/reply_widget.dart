@@ -13,7 +13,7 @@ class ReplyWidget extends StatelessWidget {
   final int? replyId;
   final int postId;
   final int userId;
-  final int likeNumber;
+  final Map<int,int> likes;
 
   const ReplyWidget({
     super.key,
@@ -23,7 +23,7 @@ class ReplyWidget extends StatelessWidget {
     required this.replyId,
     required this.postId,
     required this.userId,
-    required this.likeNumber,
+    required this.likes,
   });
 
   @override
@@ -149,10 +149,9 @@ class ReplyWidget extends StatelessWidget {
                 children: [
                   LikeButton(
                     isPost: false,
-                    likeNumber: likeNumber,
-                    postId: postId.toString(),
-                    replyId: replyId.toString(),
-                    userId: userId.toString(),
+                    likes: likes,
+                    id: replyId.toString(),
+                    userId: userId,
                   ),
                 ],
               ),

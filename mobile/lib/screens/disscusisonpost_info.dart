@@ -64,13 +64,13 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
           }
 
           if (provider.postDetails == null || provider.postUser == null) {
-            return const Center(child: Text('No posts found.'));
+            return const Center(child: Text('No posts found aaaaaa.'));
           }
 
           final resPost = provider.postDetails!;
           final userInfo = provider.postUser!;
           final replies = resPost.replies;
-          final likesNum = provider.likesCount;
+          final likesNum = provider.likes;
 
           return Column(
             children: <Widget>[
@@ -78,9 +78,9 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
                 username: userInfo.username,
                 posttitle: resPost.post?.title,
                 postContent: resPost.post?.content,
-                likeNumber: likesNum,
+                likes: likesNum,
                 postId: resPost.post!.postid.toString(),
-                userId: userInfo.id.toString(),
+                userId: userInfo.id,
                 createDate: resPost.post!.createddate,
               ),
               Expanded(child: ListofReplies(postId: resPost.post!.postid, replies: replies)),
@@ -150,7 +150,7 @@ class ListofReplies extends StatelessWidget {
                 postId: postId!,
                 userId: provider.user!.id,
                 replyId: reply?.replyid,
-                likeNumber: provider.likesCount,
+                likes: provider.likes,
               );
             },
           ),

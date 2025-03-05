@@ -23,12 +23,12 @@ class ForumProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<int> getLikesCount(String postId) async {
-    try {
-      final likes = await getLikesWithPostId(postId: postId);
-      return likes;
-    } catch (e) {
-      return 0;
-    }
-  }
+  // Future<Map<int,int>> getLikesCount(String postId) async {
+  //   try {
+  //     final likes = await getLikes(postId: postId, replyId: null);
+  //     return likes;
+  //   } catch (e) {
+  //     return {};
+  //   }
+  // }
 }

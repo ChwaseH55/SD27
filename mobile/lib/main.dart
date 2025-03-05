@@ -37,8 +37,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => EventsProvider()..fetchEvents()),
         ChangeNotifierProvider(create: (_) => EventsInfoProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
-         ChangeNotifierProvider(create: (_) => AnnouncementProvider()..fetchAnnouncements()),
-         ChangeNotifierProvider(create: (_) => AnnouncementInfoProvider()),
+        ChangeNotifierProvider(create: (_) => AnnouncementProvider()..fetchAnnouncements()),
+        ChangeNotifierProvider(create: (_) => AnnouncementInfoProvider()),
         // Add more providers here if needed
       ],
       child: const MyApp(),
@@ -63,7 +63,6 @@ class MyApp extends StatelessWidget {
         '/pos': (context) => const ForumpostScreen(),
         '/tou': (context) => const TournamentList(),
         '/annc': (context) => const AnnouncementListScreen(),
-        '/anncCrea': (context) => const AnnouncementCreationScreen(),
         '/anncDetail': (context) => const AnnouncementdetailScreen(),
         '/tes': (context) => const DisscusisonpostInfoScreen(),
         '/pro': (context) => const UserProfileScreen(),
@@ -71,11 +70,13 @@ class MyApp extends StatelessWidget {
         '/events': (context) => const EventsListScreen(),
         '/createEvent': (context) => const CreateEvent(),
         '/scores': (context) => const GolfScoreScreen(),
+
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
         EventInfo.routeName: (context) => const EventInfo(),
         PostCreationForm.routeName: (context) => const PostCreationForm(),
         CreateEvent.routeName: (context) => const CreateEvent(),
         AnnouncementInfo.routeName: (context) => const AnnouncementInfo(),
+        AnnouncementCreationScreen.routeName: (context) => const AnnouncementCreationScreen(),
       },
     );
   }

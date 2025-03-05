@@ -1,5 +1,8 @@
+import 'package:coffee_card/arguments/announcement_create_arg.dart';
 import 'package:coffee_card/arguments/announcementargument.dart';
+import 'package:coffee_card/models/announcement_model.dart';
 import 'package:coffee_card/providers/announcement_provider.dart';
+import 'package:coffee_card/screens/announcement_creation.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';
 import 'package:flutter/material.dart';
@@ -31,10 +34,27 @@ class _AnnouncementListScreen extends State<AnnouncementListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('UCF Events',
+        title: const Text('Golf Announcements',
             style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+        actions: [
+          TextButton(
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+            ),
+            onPressed: () async {
+              await Navigator.pushNamed(
+                context,
+                AnnouncementCreationScreen.routeName,
+                arguments: AnnouncementCreateArg(false, AnnouncementModel()),
+              );
+              // Force refresh after returning from create post screen
+              announcementProvider.fetchAnnouncements();
+            },
+            child: const Text('+ Create Post'),
+          ),
+        ],
       ),
       body: Column(
         children: [

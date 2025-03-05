@@ -8,7 +8,7 @@ String urlAddress =
 
 // Create an announcement
 Future<void> createAnnouncement(
-    String title, String content, int userId) async {
+    String title, String content, String userId) async {
   try {
     final response = await post(
       Uri.parse(urlAddress),

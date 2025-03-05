@@ -1,3 +1,6 @@
+import 'package:coffee_card/arguments/eventcreateargument.dart';
+import 'package:coffee_card/screens/eventcreation.dart';
+import 'package:coffee_card/widgets/creationformplus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
@@ -32,7 +35,22 @@ class _EventsListScreenState extends State<EventsListScreen> {
             style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+        actions: [
+          TextButton(
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+            ),
+            onPressed: () async {
+              await Navigator.pushNamed(context, CreateEvent.routeName,
+                  arguments:
+                      EventCreateArgument(false, 1, '', '', '', '', false, ''));
+              eventsProvider.fetchEvents();
+            },
+            child: const Text('+ New Event'),
+          ),
+        ],
       ),
+      floatingActionButton: const FloatingBtn(),
       body: Column(
         children: [
           Padding(
@@ -99,5 +117,14 @@ class _EventsListScreenState extends State<EventsListScreen> {
         ],
       ),
     );
+  }
+}
+class FloatingBtn extends StatelessWidget {
+  const FloatingBtn({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+        alignment: Alignment.bottomRight, child: FormAddWidget());
   }
 }

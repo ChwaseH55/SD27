@@ -50,7 +50,7 @@ Future<List<PostModel>> getAllPosts() async {
       throw Exception('Failed to fetch posts: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Error fetching posts: $e');
+    throw Exception('Error fetching likes: $e');
   }
 }
 
@@ -63,10 +63,10 @@ Future<PostResponse> getPostWithReplies({required String postId}) async {
       final res = PostResponse.fromJson(json.decode(response.body));
       return res;
     } else {
-      throw Exception('Failed to fetch posts: ${response.statusCode}');
+      throw Exception('Failed to fetch posts and replies: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Error fetching posts: $e');
+    throw Exception('Error fetching post and replies: $e');
   }
 }
 
@@ -183,9 +183,9 @@ Future<void> deleteReply({required String replyId}) async {
 }
 
 Future<void> addLike({
-  required String postId,
-  required String replyId,
-  required String userId,
+  required String? postId,
+  required String? replyId,
+  required String? userId,
 }) async {
   try {
     final url = Uri.parse('$urlAddress/likes');
@@ -211,10 +211,17 @@ Future<void> addLike({
   }
 }
 
-Future<int> getLikesWithPostId({required String postId}) async {
-
+// Change to one method
+Future<Map<int, int>> getLikes(
+    {required String? postId, required String? replyId}) async {
   try {
-    final url = Uri.parse('$urlAddress/likes?postid=$postId');
+    Uri url;
+    if (postId != null) {
+      url = Uri.parse('$urlAddress/likes?postid=$postId');
+    } else {
+      url = Uri.parse('$urlAddress/likes?replyid=$replyId');
+    }
+
     final response = await get(url);
 
     if (response.statusCode == 200) {
@@ -222,7 +229,13 @@ Future<int> getLikesWithPostId({required String postId}) async {
       // Parse JSON response
       final List<dynamic> jsonList = jsonDecode(response.body);
       // Map JSON list to a list of Post objects
-      return jsonList.map((json) => LikesModel.fromJson(json)).toList().length;
+      Map<int, int> likesMap = {};
+      // Map JSON list to a list of Post objects
+      for (var json in jsonList) {
+        LikesModel like = LikesModel.fromJson(json);
+        likesMap[like.likeid] = like.userid;
+      }
+      return likesMap;
     } else {
       throw Exception('Failed to fetch posts: ${response.statusCode}');
     }
@@ -251,7 +264,7 @@ Future<int> getLikesWithReplyId(String replyId) async {
 
 Future<void> deleteLike({required String likeId}) async {
   try {
-    final url = Uri.parse('$urlAddress/api/likes/$likeId');
+    final url = Uri.parse('$urlAddress/likes/$likeId');
     final response = await delete(url);
 
     if (response.statusCode == 200) {

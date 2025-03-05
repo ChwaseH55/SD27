@@ -1,3 +1,5 @@
+import 'package:coffee_card/arguments/postcreateargument.dart';
+import 'package:coffee_card/screens/postcreation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
@@ -31,6 +33,23 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
         title: const Text('UCF Post', style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+        actions: [
+          TextButton(
+            style: ButtonStyle(
+              foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+            ),
+            onPressed: () async {
+              await Navigator.pushNamed(
+                        context,
+                        PostCreationForm.routeName,
+                        arguments: CreateArgument(false, -1, '',''),
+                      );
+              // Force refresh after returning from create post screen
+              forumProvider.fetchPosts();
+            },
+            child: const Text('+ Create Post'),
+          ),
+        ],
       ),
       body: Column(
         children: [

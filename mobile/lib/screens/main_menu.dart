@@ -54,7 +54,7 @@ class MainMenu extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(
-                  Icons.train,
+                  Icons.announcement,
                 ),
                 title: const Text('Announcements'),
                 onTap: () {

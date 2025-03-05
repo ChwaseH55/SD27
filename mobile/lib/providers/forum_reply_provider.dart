@@ -6,11 +6,11 @@ import 'package:coffee_card/models/likes_model.dart';
 
 class ReplyProvider extends ChangeNotifier {
   UserModel? _user;
-  int _likesCount = 0;
+  Map<int,int> _likes = {};
   bool _isLoading = true;
 
   UserModel? get user => _user;
-  int get likesCount => _likesCount;
+  Map<int,int> get likes => _likes;
   bool get isLoading => _isLoading;
 
   ReplyProvider(String replyId, String userId) {
@@ -22,13 +22,13 @@ class ReplyProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _likesCount = await getLikesWithReplyId(replyId);
+      _likes = await getLikes(postId: null, replyId: replyId);
       
       _user = await getUser(userId: userId);
       
     } catch (e) {
       _user = null;
-      _likesCount = 0;
+      _likes = {};
     }
 
     _isLoading = false;

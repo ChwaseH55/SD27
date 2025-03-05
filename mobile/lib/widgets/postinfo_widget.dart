@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:coffee_card/arguments/postcreateargument.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
+import 'package:coffee_card/widgets/likebutton_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -12,15 +15,15 @@ class PostinfoWidget extends StatelessWidget {
   final String? posttitle;
   final String? postContent;
   final String? postId;
-  final String? userId;
-  final int likeNumber;
+  final int? userId;
+  final Map<int,int> likes;
   final String? createDate;
 
   const PostinfoWidget(
       {super.key,
       required this.postId,
       required this.userId,
-      required this.likeNumber,
+      required this.likes,
       required this.username,
       required this.posttitle,
       required this.postContent,
@@ -84,8 +87,9 @@ class PostinfoWidget extends StatelessWidget {
                                 context,
                                 listen: false);
                             await deletePost(postId: postId!);
-                            if (context.mounted)
+                            if (context.mounted) {
                               Navigator.pushNamed(context, '/pos');
+                            }
                             await forumProvider.fetchPostDetails(postId!);
                           },
                           child: const Text("Delete Post"),
@@ -145,10 +149,11 @@ class PostinfoWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  LikeButtonForPost(
-                    likeNumber: likeNumber,
-                    postId: postId,
-                    userId: userId,
+                  LikeButton(
+                    isPost: true,
+                    likes: likes,
+                    id: postId!,
+                    userId: userId!,
                   ),
                 ],
               ),
@@ -160,91 +165,3 @@ class PostinfoWidget extends StatelessWidget {
   }
 }
 
-class LikeButton extends StatelessWidget {
-  final int likeNumber;
-  final String postId;
-  final String userId;
-
-  const LikeButton(
-      {super.key,
-      required this.likeNumber,
-      required this.postId,
-      required this.userId});
-
-  @override
-  Widget build(BuildContext context) {
-    return LikeButtonForPost(
-        likeNumber: likeNumber, postId: postId, userId: userId);
-  }
-}
-
-class LikeButtonForPost extends StatefulWidget {
-  final int likeNumber;
-  final String? postId;
-  final String? userId;
-
-  const LikeButtonForPost(
-      {super.key,
-      required this.likeNumber,
-      required this.postId,
-      required this.userId});
-
-  @override
-  State<LikeButtonForPost> createState() => _LikeButtonForPost();
-}
-
-class _LikeButtonForPost extends State<LikeButtonForPost> {
-  bool isLiked = false;
-  late int likeCount; // Mutable variable to store the like count
-
-  @override
-  void initState() {
-    super.initState();
-    likeCount = widget.likeNumber; // Initialize with the given likeNumber
-  }
-
-  void toggleLike() {
-    setState(() {
-      isLiked = !isLiked;
-      if (isLiked) {
-        likeCount += 1;
-      } else {
-        likeCount -= 1;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: toggleLike,
-        child: SizedBox(
-            width: 60,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                border: Border.all(
-                    color: isLiked
-                        ? const Color.fromRGBO(186, 155, 55, 1)
-                        : Colors.black,
-                    width: 2),
-                borderRadius:
-                    const BorderRadius.all(Radius.elliptical(90, 100)),
-              ),
-              child: Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Row(
-                    children: <Widget>[
-                      Icon(Icons.thumb_up_alt,
-                          color: isLiked
-                              ? const Color.fromRGBO(186, 155, 55, 1)
-                              : Colors.black),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 2),
-                        child: Text(likeCount.toString()),
-                      )
-                    ],
-                  )),
-            )));
-  }
-}
