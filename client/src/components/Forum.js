@@ -290,16 +290,7 @@ const Forum = () => {
                     <p>{comment.content}</p>
                     <div className="text-gray-500 text-sm">
                       By{" "}
-                      {usernames[comment.userid] ? (
-                        usernames[comment.userid]
-                      ) : (
-                        <span
-                          onClick={() => fetchReplyUsername(comment.userid)}
-                          className="italic text-gray-400 cursor-pointer"
-                        >
-                          Unknown User
-                        </span>
-                      )}
+                      {comment.username || "Unknown User"}
                     </div>
                   </li>
                 ))}

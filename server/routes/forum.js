@@ -42,7 +42,14 @@ router.get('/posts/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const post = await pool.query("SELECT * FROM posts WHERE postid = $1", [id]);
-        const replies = await pool.query ("SELECT * FROM replies WHERE postid = $1 ORDER BY createddate ASC", [id]);
+        const replies = await pool.query(
+            `SELECT replies.*, users.username 
+             FROM replies 
+             JOIN users ON replies.userid = users.id 
+             WHERE replies.postid = $1 
+             ORDER BY replies.createddate ASC`, 
+            [id]
+        );        
         res.json({post: post.rows[0], replies: replies.rows });
     } catch (err) {
         console.error(err.message);
