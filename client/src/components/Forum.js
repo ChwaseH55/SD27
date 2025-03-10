@@ -218,10 +218,22 @@ const Forum = () => {
         content: newComment,
         userid: user.id, // Use logged-in user's ID from Redux state
       });
+
+      const newCommentData = {
+        ...response.data,
+        username: user.username,
+      };
+
       setComments((prevComments) => [
         ...prevComments,
-        response.data,
+        newCommentData
       ]);
+
+      setSelectedPost((prevSelectedPost) => ({
+        ...prevSelectedPost,
+        comments: [...prevSelectedPost.comments, newCommentData]
+    }));
+
       setNewComment("");
     } catch (error) {
       console.error("Error adding comment:", error);
