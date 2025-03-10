@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";  // Import useSelector
+
+const POSTS_PER_PAGE = 10;
 
 const Forum = () => {
   const [posts, setPosts] = useState([]);
@@ -15,22 +17,87 @@ const Forum = () => {
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
 
-  // Accessing the user from Redux state
- const user = useSelector((state) => state.user.user); 
+  const [likedPosts, setLikedPosts] = useState(new Set());
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const observer = useRef();
 
+  // Accessing the user from Redux state
+  const user = useSelector((state) => state.user.user);
+
+  const fetchPosts = useCallback(async() => {
+    if(loading || !hasMore) return;
+
+    setLoading (true);
+
+    try{
+      const response = await axios.get(`/api/forum/posts?limit=${POSTS_PER_PAGE}&offset=${offset}`);
+      const newPosts = response.data;
+
+      if(response.data.length < POSTS_PER_PAGE){
+        setHasMore(false);
+      }
+
+      const postsWithLikes = await Promise.all(newPosts.map(async (post) => {
+        try {
+          const likesResponse = await axios.get(`/api/forum/likes/post/${post.postid}`);
+          return {...post, likeCount: likesResponse.data.length};
+        } catch (error) {
+          console.error("Error fetching likes for post:", post.postid, error);
+          return { ...post, likeCount: 0 };
+        }
+      }));
+
+      setPosts((prevPosts) => [...prevPosts, ...postsWithLikes]);
+      setOffset((prevOffset) => prevOffset + POSTS_PER_PAGE);
+    }catch (error){
+      console.error("Error fetching posts", error);
+    }
+    setLoading(false);
+  }, [loading, hasMore, offset]);
+
+  const fetchPostLikes = async (postId) => {
+    try {
+      const response = await axios.get(`/api/forum/likes/post/${postId}`);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) => 
+          post.postid === postId ? { ...post, likeCount: response.data.length} : post
+        )
+      );
+    }catch (error) {
+      console.error("Error fetching likes for post:", error);
+    }
+  }
 
   // Fetch posts when the component mounts
   useEffect(() => {
-    const fetchPosts = async () => {
+    if (!user) return;
+    const fetchUserLikes = async () => {
       try {
-        const response = await axios.get("/api/forum/posts");
-        setPosts(response.data);
+        const response = await axios.get(`/api/forum/likes/user/${user.id}`);
+        const likedPostIds = new Set(response.data.map((like) => like.postid));
+        setLikedPosts(likedPostIds);
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        console.error("Error fetching liked posts: ", error);
       }
     };
+
+    fetchUserLikes();
+    setOffset(0);
     fetchPosts();
-  }, []);
+  }, [user, fetchPosts]);
+
+  const lastPostRef = useCallback((node) => {
+    if (loading || !hasMore || posts.length === 0) return;
+    if(observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver((entries) => {
+      if(entries[0].isIntersecting && hasMore) {
+        fetchPosts();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore, posts.length, fetchPosts]);
 
   // Handle creating a new post
   const handleCreatePost = async (e) => {
@@ -64,23 +131,35 @@ const Forum = () => {
 
   const handleLike = async (postId) => {
     try {
-      const response = await axios.post("/api/forum/likes", {
+      const isLiked = likedPosts.has(postId);
+
+      // update UI optimistically 
+      setLikedPosts((prev) => {
+        const updatedLikes = new Set(prev);
+        isLiked ? updatedLikes.delete(postId) : updatedLikes.add(postId);
+        return updatedLikes;
+      });
+
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.postid === postId
+            ? { ...post, likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1 }
+            : post
+        )
+      );
+
+      //actual API request to like or unlike
+      await axios.post("/api/forum/likes", {
         postid: postId,
         replyid: null, // We're liking a post, not a reply
         userid: user.id, // Use logged-in user's ID from Redux state
       });
-  
-      const updatedPosts = posts.map((post) =>
-        post.postid === postId
-          ? { ...post, likes: post.likes + 1 }
-          : post
-      );
-      setPosts(updatedPosts);
+
     } catch (error) {
       console.error("Error liking post:", error);
     }
   };
-  
+
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -114,16 +193,16 @@ const Forum = () => {
 
   const fetchReplyUsername = async (userid) => {
     if (usernames[userid]) return usernames[userid]; // Use cached username if available
-  
+
     try {
       const response = await axios.get(`/api/auth/users/${userid}`);
       const username = response.data.username;
-  
+
       setUsernames((prev) => ({
         ...prev,
         [userid]: username, // Cache the username
       }));
-  
+
       return username; // Return the fetched username
     } catch (error) {
       console.error("Error finding reply username", error);
@@ -133,7 +212,7 @@ const Forum = () => {
 
   const handleCommentSubmit = async () => {
     if (!newComment.trim()) return;
-  
+
     try {
       const response = await axios.post(`/api/forum/posts/${selectedPost.post.postid}/replies`, {
         content: newComment,
@@ -245,9 +324,10 @@ const Forum = () => {
               .filter((post) =>
                 post.title.toLowerCase().includes(searchQuery.toLowerCase())
               )
-              .map((post) => (
+              .map((post, index) => (
                 <li
                   key={post.postid}
+                  ref={index === posts.length - 1 ? lastPostRef : null}
                   className="bg-white p-4 shadow rounded-lg border border-gray-200 hover:shadow-lg transition"
                 >
                   <h3 className="text-xl font-bold text-black">{post.title}</h3>
@@ -259,9 +339,10 @@ const Forum = () => {
                   <div className="flex items-center mt-4 space-x-4">
                     <button
                       onClick={() => handleLike(post.postid)}
-                      className="text-sm text-gray-600"
+                      className={`text-sm ${likedPosts.has(post.postid) ? "text-red-500" : "text-gray-600"
+                        }`}
                     >
-                      👍 {post.likes} Likes
+                      {likedPosts.has(post.postid) ? "❤️ Unlike" : "👍 Like"} {post.likeCount || 0}
                     </button>
                     <button
                       onClick={() => fetchPostDetails(post.postid)}
@@ -276,47 +357,47 @@ const Forum = () => {
         )}
       </main>
 
-        {/* Create Post Modal */}
-        {showCreateModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
-              <h2 className="text-2xl font-bold mb-4">Create a New Post</h2>
-              <form onSubmit={handleCreatePost}>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Post Title"
-                    value={newPostTitle}
-                    onChange={(e) => setNewPostTitle(e.target.value)}
-                    className="w-full p-2 mb-4 border border-gray-300 rounded"
-                    required
-                  />
-                  <textarea
-                    placeholder="Post Content"
-                    value={newPostContent}
-                    onChange={(e) => setNewPostContent(e.target.value)}
-                    className="w-full p-2 mb-4 border border-gray-300 rounded"
-                    required
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    className="bg-gold text-black px-6 py-2 rounded shadow hover:bg-yellow-400 transition"
-                  >
-                    Submit
-                  </button>
-                </div>
-              </form>
-              <button
-                onClick={() => setShowCreateModal(false)} // Close modal without submitting
-                className="absolute top-2 right-2 text-black font-bold"
-              >
-                X
-              </button>
-            </div>
+      {/* Create Post Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
+            <h2 className="text-2xl font-bold mb-4">Create a New Post</h2>
+            <form onSubmit={handleCreatePost}>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Post Title"
+                  value={newPostTitle}
+                  onChange={(e) => setNewPostTitle(e.target.value)}
+                  className="w-full p-2 mb-4 border border-gray-300 rounded"
+                  required
+                />
+                <textarea
+                  placeholder="Post Content"
+                  value={newPostContent}
+                  onChange={(e) => setNewPostContent(e.target.value)}
+                  className="w-full p-2 mb-4 border border-gray-300 rounded"
+                  required
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="bg-gold text-black px-6 py-2 rounded shadow hover:bg-yellow-400 transition"
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+            <button
+              onClick={() => setShowCreateModal(false)} // Close modal without submitting
+              className="absolute top-2 right-2 text-black font-bold"
+            >
+              X
+            </button>
           </div>
-        )}
+        </div>
+      )}
 
     </div>
   );

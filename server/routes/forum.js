@@ -18,8 +18,10 @@ router.post('/posts', async(req, res) => {
 
 //get all post
 router.get('/posts', async(req, res) => {
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = parseInt(req.query.offset) || 0;
     try {
-        const posts = await pool.query("SELECT * FROM posts ORDER BY createddate DESC");
+        const posts = await pool.query("SELECT * FROM posts ORDER BY createddate DESC LIMIT $1 OFFSET $2", [limit, offset]);
         res.json(posts.rows);
     } catch (err){
         console.error(err.message);
@@ -140,38 +142,14 @@ router.delete('/replies/:id', async (req, res) => {
 
 });
 
-//like a post or reply
-router.post('/likes', async (req, res) => {
-    const { postid, replyid, userid } = req.body;
-    try {
-        const newLike = await pool.query( `INSERT INTO likes (postid, replyid, userid) VALUES ($1, $2, $3) RETURNING *`, [postid || null, replyid || null, userid]);
-        res.json(newLike.rows[0]);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send("Server error");
-    }
-});
-
-//get likes for a post or a reply
-router.get('/likes', async (req, res) => {
-
-    const { postid, replyid } = req.query;
+//get likes from a post
+router.get('/likes/post/:postid', async (req, res) => {
+    const { postid } = req.params;
 
     try { 
-        
-        if(!postid && !replyid){
-            return res.status(404).json({message: "Please provide either postid or replyid."});
-        }
-        
-        let likes;
-
-        if(postid){
-            likes = await pool.query(
-                `SELECT likeid, userid FROM likes WHERE postid = $1`, [postid]
-            );
-        }else if (replyid) {
-            likes = await pool.query( `SELECT likeid, userid FROM likes WHERE replyid = $1`, [replyid]);
-        }
+        const likes = await pool.query(
+            `SELECT likeid, userid FROM likes WHERE postid = $1`, [postid]
+        );
 
         res.json(likes.rows);
     } catch (err) {
@@ -180,7 +158,75 @@ router.get('/likes', async (req, res) => {
     }
 });
 
-// delete a like by ID
+//get likes for a reply
+router.get('/likes/reply/:replyid', async (req, res) => {
+    const { replyid } = req.params;
+
+    try { 
+        const likes = await pool.query(
+            `SELECT likeid, userid FROM likes WHERE replyid = $1`, [replyid]
+        );
+
+        res.json(likes.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Server error");
+    }
+});
+
+
+
+//like for a post or a reply
+router.post('/likes', async (req, res) => {
+
+    const { postid, replyid, userid } = req.body;
+
+    try { 
+        const exisitingLike = await pool.query(
+            `SELECT * FROM likes WHERE userid = $1 AND (postid = $2 OR replyid = $3)`, 
+            [userid, postid || null, replyid || null]
+        );
+
+        if(exisitingLike.rows.length > 0) {
+            await pool.query(
+                `DELETE FROM likes WHERE likeid = $1`,
+                [exisitingLike.rows[0].likeid]
+            );
+            return res.json({ message: "Like removed (unliked)"});
+        }
+        
+        
+        const newLike = await pool.query(
+            `INSERT INTO likes (postid, replyid, userid) VALUES ($1, $2, $3) RETURNING *`,
+            [postid || null, replyid || null, userid]
+        );
+
+        res.json(newLike.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Server error");
+    }
+});
+
+// Get all likes for a specific user
+router.get('/likes/user/:userid', async (req, res) => {
+    const { userid } = req.params;
+
+    try { 
+        const userLikes = await pool.query(
+            `SELECT likeid, postid, replyid FROM likes WHERE userid = $1`, 
+            [userid]
+        );
+
+        res.json(userLikes.rows);
+    } catch (err) {
+        console.error("Error fetching user likes:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+
+/* delete a like by ID
 router.delete('/likes/:id', async (req, res) => {
     const { id } = req.params;
 
@@ -196,7 +242,7 @@ router.delete('/likes/:id', async (req, res) => {
         console.error(err.message);
         res.status(500).send("Server error");
     }
-});
+}); */
 
 module.exports = router;
 
