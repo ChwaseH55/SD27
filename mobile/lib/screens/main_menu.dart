@@ -7,14 +7,22 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'UCF',
-            style: TextStyle(fontWeight: FontWeight.w900),
-          ),
-          centerTitle: true,
-          backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+      appBar: AppBar(
+        title: const Text(
+          'UCF',
+          style: TextStyle(fontWeight: FontWeight.w900),
         ),
+        centerTitle: true,
+        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () {
+              Navigator.pushNamed(context, '/userpro'); // Navigate to profile
+            },
+          ),
+        ],
+      ),
         drawer: Drawer(
           child: ListView(
             // Important: Remove any padding from the ListView.
@@ -55,6 +63,15 @@ class MainMenu extends StatelessWidget {
                 title: const Text('Tournaments'),
                 onTap: () {
                   Navigator.pushNamed(context, '/tou');
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.train,
+                ),
+                title: const Text('Shop'),
+                onTap: () {
+                  Navigator.pushNamed(context, '/shop');
                 },
               ),
             ],

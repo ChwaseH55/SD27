@@ -7,6 +7,8 @@ import 'package:coffee_card/screens/tournament_list.dart';
 import 'package:coffee_card/screens/register_screen.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
 import 'package:coffee_card/screens/announcementdetail_screen.dart';
+import 'package:coffee_card/screens/shop_screen.dart';
+import 'package:coffee_card/screens/user_profile.dart';
 import 'package:flutter/material.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -25,6 +27,8 @@ void main() => runApp(MaterialApp(
     '/pos': (context) => const ForumpostScreen(),
     '/tou': (context) => const TournamentList(),
     '/annc': (context) => const AnnouncementList(),
+    '/shop': (context) => const ShopScreen(),
+    '/userpro': (context) => const UserProfile(),
     '/anncCrea': (context) => const AnnouncementCreationScreen(),
     '/anncDetail': (context) => const AnnouncementdetailScreen(),
   }
