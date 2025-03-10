@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";  // Import useSelector
-import { api } from '../config';  // Import our configured api instance
+import { useSelector } from "react-redux";
+import { api } from '../config';
 
 const POSTS_PER_PAGE = 10;
 
@@ -33,8 +31,8 @@ const Forum = () => {
 
     setLoading (true);
 
-    try{
-      const response = await axios.get(`/api/forum/posts?limit=${POSTS_PER_PAGE}&offset=${offset}`);
+    try {
+      const response = await api.get(`/forum/posts?limit=${POSTS_PER_PAGE}&offset=${offset}`);
       const newPosts = response.data;
 
       if(response.data.length < POSTS_PER_PAGE){
@@ -43,7 +41,7 @@ const Forum = () => {
 
       const postsWithLikes = await Promise.all(newPosts.map(async (post) => {
         try {
-          const likesResponse = await axios.get(`/api/forum/likes/post/${post.postid}`);
+          const likesResponse = await api.get(`/forum/likes/post/${post.postid}`);
           return {...post, likeCount: likesResponse.data.length};
         } catch (error) {
           console.error("Error fetching likes for post:", post.postid, error);
@@ -61,7 +59,7 @@ const Forum = () => {
 
   const fetchPostLikes = async (postId) => {
     try {
-      const response = await axios.get(`/api/forum/likes/post/${postId}`);
+      const response = await api.get(`/forum/likes/post/${postId}`);
       setPosts((prevPosts) =>
         prevPosts.map((post) => 
           post.postid === postId ? { ...post, likeCount: response.data.length} : post
@@ -77,7 +75,7 @@ const Forum = () => {
     if (!user) return;
     const fetchUserLikes = async () => {
       try {
-        const response = await axios.get(`/api/forum/likes/user/${user.id}`);
+        const response = await api.get(`/forum/likes/user/${user.id}`);
         const likedPostIds = new Set(response.data.map((like) => like.postid));
         setLikedPosts(likedPostIds);
       } catch (error) {
@@ -151,7 +149,7 @@ const Forum = () => {
       );
 
       //actual API request to like or unlike
-      await axios.post("/api/forum/likes", {
+      await api.post("/forum/likes", {
         postid: postId,
         replyid: null, // We're liking a post, not a reply
         userid: user.id, // Use logged-in user's ID from Redux state

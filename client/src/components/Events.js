@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import axios from "axios";
 import { useSelector } from "react-redux";
 import { api } from '../config';  // Import our configured api instance
 
@@ -16,7 +15,7 @@ const EventsPage = () => {
   //fetch all events
   const fetchEvents = async () => {
     try {
-      const response = await axios.get("/api/events");
+      const response = await api.get("/events");
       setEvents(response.data);
     } catch (err) {
       console.error("Error fetching events:", err);
@@ -26,7 +25,7 @@ const EventsPage = () => {
   // Fetch user's registered events
   const fetchMyEvents = async () => {
     try {
-      const response = await axios.get(`/api/events/my-events/${user.id}`);
+      const response = await api.get(`/events/my-events/${user.id}`);
       setMyEvents(response.data);
       const registeredEventIds = response.data.reduce((acc, event) => {
         acc[event.eventid] = true;
@@ -45,8 +44,7 @@ const EventsPage = () => {
     if (user) {
       fetchMyEvents();
     }
-  }, [user], fetchMyEvents, fetchEvents); // Only fetch once on mount
-
+  }, [user]); // Only fetch once on mount
 
   // Register or unregister user from an event
   const toggleRegistration = async (eventid) => {
@@ -55,7 +53,7 @@ const EventsPage = () => {
       console.log(registrations[eventid])
       if (registrations[eventid]) {
         console.log(eventid, user.id)
-        await axios.delete(`/api/events/unregister/${eventid}/${user.id}`);
+        await api.delete(`/events/unregister/${eventid}/${user.id}`);
 
         // Optimistically update state
         setRegistrations((prev) => {
@@ -68,7 +66,7 @@ const EventsPage = () => {
         setMyEvents((prev) => prev.filter(event => event.eventid !== eventid));
 
       } else {
-        await axios.post("/api/events/register", { eventid, userid: user.id });
+        await api.post("/events/register", { eventid, userid: user.id });
 
         // Optimistically update state
         setRegistrations((prev) => ({ ...prev, [eventid]: true }));
