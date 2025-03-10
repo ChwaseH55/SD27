@@ -123,7 +123,7 @@ const Store = () => {
                             {product.name}
                           </h3>
                           <p className="text-gray-500 mb-4">
-                            {product.price ? `$${(product.price.unit_amount / 100).toFixed(2)}` : "Price not available"}
+                            {product.price ? `$${(product.price).toFixed(2)}` : "Price not available"}
                           </p>
                           <button
                             onClick={() => addToCart(product)}
