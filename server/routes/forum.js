@@ -21,7 +21,15 @@ router.get('/posts', async(req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = parseInt(req.query.offset) || 0;
     try {
-        const posts = await pool.query("SELECT * FROM posts ORDER BY createddate DESC LIMIT $1 OFFSET $2", [limit, offset]);
+        const posts = await pool.query(
+            `SELECT posts.*, users.username 
+            FROM posts 
+            JOIN users 
+            ON posts.userid = users.id 
+            ORDER BY createddate DESC 
+            LIMIT $1 OFFSET $2`, 
+            [limit, offset]
+        );
         res.json(posts.rows);
     } catch (err){
         console.error(err.message);

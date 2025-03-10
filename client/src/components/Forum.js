@@ -333,7 +333,7 @@ const Forum = () => {
                   <h3 className="text-xl font-bold text-black">{post.title}</h3>
                   <p className="text-gray-700 mt-2">{post.content}</p>
                   <div className="text-gray-500 text-sm mt-2">
-                    By {post.author} on{" "}
+                    By {post.username} on{" "}
                     {new Date(post.createddate).toLocaleDateString()}
                   </div>
                   <div className="flex items-center mt-4 space-x-4">
