@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { api } from '../config';  // Import our configured api instance
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);

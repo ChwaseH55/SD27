@@ -2,7 +2,7 @@
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
+import { api } from './config';
 import Register from './components/Register';
 import Login from './components/Login';
 import Landing from './components/Landing';
@@ -31,8 +31,8 @@ function App() {
   const { user } = useSelector((state) => state.user);
 
   useEffect(() => {
-    axios
-      .get('http://localhost:5000/api/test')
+    api
+      .get('/test')
       .then((response) => setData(response.data.message))
       .catch((error) => console.error(error));
   }, []);

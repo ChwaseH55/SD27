@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";  // Import useSelector
+import { api } from '../config';  // Import our configured api instance
 
 const POSTS_PER_PAGE = 10;
 
@@ -110,7 +112,7 @@ const Forum = () => {
 
     try {
       // Sending the new post data to the backend
-      await axios.post("/api/forum/posts", {
+      await api.post("/forum/posts", {
         title: newPostTitle,
         content: newPostContent,
         userid: user.id, // Attach user ID from Redux
@@ -122,7 +124,7 @@ const Forum = () => {
       setNewPostContent("");
 
       // Refetch posts to update the list
-      const response = await axios.get("/api/forum/posts");
+      const response = await api.get("/forum/posts");
       setPosts(response.data);
     } catch (error) {
       console.error("Error creating post:", error);
@@ -181,7 +183,7 @@ const Forum = () => {
 
   const fetchPostDetails = async (postId) => {
     try {
-      const response = await axios.get(`/api/forum/posts/${postId}`);
+      const response = await api.get(`/forum/posts/${postId}`);
       setSelectedPost({
         post: response.data.post,
         comments: response.data.replies,
@@ -195,7 +197,7 @@ const Forum = () => {
     if (usernames[userid]) return usernames[userid]; // Use cached username if available
 
     try {
-      const response = await axios.get(`/api/auth/users/${userid}`);
+      const response = await api.get(`/auth/users/${userid}`);
       const username = response.data.username;
 
       setUsernames((prev) => ({
@@ -214,7 +216,7 @@ const Forum = () => {
     if (!newComment.trim()) return;
 
     try {
-      const response = await axios.post(`/api/forum/posts/${selectedPost.post.postid}/replies`, {
+      const response = await api.post(`/forum/posts/${selectedPost.post.postid}/replies`, {
         content: newComment,
         userid: user.id, // Use logged-in user's ID from Redux state
       });

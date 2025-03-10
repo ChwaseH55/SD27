@@ -64,7 +64,9 @@ const Account = () => {
                 <p className="text-lg font-semibold">
                   Welcome, {user.user.username}!
                 </p>
-                <p className="text-sm text-gray-500">Email: {user.user.email}</p>
+                <p className="text-sm text-gray-500">
+                  Email: {user.user.email}
+                </p>
               </div>
 
               {/* Edit Account Details */}

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { api } from '../config';
 
 // Action types
 const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
@@ -43,12 +43,13 @@ export const logout = () => {
 // Async action to handle login
 export const login = (username, password) => async (dispatch) => {
   try {
-    const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
-    dispatch(loginSuccess(response.data)); // Dispatch login success with user data
-    return { user: response.data }; // Return the user data
+    console.log('Attempting login with:', { username });
+    const response = await api.post('/auth/login', { username, password });
+    console.log('Login response:', response.data);
+    dispatch(loginSuccess(response.data));
+    return { user: response.data };
   } catch (error) {
     console.error('Login failed:', error);
-    // Return an object with an error property
     return { error: { message: error.response?.data?.message || 'Login failed' } };
   }
 };
@@ -56,7 +57,7 @@ export const login = (username, password) => async (dispatch) => {
 // Async action to handle registration
 export const register = ({ username, email, password, firstName, lastName }) => async (dispatch) => {
   try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {           
+      const response = await api.post('/auth/register', {           
         username, 
         email, 
         password, 

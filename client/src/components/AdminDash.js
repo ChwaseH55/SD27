@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../config';  // Import our configured api instance
 
 const AdminDashboard = () => {
   const [forumPosts, setForumPosts] = useState([]);
@@ -25,10 +25,10 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const [forumResponse, usersResponse, eventsResponse] = await Promise.all([
-          axios.get("/api/forum/posts"),
-          axios.get("/api/users"),
-          axios.get("/api/events"),
-          //axios.get("/api/scores"),
+          api.get("/forum/posts"),
+          api.get("/users"),
+          api.get("/events"),
+          //api.get("/scores"),
         ]);
 
         setForumPosts(forumResponse.data);
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
   const handleCreateEvent = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/events", newEvent);
+      const response = await api.post("/events", newEvent);
       setEvents([...events, response.data]);
       setNewEvent({
         event_name: "",
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
   const handleUpdateEvent = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`/api/events/${isEditingEvent}`, newEvent);
+      const response = await api.put(`/events/${isEditingEvent}`, newEvent);
       setEvents(events.map(event => event.eventid === response.data.eventid ? response.data : event));
       setIsEditingEvent(null);
       setNewEvent({
@@ -100,7 +100,7 @@ const AdminDashboard = () => {
   // Handle event deletion
   const handleDeleteEvent = async (eventId) => {
     try {
-      await axios.delete(`/api/events/${eventId}`);
+      await api.delete(`/events/${eventId}`);
       setEvents(events.filter(event => event.eventid !== eventId));
     } catch (error) {
       console.error("Error deleting event:", error);
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
   // Handle deleting a forum post
   const handleDeletePost = async (postId) => {
     try {
-      const response = await axios.delete(`/api/forum/posts/${postId}`);
+      await api.delete(`/forum/posts/${postId}`);
       setForumPosts((prevPosts) => prevPosts.filter((post) => post.postid !== postId));
       alert("Post deleted successfully!");
     } catch (error) {

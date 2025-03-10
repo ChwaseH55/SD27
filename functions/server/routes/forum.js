@@ -18,18 +18,8 @@ router.post('/posts', async(req, res) => {
 
 //get all post
 router.get('/posts', async(req, res) => {
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = parseInt(req.query.offset) || 0;
     try {
-        const posts = await pool.query(
-            `SELECT posts.*, users.username 
-            FROM posts 
-            JOIN users 
-            ON posts.userid = users.id 
-            ORDER BY createddate DESC 
-            LIMIT $1 OFFSET $2`, 
-            [limit, offset]
-        );
+        const posts = await pool.query("SELECT * FROM posts ORDER BY createddate DESC");
         res.json(posts.rows);
     } catch (err){
         console.error(err.message);
@@ -42,14 +32,7 @@ router.get('/posts/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const post = await pool.query("SELECT * FROM posts WHERE postid = $1", [id]);
-        const replies = await pool.query(
-            `SELECT replies.*, users.username 
-             FROM replies 
-             JOIN users ON replies.userid = users.id 
-             WHERE replies.postid = $1 
-             ORDER BY replies.createddate ASC`, 
-            [id]
-        );        
+        const replies = await pool.query ("SELECT * FROM replies WHERE postid = $1 ORDER BY createddate ASC", [id]);
         res.json({post: post.rows[0], replies: replies.rows });
     } catch (err) {
         console.error(err.message);
@@ -157,65 +140,11 @@ router.delete('/replies/:id', async (req, res) => {
 
 });
 
-//get likes from a post
-router.get('/likes/post/:postid', async (req, res) => {
-    const { postid } = req.params;
-
-    try { 
-        const likes = await pool.query(
-            `SELECT likeid, userid FROM likes WHERE postid = $1`, [postid]
-        );
-
-        res.json(likes.rows);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send("Server error");
-    }
-});
-
-//get likes for a reply
-router.get('/likes/reply/:replyid', async (req, res) => {
-    const { replyid } = req.params;
-
-    try { 
-        const likes = await pool.query(
-            `SELECT likeid, userid FROM likes WHERE replyid = $1`, [replyid]
-        );
-
-        res.json(likes.rows);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send("Server error");
-    }
-});
-
-
-
-//like for a post or a reply
+//like a post or reply
 router.post('/likes', async (req, res) => {
-
     const { postid, replyid, userid } = req.body;
-
-    try { 
-        const exisitingLike = await pool.query(
-            `SELECT * FROM likes WHERE userid = $1 AND (postid = $2 OR replyid = $3)`, 
-            [userid, postid || null, replyid || null]
-        );
-
-        if(exisitingLike.rows.length > 0) {
-            await pool.query(
-                `DELETE FROM likes WHERE likeid = $1`,
-                [exisitingLike.rows[0].likeid]
-            );
-            return res.json({ message: "Like removed (unliked)"});
-        }
-        
-        
-        const newLike = await pool.query(
-            `INSERT INTO likes (postid, replyid, userid) VALUES ($1, $2, $3) RETURNING *`,
-            [postid || null, replyid || null, userid]
-        );
-
+    try {
+        const newLike = await pool.query( `INSERT INTO likes (postid, replyid, userid) VALUES ($1, $2, $3) RETURNING *`, [postid || null, replyid || null, userid]);
         res.json(newLike.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -223,25 +152,35 @@ router.post('/likes', async (req, res) => {
     }
 });
 
-// Get all likes for a specific user
-router.get('/likes/user/:userid', async (req, res) => {
-    const { userid } = req.params;
+//get likes for a post or a reply
+router.get('/likes', async (req, res) => {
+
+    const { postid, replyid } = req.query;
 
     try { 
-        const userLikes = await pool.query(
-            `SELECT likeid, postid, replyid FROM likes WHERE userid = $1`, 
-            [userid]
-        );
+        
+        if(!postid && !replyid){
+            return res.status(404).json({message: "Please provide either postid or replyid."});
+        }
+        
+        let likes;
 
-        res.json(userLikes.rows);
+        if(postid){
+            likes = await pool.query(
+                `SELECT likeid, userid FROM likes WHERE postid = $1`, [postid]
+            );
+        }else if (replyid) {
+            likes = await pool.query( `SELECT likeid, userid FROM likes WHERE replyid = $1`, [replyid]);
+        }
+
+        res.json(likes.rows);
     } catch (err) {
-        console.error("Error fetching user likes:", err);
+        console.error(err.message);
         res.status(500).send("Server error");
     }
 });
 
-
-/* delete a like by ID
+// delete a like by ID
 router.delete('/likes/:id', async (req, res) => {
     const { id } = req.params;
 
@@ -257,7 +196,7 @@ router.delete('/likes/:id', async (req, res) => {
         console.error(err.message);
         res.status(500).send("Server error");
     }
-}); */
+});
 
 module.exports = router;
 
