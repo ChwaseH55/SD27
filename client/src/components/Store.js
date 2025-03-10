@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
+import { api } from '../config';
 
 // Initialize Stripe with your public key
 const stripePromise = loadStripe("pk_test_51PzZ4xRs4YZmhcoeiINiWfKCCh0sC5gpVqxfhtT24PzY7OPcUAlZuxyldOm7kKOejlZxi1wIwwbzMPVLVAS2pz2f00zNR0YmWR");
@@ -26,10 +27,9 @@ const Store = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/stripe/productlist");
-        const data = await response.json();
-        setProducts(data);  // Set products once they are fetched
-        setLoading(false);  // Set loading to false once data is loaded
+        const response = await api.get("/stripe/productlist");
+        setProducts(response.data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching products:", error);
         setLoading(false);
@@ -45,22 +45,19 @@ const Store = () => {
       quantity: item.quantity,
     }));
   
-    // Fetch the session URL from your backend
-    const response = await fetch("http://localhost:5000/api/stripe/create-checkout-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ cartItems: lineItems }),
-    });
-  
-    const data = await response.json();
-  
-    // Check if the URL exists and redirect
-    if (data.url) {
-      window.location.href = data.url;  // Redirect to the Stripe Checkout URL
-    } else {
-      console.error("Error: No URL returned from Stripe session creation.");
+    try {
+      const response = await api.post("/stripe/create-checkout-session", {
+        cartItems: lineItems
+      });
+    
+      // Check if the URL exists and redirect
+      if (response.data.url) {
+        window.location.href = response.data.url;  // Redirect to the Stripe Checkout URL
+      } else {
+        console.error("Error: No URL returned from Stripe session creation.");
+      }
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
     }
   };
   

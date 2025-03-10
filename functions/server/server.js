@@ -1,19 +1,28 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
-const usersRoutes = require('./routes/users'); // If exists
+const usersRoutes = require('./routes/users');
 const eventsRouter = require('./routes/events');
 const forumRouter = require('./routes/forum');
 const announcementsRouter = require('./routes/announcements');
 const productsRouter = require('./routes/products');
 const stripeRouter = require('./routes/stripe');
-
 const scoresRouter = require('./routes/scores');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 8080;
 
-app.use(cors());
+// Apply CORS first before parsing JSON
+const corsOptions = {
+  origin: true, // Allows all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
+
+// Apply CORS middleware globally with the options
+app.use(cors(corsOptions));
+
 app.use(express.json()); // Parses incoming JSON
 
 // Test endpoint
@@ -22,7 +31,7 @@ app.get('/api/test', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/api/users', usersRoutes); 
+app.use('/api/users', usersRoutes);
 app.use('/api/events', eventsRouter);
 app.use('/api/forum', forumRouter);
 app.use('/api/announcements', announcementsRouter);

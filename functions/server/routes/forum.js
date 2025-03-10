@@ -5,38 +5,102 @@ const router = express.Router();
 //create post
 router.post('/posts', async(req, res) => {
     const {title, content, userid } = req.body;
-    try{
+    
+    // Validate required fields
+    if (!title || !content || !userid) {
+        return res.status(400).json({
+            error: "Missing required fields",
+            details: "Title, content, and userid are required"
+        });
+    }
+
+    // Validate user matches authenticated user
+    if (userid !== req.user.id) {
+        return res.status(403).json({
+            error: "Unauthorized",
+            details: "User ID does not match authenticated user"
+        });
+    }
+
+    try {
         const newPost = await pool.query(
-            `INSERT INTO posts (title, content, userid, createddate) VALUES ($1, $2, $3, NOW()) RETURNING *`, [title, content, userid]
+            `INSERT INTO posts (title, content, userid, createddate) VALUES ($1, $2, $3, NOW()) RETURNING *`, 
+            [title, content, userid]
         );
         res.json(newPost.rows[0]);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send("Server error");
+        console.error('Error creating post:', err);
+        res.status(500).json({
+            error: "Server error",
+            details: err.message
+        });
     }
 });
 
-//get all post
+//get all posts
 router.get('/posts', async(req, res) => {
     try {
+        console.log('GET /posts - Auth Debug:', {
+            user: req.user,
+            headers: req.headers,
+            token: req.headers.authorization
+        });
+        
+        // Test database connection first
+        const testConnection = await pool.query('SELECT 1');
+        if (!testConnection) {
+            throw new Error('Database connection failed');
+        }
+
         const posts = await pool.query("SELECT * FROM posts ORDER BY createddate DESC");
         res.json(posts.rows);
-    } catch (err){
-        console.error(err.message);
-        res.status(500).send("Server error");
+    } catch (err) {
+        console.error('Error in GET /posts:', err);
+        res.status(500).json({
+            error: "Server error",
+            details: err.message
+        });
     }
 });
 
-//get a single post with replies **need to update **
+//get a single post with replies
 router.get('/posts/:id', async (req, res) => {
     const { id } = req.params;
+    
+    // Validate ID
+    if (!id || isNaN(id)) {
+        return res.status(400).json({
+            error: "Invalid ID",
+            details: "Post ID must be a valid number"
+        });
+    }
+
     try {
         const post = await pool.query("SELECT * FROM posts WHERE postid = $1", [id]);
-        const replies = await pool.query ("SELECT * FROM replies WHERE postid = $1 ORDER BY createddate ASC", [id]);
-        res.json({post: post.rows[0], replies: replies.rows });
+        
+        // Check if post exists
+        if (post.rows.length === 0) {
+            return res.status(404).json({
+                error: "Not found",
+                details: "Post not found"
+            });
+        }
+
+        const replies = await pool.query(
+            "SELECT * FROM replies WHERE postid = $1 ORDER BY createddate ASC", 
+            [id]
+        );
+        
+        res.json({
+            post: post.rows[0], 
+            replies: replies.rows 
+        });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send("Server error");
+        console.error('Error fetching post:', err);
+        res.status(500).json({
+            error: "Server error",
+            details: err.message
+        });
     }
 });
 

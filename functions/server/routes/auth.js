@@ -1,3 +1,7 @@
+const cors = require('cors');
+const corsMiddleware = cors({ origin: 'https://sd27-87d55.web.app', credentials: true });
+
+
 // server/routes/auth.js
 const express = require('express');
 const bcrypt = require('bcrypt');
@@ -5,7 +9,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db'); // Adjust the path as needed
 const router = express.Router();
 
-router.post('/register', async (req, res) => {
+router.post('/register', corsMiddleware, async (req, res) => {
     console.log("Received registration request with:", req.body);
 
     // Check if the pool is connected
@@ -46,7 +50,7 @@ router.post('/register', async (req, res) => {
 
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', corsMiddleware, async (req, res) => {
     const { username, password } = req.body;
 
     try {
@@ -55,11 +59,20 @@ router.post('/login', async (req, res) => {
         if (user.rows.length > 0) {
             const isMatch = await bcrypt.compare(password, user.rows[0].password);
             if (isMatch) {
+                if (!process.env.JWT_SECRET) {
+                    console.error('JWT_SECRET is not set in environment variables');
+                    return res.status(500).json({ error: 'Server configuration error' });
+                }
+                
                 const token = jwt.sign(
                     { id: user.rows[0].id, roleid: user.rows[0].roleid, paymentStatus: user.rows[0].paymentstatus },
-                    'your_jwt_secret',
+                    process.env.JWT_SECRET,
                     { expiresIn: '1h' }
                 );
+                console.log('Login successful:', {
+                    userId: user.rows[0].id,
+                    roleId: user.rows[0].roleid
+                });
                 res.json({
                     token,
                     user: {
@@ -85,7 +98,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Fetch username by userID
-router.get("/users/:userid", async (req, res) => {
+router.get("/users/:userid", corsMiddleware, async (req, res) => {
     const { userid } = req.params;
   
     try {

@@ -1,9 +1,13 @@
+require('dotenv').config();
+const functions = require("firebase-functions");
+// Access the Stripe secret key using process.env.FIREBASE_CONFIG
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripe = require('stripe')(stripeSecretKey);
 const express = require('express');
 const router = express.Router();
 require('dotenv').config({ path: `${__dirname}/../.env` });
 //console.log('Loaded Environment Variables:', process.env);
 //console.log('Stripe Secret Key:', process.env.STRIPE_SECRET_KEY);
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const YOUR_DOMAIN = 'http://localhost:3000';
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
+import { api } from '../config';  // Import our configured api instance
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
@@ -10,7 +11,7 @@ const EventsPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get("/api/events");  // Get all events
+        const response = await api.get(("/events"));  // Get all events
         setEvents(response.data);  // Populate the events state
       } catch (err) {
         console.error("Error fetching events:", err);
