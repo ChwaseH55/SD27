@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
   }
 
   static FirebaseOptions android = FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_API_KEY'] ?? 'default',
+    apiKey: dotenv.env['FIREBASE_API_KEY_ANDROID'] ?? 'default',
     appId: '1:51740552750:android:96e482e18dc0afe22e39bf',
     messagingSenderId: '51740552750',
     projectId: 'sd27-87d55',
@@ -59,7 +59,7 @@ class DefaultFirebaseOptions {
   );
 
   static FirebaseOptions ios = FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_API_KEY'] ?? 'default',
+    apiKey: dotenv.env['FIREBASE_API_KEY_IOS'] ?? 'default',
     appId: '1:51740552750:ios:4fd18cb992c4beea2e39bf',
     messagingSenderId: '51740552750',
     projectId: 'sd27-87d55',
