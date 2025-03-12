@@ -68,7 +68,7 @@ class MainMenu extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(
-                  Icons.train,
+                  Icons.score,
                 ),
                 title: const Text('Scores'),
                 onTap: () {
@@ -88,9 +88,9 @@ class MainMenu extends StatelessWidget {
                 visible: true,
                 child: ListTile(
                   leading: const Icon(
-                    Icons.train,
+                    Icons.people,
                   ),
-                  title: const Text('User'),
+                  title: const Text('Users'),
                   onTap: () {
                     Navigator.pushNamed(context, '/users');
                   },
