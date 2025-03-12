@@ -34,12 +34,12 @@ class _EventsWidgetsState extends State<EventsWidgets> {
     if (_isRegistered) {
       // Call API to unregister
       await unregisterFromEvent(widget.event.eventid.toString(), widget.userId.toString());
+
     } else {
       // Call API to register
       await registerForEvent(widget.event.eventid.toString(), widget.userId.toString());
     }
 
-    // Update the UI
     setState(() {
       _isRegistered = !_isRegistered;
     });
