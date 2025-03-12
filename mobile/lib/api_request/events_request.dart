@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:coffee_card/models/events_model.dart';
 import 'package:http/http.dart';
 import 'dart:developer';
+import 'package:coffee_card/api_request/config.dart';
 
-String urlAddress =
-    "http://10.0.2.2:5000/api/events"; 
+String urlAddress = "http://10.0.2.2:5000/api/events";
+
 
 Future<void> createEvent(
     String eventName,

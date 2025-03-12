@@ -7,6 +7,8 @@ import 'package:coffee_card/models/postwithreplies_model.dart';
 
 String urlAddress = "http://10.0.2.2:5000/api/forum/";
 
+
+
 Future<void> createPost({
   required String title,
   required String content,
@@ -236,24 +238,6 @@ Future<Map<int, int>> getLikes(
         likesMap[like.likeid] = like.userid;
       }
       return likesMap;
-    } else {
-      throw Exception('Failed to fetch posts: ${response.statusCode}');
-    }
-  } catch (e) {
-    throw Exception('Error fetching posts: $e');
-  }
-}
-
-Future<int> getLikesWithReplyId(String replyId) async {
-  try {
-    final url = Uri.parse('$urlAddress/likes?postid=$replyId');
-    final response = await get(url);
-
-    if (response.statusCode == 200) {
-      // Parse JSON response
-      final List<dynamic> jsonList = jsonDecode(response.body);
-      // Map JSON list to a list of Post objects
-      return jsonList.map((json) => LikesModel.fromJson(json)).toList().length;
     } else {
       throw Exception('Failed to fetch posts: ${response.statusCode}');
     }

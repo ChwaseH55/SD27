@@ -64,7 +64,7 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
           }
 
           if (provider.postDetails == null || provider.postUser == null) {
-            return const Center(child: Text('No posts found aaaaaa.'));
+            return const Center(child: Text('No posts found.'));
           }
 
           final resPost = provider.postDetails!;

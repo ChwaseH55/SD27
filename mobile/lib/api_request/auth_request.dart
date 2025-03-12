@@ -1,11 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:coffee_card/api_request/config.dart';
 import 'package:coffee_card/main.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-String urlAddress = "http://10.0.2.2:5000";
+String urlAddress = "http://10.0.2.2:5000/api/auth";
+const FlutterSecureStorage storage = FlutterSecureStorage();
+Dio dio = ApiService.dio;
 
 Future<void> registerUser({
   required BuildContext context,
@@ -16,7 +21,7 @@ Future<void> registerUser({
   required String lastName,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/auth/register');
+    final url = Uri.parse('/auth/register');
 
     final response = await post(
       url,
@@ -50,7 +55,7 @@ Future<void> loginUser({
   required BuildContext context,
 }) async {
   try {
-    final url = Uri.parse('$urlAddress/api/auth/login');
+    final url = Uri.parse('$urlAddress/login');
     final response = await post(
       url,
       headers: <String, String>{
@@ -64,13 +69,12 @@ Future<void> loginUser({
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body.toString());
-      String userId =
-          data['user']['id'].toString(); // Assuming 'userID' exists in response
+      // Assuming 'userID' exists in response
 
       // Save userID to shared preferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userID', userId);
-
+      await storage.write(key: 'userId', value: data['user']['id'].toString());
+      await storage.write(key: 'token', value: data['token'].toString());
+      String? userId = await storage.read(key: 'userId');
       log('User ID cached: $userId');
       log('Login successfully');
 
@@ -84,12 +88,11 @@ Future<void> loginUser({
 }
 
 Future<String?> getUserID() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString('userID');
+  return await storage.read(key: 'userId');
 }
 
 Future<void> logoutUser() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('userID');
+  await storage.delete(key: 'userId');
+  await storage.delete(key: 'token');
   log('User logged out, ID removed');
 }

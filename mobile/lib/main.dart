@@ -1,3 +1,4 @@
+import 'package:coffee_card/api_request/notifications.dart';
 import 'package:coffee_card/providers/announcement_info_provider.dart';
 import 'package:coffee_card/providers/announcement_provider.dart';
 import 'package:coffee_card/providers/events_info_provider.dart';
@@ -26,9 +27,16 @@ import 'package:coffee_card/screens/userprofile_screen.dart';
 import 'package:coffee_card/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await Notifications.intsance.initialize();
   runApp(
     MultiProvider(
       providers: [
@@ -37,7 +45,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => EventsProvider()..fetchEvents()),
         ChangeNotifierProvider(create: (_) => EventsInfoProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
-        ChangeNotifierProvider(create: (_) => AnnouncementProvider()..fetchAnnouncements()),
+        ChangeNotifierProvider(
+            create: (_) => AnnouncementProvider()..fetchAnnouncements()),
         ChangeNotifierProvider(create: (_) => AnnouncementInfoProvider()),
         // Add more providers here if needed
       ],
@@ -70,13 +79,13 @@ class MyApp extends StatelessWidget {
         '/events': (context) => const EventsListScreen(),
         '/createEvent': (context) => const CreateEvent(),
         '/scores': (context) => const GolfScoreScreen(),
-
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
         EventInfo.routeName: (context) => const EventInfo(),
         PostCreationForm.routeName: (context) => const PostCreationForm(),
         CreateEvent.routeName: (context) => const CreateEvent(),
         AnnouncementInfo.routeName: (context) => const AnnouncementInfo(),
-        AnnouncementCreationScreen.routeName: (context) => const AnnouncementCreationScreen(),
+        AnnouncementCreationScreen.routeName: (context) =>
+            const AnnouncementCreationScreen(),
       },
     );
   }
