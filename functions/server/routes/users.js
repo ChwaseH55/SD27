@@ -36,7 +36,7 @@ router.get('/:id', async (req, res) => {
 //update user info
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { username, firstname, lastname } = req.body;
+    const { username, firstname, lastname, roleid } = req.body;
 
     try {
         const updateQuery = `
@@ -44,14 +44,16 @@ router.put('/:id', async (req, res) => {
             SET
                 username = COALESCE($1, username),
                 firstname = COALESCE($2, firstname),
-                lastname = COALESCE($3, lastname)
-            WHERE id = $4
+                lastname = COALESCE($3, lastname),
+                roleid = COALESCE($4, roleid)
+            WHERE id = $5
             RETURNING *;`;
 
         const updateResult = await pool.query(updateQuery, [
             username || null,
             firstname || null,
             lastname || null,
+            roleid || null,
             id
         ]);
 

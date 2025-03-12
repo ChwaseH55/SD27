@@ -62,14 +62,63 @@ function App() {
             }
           />
           
-          {/* Other Public or User Routes */}
-          <Route path="/home" element={<Home />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/forum" element={<Forum />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/scores" element={<ScoresPage />} />
-          <Route path="/store" element={<Store />} />
+          {/* Protected Routes for Logged-in Users */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <Account />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forum"
+            element={
+              <ProtectedRoute>
+                <Forum />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <CalendarPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <ProtectedRoute>
+                <EventsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/scores"
+            element={
+              <ProtectedRoute>
+                <ScoresPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/store"
+            element={
+              <ProtectedRoute>
+                <Store />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
         {data && (
           <p className="absolute bottom-4 text-center w-full text-sm text-gray-600">

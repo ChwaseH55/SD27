@@ -27,17 +27,9 @@ const Forum = () => {
   const user = useSelector((state) => state.user.user);
 
   const fetchPosts = useCallback(async() => {
-    if(loading || !hasMore) return;
-
-    setLoading (true);
-
     try {
-      const response = await api.get(`/forum/posts?limit=${POSTS_PER_PAGE}&offset=${offset}`);
+      const response = await api.get(`/forum/posts`);
       const newPosts = response.data;
-
-      if(response.data.length < POSTS_PER_PAGE){
-        setHasMore(false);
-      }
 
       const postsWithLikes = await Promise.all(newPosts.map(async (post) => {
         try {
@@ -49,43 +41,36 @@ const Forum = () => {
         }
       }));
 
-      setPosts((prevPosts) => [...prevPosts, ...postsWithLikes]);
-      setOffset((prevOffset) => prevOffset + POSTS_PER_PAGE);
-    }catch (error){
+      setPosts(postsWithLikes);
+    } catch (error) {
       console.error("Error fetching posts", error);
     }
-    setLoading(false);
-  }, [loading, hasMore, offset]);
+  }, []); 
 
-  const fetchPostLikes = async (postId) => {
-    try {
-      const response = await api.get(`/forum/likes/post/${postId}`);
-      setPosts((prevPosts) =>
-        prevPosts.map((post) => 
-          post.postid === postId ? { ...post, likeCount: response.data.length} : post
-        )
-      );
-    }catch (error) {
-      console.error("Error fetching likes for post:", error);
-    }
-  }
-
-  // Fetch posts when the component mounts
+  // Fetch posts and likes when component mounts
   useEffect(() => {
     if (!user) return;
-    const fetchUserLikes = async () => {
+    
+    const initializeForum = async () => {
       try {
-        const response = await api.get(`/forum/likes/user/${user.id}`);
-        const likedPostIds = new Set(response.data.map((like) => like.postid));
+        // Fetch posts first
+        await fetchPosts();
+        
+        // Then fetch user's likes
+        const likesResponse = await api.get(`/forum/likes/user/${user.id}`);
+        // Only set likes that exist in the database
+        const likedPostIds = new Set(
+          likesResponse.data
+            .filter(like => like.postid !== null && like.likeid !== null)
+            .map(like => like.postid)
+        );
         setLikedPosts(likedPostIds);
       } catch (error) {
-        console.error("Error fetching liked posts: ", error);
+        console.error("Error initializing forum:", error);
       }
     };
 
-    fetchUserLikes();
-    setOffset(0);
-    fetchPosts();
+    initializeForum();
   }, [user, fetchPosts]);
 
   const lastPostRef = useCallback((node) => {
@@ -121,45 +106,159 @@ const Forum = () => {
       setNewPostTitle("");
       setNewPostContent("");
 
-      // Refetch posts to update the list
-      const response = await api.get("/forum/posts");
-      setPosts(response.data);
+      // Reset offset and fetch posts again
+      setOffset(0);
+      setPosts([]);
+      setHasMore(true);
+      await fetchPosts();
+
     } catch (error) {
       console.error("Error creating post:", error);
     }
   };
 
-  const handleLike = async (postId) => {
+  const handleViewPost = async (post) => {
     try {
-      const isLiked = likedPosts.has(postId);
-
-      // update UI optimistically 
-      setLikedPosts((prev) => {
-        const updatedLikes = new Set(prev);
-        isLiked ? updatedLikes.delete(postId) : updatedLikes.add(postId);
-        return updatedLikes;
+      const response = await api.get(`/forum/posts/${post.postid}`);
+      setSelectedPost({
+        post: response.data.post,
+        replies: response.data.replies,
       });
-
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.postid === postId
-            ? { ...post, likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1 }
-            : post
-        )
-      );
-
-      //actual API request to like or unlike
-      await api.post("/forum/likes", {
-        postid: postId,
-        replyid: null, // We're liking a post, not a reply
-        userid: user.id, // Use logged-in user's ID from Redux state
-      });
-
     } catch (error) {
-      console.error("Error liking post:", error);
+      console.error("Error fetching post details:", error);
     }
   };
 
+  const handleLikePost = async (postId) => {
+    if (!user) {
+      alert("Please log in to like posts");
+      return;
+    }
+    
+    const isLiked = likedPosts.has(postId);
+    
+    try {
+      if (isLiked) {
+        // Get the like ID first
+        const likesResponse = await api.get(`/forum/likes/post/${postId}`);
+        const userLike = likesResponse.data.find(like => like.userid === user.id);
+        if (userLike) {
+          // Delete the like
+          await api.delete(`/forum/likes/${userLike.likeid}`);
+          // Update UI after successful deletion
+          setLikedPosts(prev => {
+            const updated = new Set(prev);
+            updated.delete(postId);
+            return updated;
+          });
+        }
+      } else {
+        // Create new like
+        await api.post("/forum/likes", {
+          postid: postId,
+          replyid: null,
+          userid: user.id,
+        });
+        // Update UI after successful creation
+        setLikedPosts(prev => {
+          const updated = new Set(prev);
+          updated.add(postId);
+          return updated;
+        });
+      }
+      
+      // Refresh posts to update like counts
+      fetchPosts();
+
+    } catch (error) {
+      console.error("Error liking/unliking post:", error);
+    }
+  };
+
+  // State for liked replies
+  const [likedReplies, setLikedReplies] = useState(new Set());
+  // State for new reply content
+  const [newReplyContent, setNewReplyContent] = useState("");
+
+  // Handle liking a reply
+  const handleLikeReply = async (replyId) => {
+    if (!user) {
+      alert("Please log in to like comments");
+      return;
+    }
+    
+    const isLiked = likedReplies.has(replyId);
+    
+    try {
+      if (isLiked) {
+        // Get the like ID first
+        const likesResponse = await api.get(`/forum/likes/reply/${replyId}`);
+        const userLike = likesResponse.data.find(like => like.userid === user.id);
+        if (userLike) {
+          // Delete the like
+          await api.delete(`/forum/likes/${userLike.likeid}`);
+          // Update UI after successful deletion
+          setLikedReplies(prev => {
+            const updated = new Set(prev);
+            updated.delete(replyId);
+            return updated;
+          });
+        }
+      } else {
+        // Create new like
+        await api.post("/forum/likes", {
+          postid: null,
+          replyid: replyId,
+          userid: user.id,
+        });
+        // Update UI after successful creation
+        setLikedReplies(prev => {
+          const updated = new Set(prev);
+          updated.add(replyId);
+          return updated;
+        });
+      }
+      
+      // Refresh the selected post to update reply like counts
+      if (selectedPost) {
+        handleViewPost(selectedPost.post);
+      }
+
+    } catch (error) {
+      console.error("Error liking/unliking reply:", error);
+    }
+  };
+
+  // Handle adding a reply to a post
+  const handleAddReply = async (e) => {
+    e.preventDefault();
+    
+    if (!user) {
+      alert("Please log in to comment");
+      return;
+    }
+    
+    if (!newReplyContent.trim()) {
+      alert("Comment cannot be empty");
+      return;
+    }
+    
+    try {
+      await api.post(`/forum/posts/${selectedPost.post.postid}/replies`, {
+        content: newReplyContent,
+        userid: user.id,
+      });
+      
+      // Clear the input
+      setNewReplyContent("");
+      
+      // Refresh the post details to show the new reply
+      handleViewPost(selectedPost.post);
+      
+    } catch (error) {
+      console.error("Error adding reply:", error);
+    }
+  };
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -175,20 +274,9 @@ const Forum = () => {
     setPosts(sortedPosts);
   };
 
+  // Handle filter change
   const handleFilter = (e) => {
     setFilterRole(e.target.value);
-  };
-
-  const fetchPostDetails = async (postId) => {
-    try {
-      const response = await api.get(`/forum/posts/${postId}`);
-      setSelectedPost({
-        post: response.data.post,
-        comments: response.data.replies,
-      });
-    } catch (error) {
-      console.error("Error fetching post details:", error);
-    }
   };
 
   const fetchReplyUsername = async (userid) => {
@@ -231,13 +319,52 @@ const Forum = () => {
 
       setSelectedPost((prevSelectedPost) => ({
         ...prevSelectedPost,
-        comments: [...prevSelectedPost.comments, newCommentData]
+        replies: [...prevSelectedPost.replies, newCommentData]
     }));
 
       setNewComment("");
     } catch (error) {
       console.error("Error adding comment:", error);
     }
+  };
+
+  // Filter posts based on user role
+  const getFilteredPosts = () => {
+    let filteredPosts = [...posts];
+    
+    // Filter by search query
+    if (searchQuery) {
+      filteredPosts = filteredPosts.filter(post => 
+        post.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Filter by role
+    if (filterRole !== "all") {
+      filteredPosts = filteredPosts.filter(post => {
+        // Get the user's roleid from the post
+        const posterRoleId = post.roleid || 1; // Default to guest (1) if not specified
+        
+        if (filterRole === "members") {
+          return posterRoleId < 4; // Members have roleid < 4
+        } else if (filterRole === "admins") {
+          return posterRoleId >= 4; // Admins have roleid >= 4
+        }
+        return true;
+      });
+    }
+    
+    // Sort posts
+    return filteredPosts.sort((a, b) => {
+      const dateA = new Date(a.createddate);
+      const dateB = new Date(b.createddate);
+      
+      if (sortOrder === "newest") {
+        return dateB - dateA;
+      } else {
+        return dateA - dateB;
+      }
+    });
   };
 
   return (
@@ -285,119 +412,168 @@ const Forum = () => {
         </div>
 
         {selectedPost ? (
-          <div className="bg-white p-6 shadow rounded-lg border border-gray-200">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold mb-2">{selectedPost.post.title}</h2>
+            <p className="text-gray-700 mb-4">{selectedPost.post.content}</p>
+            <div className="text-gray-500 text-sm mb-6">
+              Posted by {selectedPost.post.username || 'Unknown User'} on{" "}
+              {new Date(selectedPost.post.createddate).toLocaleDateString()}
+            </div>
+            
+            <div className="border-t pt-4">
+              <h3 className="text-xl font-bold mb-4">Comments</h3>
+              {selectedPost.replies.length === 0 ? (
+                <p className="text-gray-500">No comments yet. Be the first to comment!</p>
+              ) : (
+                <ul className="space-y-4">
+                  {selectedPost.replies.map((reply) => (
+                    <li key={reply.replyid} className="border-b pb-4">
+                      <p className="text-gray-700">{reply.content}</p>
+                      <div className="flex justify-between items-center mt-2">
+                        <div className="text-gray-500 text-sm">
+                          By {reply.username || 'Unknown User'} on{" "}
+                          {new Date(reply.createddate).toLocaleDateString()}
+                        </div>
+                        <button
+                          onClick={() => handleLikeReply(reply.replyid)}
+                          className={`flex items-center ${
+                            likedReplies.has(reply.replyid)
+                              ? "text-red-500"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          <span className="mr-1">
+                            {likedReplies.has(reply.replyid) ? "♥" : "♡"}
+                          </span>
+                          {reply.likeCount || 0}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            
+            {user && (
+              <div className="mt-6">
+                <h3 className="text-lg font-bold mb-2">Add a Comment</h3>
+                <form onSubmit={handleAddReply}>
+                  <textarea
+                    value={newReplyContent}
+                    onChange={(e) => setNewReplyContent(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded mb-2"
+                    placeholder="Write your comment here..."
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-gold text-black rounded"
+                  >
+                    Post Comment
+                  </button>
+                </form>
+              </div>
+            )}
+            
             <button
               onClick={() => setSelectedPost(null)}
-              className="text-gray-600 text-sm underline"
+              className="mt-6 px-4 py-2 border border-gray-300 rounded"
             >
               Back to Posts
             </button>
-            <h2 className="text-2xl font-bold mt-4">{selectedPost.post.title}</h2>
-            <p className="text-gray-700 mt-2">{selectedPost.post.content}</p>
-            <div className="mt-4">
-              <h3 className="text-xl font-semibold">Comments</h3>
-              <ul className="space-y-2 mt-2">
-                {selectedPost.comments.map((comment) => (
-                  <li key={comment.replyid} className="bg-gray-100 p-2 rounded">
-                    <p>{comment.content}</p>
-                    <div className="text-gray-500 text-sm">
-                      By{" "}
-                      {comment.username || "Unknown User"}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <textarea
-                className="w-full mt-4 p-2 border border-gray-300 rounded"
-                placeholder="Write a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-              />
-              <button
-                onClick={handleCommentSubmit}
-                className="bg-gold text-black px-4 py-2 rounded mt-2"
-              >
-                Submit Comment
-              </button>
-            </div>
           </div>
         ) : (
-          <ul className="space-y-4">
-            {posts
-              .filter((post) =>
-                post.title.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-              .map((post, index) => (
-                <li
-                  key={post.postid}
-                  ref={index === posts.length - 1 ? lastPostRef : null}
-                  className="bg-white p-4 shadow rounded-lg border border-gray-200 hover:shadow-lg transition"
-                >
-                  <h3 className="text-xl font-bold text-black">{post.title}</h3>
-                  <p className="text-gray-700 mt-2">{post.content}</p>
-                  <div className="text-gray-500 text-sm mt-2">
-                    By {post.username} on{" "}
-                    {new Date(post.createddate).toLocaleDateString()}
-                  </div>
-                  <div className="flex items-center mt-4 space-x-4">
-                    <button
-                      onClick={() => handleLike(post.postid)}
-                      className={`text-sm ${likedPosts.has(post.postid) ? "text-red-500" : "text-gray-600"
-                        }`}
+          <>
+            {loading && posts.length === 0 ? (
+              <div className="text-center py-4">Loading posts...</div>
+            ) : (
+              <ul className="space-y-4">
+                {getFilteredPosts()
+                  .map((post, index) => (
+                    <li
+                      key={post.postid}
+                      ref={index === posts.length - 1 ? lastPostRef : null}
+                      className="bg-white p-4 shadow rounded-lg border border-gray-200 hover:shadow-lg transition"
                     >
-                      {likedPosts.has(post.postid) ? "❤️ Unlike" : "👍 Like"} {post.likeCount || 0}
-                    </button>
-                    <button
-                      onClick={() => fetchPostDetails(post.postid)}
-                      className="text-sm underline"
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </li>
-              ))}
-          </ul>
+                      <h3 className="text-xl font-bold text-black">{post.title}</h3>
+                      <p className="text-gray-700 mt-2">{post.content}</p>
+                      <div className="text-gray-500 text-sm mt-2">
+                        By {post.username || 'Unknown User'} on{" "}
+                        {new Date(post.createddate).toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center mt-4 space-x-4">
+                        <button
+                          onClick={() => handleViewPost(post)}
+                          className="text-blue-500 hover:underline"
+                        >
+                          View Discussion ({post.replyCount || 0})
+                        </button>
+                        <button
+                          onClick={() => handleLikePost(post.postid)}
+                          className={`flex items-center ${
+                            likedPosts.has(post.postid)
+                              ? "text-red-500"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          <span className="mr-1">
+                            {likedPosts.has(post.postid) ? "♥" : "♡"}
+                          </span>
+                          {post.likeCount || 0}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            )}
+            {loading && posts.length > 0 && (
+              <div className="text-center py-4">Loading more posts...</div>
+            )}
+          </>
         )}
       </main>
 
       {/* Create Post Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
-            <h2 className="text-2xl font-bold mb-4">Create a New Post</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+            <h2 className="text-2xl font-bold mb-4">Create New Post</h2>
             <form onSubmit={handleCreatePost}>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Post Title"
-                  value={newPostTitle}
-                  onChange={(e) => setNewPostTitle(e.target.value)}
-                  className="w-full p-2 mb-4 border border-gray-300 rounded"
-                  required
-                />
-                <textarea
-                  placeholder="Post Content"
-                  value={newPostContent}
-                  onChange={(e) => setNewPostContent(e.target.value)}
-                  className="w-full p-2 mb-4 border border-gray-300 rounded"
-                  required
-                />
-              </div>
-              <div className="flex justify-end">
+              <input
+                type="text"
+                placeholder="Post Title"
+                value={newPostTitle}
+                onChange={(e) => setNewPostTitle(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded mb-4"
+                required
+              />
+              <textarea
+                placeholder="Post Content"
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded mb-4 h-32"
+                required
+              />
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setNewPostTitle("");
+                    setNewPostContent("");
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
-                  className="bg-gold text-black px-6 py-2 rounded shadow hover:bg-yellow-400 transition"
+                  className="px-4 py-2 bg-gold text-black rounded"
                 >
-                  Submit
+                  Create Post
                 </button>
               </div>
             </form>
-            <button
-              onClick={() => setShowCreateModal(false)} // Close modal without submitting
-              className="absolute top-2 right-2 text-black font-bold"
-            >
-              X
-            </button>
           </div>
         </div>
       )}

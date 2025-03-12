@@ -1,12 +1,13 @@
 import axios from 'axios';
 
 // API Configuration
-export const API_BASE_URL = '/api';  // Use relative URL - Firebase Hosting handles routing
+const isDevelopment = process.env.NODE_ENV === 'development';
+export const API_BASE_URL = '/api';
 
 // Create axios instance with default config
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: false,  // Changed to false since we're using token auth
+  withCredentials: false,  // Using token auth
   headers: {
     'Content-Type': 'application/json',
   }
@@ -77,7 +78,7 @@ api.interceptors.response.use(
   }
 );
 
-// Environment-specific URLs
+// Helper function to get full API URL
 export const getApiUrl = (endpoint) => {
   return `${API_BASE_URL}${endpoint}`;
 }; 

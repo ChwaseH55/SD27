@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { api } from '../config';  // Import our configured api instance
+import { useSelector } from 'react-redux'; // Import useSelector to access Redux state
 
 const AdminDashboard = () => {
+  // Get the current user from Redux store
+  const currentUser = useSelector(state => state.user.user);
+  const userId = currentUser ? currentUser.id : 1; // Use the current user's ID or default to 1
+
   const [forumPosts, setForumPosts] = useState([]);
   const [users, setUsers] = useState([]);
   const [events, setEvents] = useState([]);
@@ -17,8 +22,21 @@ const AdminDashboard = () => {
     event_location: "",
     event_type: "",
     requires_registration: false,
+    created_by_user_id: userId, // Use the current user's ID
     event_description: "",
   });
+  const [announcement, setAnnouncement] = useState({
+    title: "",
+    content: "",
+    userid: userId // Use the current user's ID
+  });
+  const [isCreatingAnnouncement, setIsCreatingAnnouncement] = useState(false);
+
+  // Update event and announcement user IDs when the current user changes
+  useEffect(() => {
+    setNewEvent(prev => ({ ...prev, created_by_user_id: userId }));
+    setAnnouncement(prev => ({ ...prev, userid: userId }));
+  }, [userId]);
 
   // Fetch forum posts, users, events, and score submissions from API
   useEffect(() => {
@@ -63,6 +81,7 @@ const AdminDashboard = () => {
         event_location: "",
         event_type: "",
         requires_registration: false,
+        created_by_user_id: userId, // Use the current user's ID
         event_description: "",
       });
       setIsCreatingEvent(false);
@@ -119,12 +138,126 @@ const AdminDashboard = () => {
     }
   };
 
+  // Toggle to show the announcement creation form
+  const handleCreateAnnouncementClick = () => {
+    setIsCreatingAnnouncement(true);
+  };
+
+  // Create an announcement
+  const handleCreateAnnouncement = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post('/announcements', announcement);
+      alert('Announcement created successfully!');
+      setAnnouncement({
+        title: "",
+        content: "",
+        userid: userId // Use the current user's ID
+      });
+      setIsCreatingAnnouncement(false);
+    } catch (error) {
+      console.error("Error creating announcement:", error);
+    }
+  };
+
+  // Update user role
+  const handleUpdateUserRole = async (userId, newRoleId) => {
+    try {
+      // Use the general user update endpoint with the roleid field
+      const response = await api.put(`/users/${userId}`, { roleid: newRoleId });
+      setUsers(users.map(user => user.id === userId ? { ...user, roleid: newRoleId } : user));
+      alert('User role updated successfully!');
+    } catch (error) {
+      console.error("Error updating user role:", error);
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <header className="bg-black text-gold p-6 shadow-md">
         <h1 className="text-3xl font-bold text-center">Admin Dashboard</h1>
       </header>
       <main className="max-w-4xl mx-auto p-6">
+        {/* Announcement Section */}
+        <button
+          onClick={handleCreateAnnouncementClick}
+          className="w-full bg-blue-500 text-white p-2 rounded mb-4"
+        >
+          Create Announcement
+        </button>
+        {isCreatingAnnouncement && (
+          <form onSubmit={handleCreateAnnouncement} className="bg-white p-4 shadow rounded-lg border border-gray-200 mt-6">
+            <h3 className="text-xl font-semibold">Create Announcement</h3>
+            <input
+              type="text"
+              value={announcement.title}
+              onChange={(e) => setAnnouncement({...announcement, title: e.target.value})}
+              placeholder="Enter announcement title"
+              className="w-full p-2 my-2 border border-gray-300 rounded"
+              required
+            />
+            <textarea
+              value={announcement.content}
+              onChange={(e) => setAnnouncement({...announcement, content: e.target.value})}
+              placeholder="Enter announcement content"
+              className="w-full p-2 my-2 border border-gray-300 rounded"
+              required
+            />
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCreatingAnnouncement(false);
+                  setAnnouncement({
+                    title: "",
+                    content: "",
+                    userid: userId
+                  });
+                }}
+                className="text-gray-500"
+              >
+                Cancel
+              </button>
+              <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+                Create
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* User Management Section */}
+        <button
+          className="w-full bg-gray-300 p-2 rounded mb-2"
+          onClick={() => setIsUsersVisible(!isUsersVisible)}
+        >
+          {isUsersVisible ? "Hide Users" : "Show Users"}
+        </button>
+        {isUsersVisible && (
+          <div className="bg-white p-4 shadow rounded-lg border border-gray-200">
+            <h3 className="text-xl font-semibold">Users</h3>
+            <ul className="space-y-4">
+              {users.map((user) => (
+                <li key={user.id} className="bg-white p-4 shadow rounded-lg border border-gray-200">
+                  <h4 className="text-lg font-bold">{user.username}</h4>
+                  <p>{user.email}</p>
+                  <select
+                    value={user.roleid || 1}
+                    onChange={(e) => handleUpdateUserRole(user.id, parseInt(e.target.value))}
+                    className="w-full p-2 my-2 border border-gray-300 rounded"
+                  >
+                    <option value={1}>Guest</option>
+                    <option value={2}>Member (Dues Not Paid)</option>
+                    <option value={3}>Member (Dues Paid)</option>
+                    <option value={4}>Coach</option>
+                    <option value={5}>Executive Board</option>
+                    <option value={6}>President</option>
+                  </select>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Button to Create Event */}
         <button
           onClick={() => setIsCreatingEvent(true)}
@@ -156,27 +289,6 @@ const AdminDashboard = () => {
                       Delete
                     </button>
                   </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-  
-        {/* Users Section */}
-        <button
-          className="w-full bg-gray-300 p-2 rounded mb-2"
-          onClick={() => setIsUsersVisible(!isUsersVisible)}
-        >
-          {isUsersVisible ? "Hide Users" : "Show Users"}
-        </button>
-        {isUsersVisible && (
-          <div className="bg-white p-4 shadow rounded-lg border border-gray-200">
-            <h3 className="text-xl font-semibold">Users</h3>
-            <ul className="space-y-4">
-              {users.map((user) => (
-                <li key={user.id} className="bg-white p-4 shadow rounded-lg border border-gray-200">
-                  <h4 className="text-lg font-bold">{user.username}</h4>
-                  <p>{user.email}</p>
                 </li>
               ))}
             </ul>
@@ -277,6 +389,7 @@ const AdminDashboard = () => {
                     event_location: "",
                     event_type: "",
                     requires_registration: false,
+                    created_by_user_id: userId, // Use the current user's ID
                     event_description: "",
                   });
                 }}

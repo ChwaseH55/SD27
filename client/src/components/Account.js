@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../reducers/userReducer'; // Adjust the path if necessary
 import { useNavigate } from 'react-router-dom';
 import { AccessLevels } from '../utils/constants';
 import Nav from './Nav'; // Import the Nav component
 import clubLogo from '../assets/clublogo.png';
+import { api } from '../config'; // Update the import path for the api instance
 
 const accessLevelLabels = {
   [AccessLevels.GUEST]: 'Guest',
@@ -20,15 +21,68 @@ const Account = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const user = useSelector((state) => {
-    console.log(state); // Log the entire Redux state
-    return state.user;
-  });
-  //console.log(user.user.username);
+  const user = useSelector((state) => state.user);
+  const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [newName, setNewName] = useState(user.user.firstname || '');
+  const [newUsername, setNewUsername] = useState(user.user.username || '');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        // Use the correct endpoint for fetching user's registered events
+        const eventsResponse = await api.get(`/events/my-events/${user.user.id}`);
+        setRegisteredEvents(eventsResponse.data);
+
+        const announcementsResponse = await api.get('/announcements');
+        setAnnouncements(announcementsResponse.data);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+
+    fetchUserDetails();
+  }, [user.user.id]);
 
   const handleLogout = () => {
     dispatch(logoutUser());
-    navigate('/login'); // Redirect to login page after logout
+    navigate('/login');
+  };
+
+  const handleEditName = async () => {
+    try {
+      const response = await api.put(`/users/${user.user.id}`, { firstname: newName });
+      alert('Name updated successfully!');
+      // Update the user state with the new name
+      dispatch({ type: 'UPDATE_USER_NAME', payload: newName });
+      setIsEditingName(false);
+    } catch (error) {
+      console.error('Error updating name:', error);
+    }
+  };
+
+  const handleEditUsername = async () => {
+    try {
+      const response = await api.put(`/users/${user.user.id}`, { username: newUsername });
+      alert('Username updated successfully!');
+      // Update the user state with the new username
+      dispatch({ type: 'UPDATE_USER_USERNAME', payload: newUsername });
+      setIsEditingUsername(false);
+    } catch (error) {
+      console.error('Error updating username:', error);
+    }
+  };
+
+  const fetchUserEvents = async () => {
+    try {
+      const userId = user.id; // Assuming you have access to the user's ID
+      const response = await api.get(`/events/my-events/${userId}`);
+      setRegisteredEvents(response.data);
+    } catch (error) {
+      console.error("Error fetching user events:", error);
+    }
   };
 
   return (
@@ -71,18 +125,71 @@ const Account = () => {
 
               {/* Edit Account Details */}
               <div className="space-y-4">
-                <button
-                  className="w-full px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition"
-                  onClick={() => alert('Edit name functionality coming soon!')}
-                >
-                  Edit Name
-                </button>
-                <button
-                  className="w-full px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition"
-                  onClick={() => alert('Edit username functionality coming soon!')}
-                >
-                  Edit Username
-                </button>
+                {isEditingName ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      placeholder="Enter new name"
+                      className="w-full px-4 py-2 border border-gray-300 rounded mb-2"
+                    />
+                    <div className="flex space-x-2">
+                      <button
+                        className="w-1/2 px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition"
+                        onClick={handleEditName}
+                      >
+                        Submit
+                      </button>
+                      <button
+                        className="w-1/2 px-6 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition"
+                        onClick={() => setIsEditingName(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    className="w-full px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition"
+                    onClick={() => setIsEditingName(true)}
+                  >
+                    Edit Name
+                  </button>
+                )}
+
+                {isEditingUsername ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      placeholder="Enter new username"
+                      className="w-full px-4 py-2 border border-gray-300 rounded mb-2"
+                    />
+                    <div className="flex space-x-2">
+                      <button
+                        className="w-1/2 px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition"
+                        onClick={handleEditUsername}
+                      >
+                        Submit
+                      </button>
+                      <button
+                        className="w-1/2 px-6 py-3 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition"
+                        onClick={() => setIsEditingUsername(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    className="w-full px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition"
+                    onClick={() => setIsEditingUsername(true)}
+                  >
+                    Edit Username
+                  </button>
+                )}
               </div>
 
               {/* Signed-Up Events */}
@@ -91,9 +198,19 @@ const Account = () => {
                   Your Events
                 </h3>
                 <div className="bg-gray-100 p-4 rounded shadow-sm">
-                  <p className="text-gray-500 text-center">
-                    No events signed up yet.
-                  </p>
+                  {registeredEvents.length > 0 ? (
+                    <ul>
+                      {registeredEvents.map(event => (
+                        <li key={event.eventid} className="text-gray-700">
+                          {event.eventname} - {new Date(event.eventdate).toLocaleDateString()} at {event.eventlocation}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-500 text-center">
+                      No events signed up yet.
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -103,9 +220,23 @@ const Account = () => {
                   Notifications
                 </h3>
                 <div className="bg-gray-100 p-4 rounded shadow-sm">
-                  <p className="text-gray-500 text-center">
-                    No notifications yet.
-                  </p>
+                  {announcements.length > 0 ? (
+                    <ul>
+                      {announcements.map(announcement => (
+                        <li key={announcement.announcementid} className="text-gray-700 mb-2">
+                          <h4 className="font-bold">{announcement.title}</h4>
+                          <p>{announcement.content}</p>
+                          <small className="text-gray-500">
+                            {new Date(announcement.createddate).toLocaleDateString()}
+                          </small>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-500 text-center">
+                      No announcements yet.
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -115,7 +246,9 @@ const Account = () => {
               </p>
             </div>
           ) : (
-            <p className="text-center">You are not logged in.</p>
+            <p className="text-center text-gray-500">
+              Please log in to view your account details.
+            </p>
           )}
         </div>
       </div>

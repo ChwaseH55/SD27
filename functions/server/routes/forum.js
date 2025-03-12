@@ -19,10 +19,39 @@ router.post('/posts', async(req, res) => {
 //get all post
 router.get('/posts', async(req, res) => {
     try {
-        const posts = await pool.query("SELECT * FROM posts ORDER BY createddate DESC");
-        res.json(posts.rows);
+        console.log("GET /posts route hit");
+        // Join with users table to get username and roleid
+        const posts = await pool.query(`
+            SELECT p.*, u.username, u.roleid 
+            FROM posts p
+            LEFT JOIN users u ON p.userid = u.id
+            ORDER BY p.createddate DESC
+        `);
+        
+        // Add like count for each post
+        const postsWithCounts = await Promise.all(posts.rows.map(async (post) => {
+            // Get like count
+            const likeCountResult = await pool.query(
+                "SELECT COUNT(*) FROM likes WHERE postid = $1",
+                [post.postid]
+            );
+            
+            // Get reply count
+            const replyCountResult = await pool.query(
+                "SELECT COUNT(*) FROM replies WHERE postid = $1",
+                [post.postid]
+            );
+            
+            return {
+                ...post,
+                likeCount: parseInt(likeCountResult.rows[0].count),
+                replyCount: parseInt(replyCountResult.rows[0].count)
+            };
+        }));
+        
+        res.json(postsWithCounts);
     } catch (err){
-        console.error(err.message);
+        console.error("Error fetching posts:", err.message);
         res.status(500).send("Server error");
     }
 });
@@ -31,11 +60,50 @@ router.get('/posts', async(req, res) => {
 router.get('/posts/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const post = await pool.query("SELECT * FROM posts WHERE postid = $1", [id]);
-        const replies = await pool.query ("SELECT * FROM replies WHERE postid = $1 ORDER BY createddate ASC", [id]);
-        res.json({post: post.rows[0], replies: replies.rows });
+        // Get post with username
+        const post = await pool.query(`
+            SELECT p.*, u.username, u.roleid 
+            FROM posts p
+            LEFT JOIN users u ON p.userid = u.id
+            WHERE p.postid = $1
+        `, [id]);
+        
+        // Get replies with usernames
+        const replies = await pool.query(`
+            SELECT r.*, u.username, u.roleid 
+            FROM replies r
+            LEFT JOIN users u ON r.userid = u.id
+            WHERE r.postid = $1 
+            ORDER BY r.createddate ASC
+        `, [id]);
+        
+        // Get like count for post
+        const postLikeCount = await pool.query(
+            "SELECT COUNT(*) FROM likes WHERE postid = $1",
+            [id]
+        );
+        
+        // Add like counts for each reply
+        const repliesWithLikes = await Promise.all(replies.rows.map(async (reply) => {
+            const likeCountResult = await pool.query(
+                "SELECT COUNT(*) FROM likes WHERE replyid = $1",
+                [reply.replyid]
+            );
+            
+            return {
+                ...reply,
+                likeCount: parseInt(likeCountResult.rows[0].count)
+            };
+        }));
+        
+        const postWithLikes = {
+            ...post.rows[0],
+            likeCount: parseInt(postLikeCount.rows[0].count)
+        };
+        
+        res.json({post: postWithLikes, replies: repliesWithLikes});
     } catch (err) {
-        console.error(err.message);
+        console.error("Error fetching post details:", err.message);
         res.status(500).send("Server error");
     }
 });
@@ -195,6 +263,51 @@ router.delete('/likes/:id', async (req, res) => {
     } catch(err) {
         console.error(err.message);
         res.status(500).send("Server error");
+    }
+});
+
+// Get likes by user ID
+router.get('/likes/user/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const likes = await pool.query(
+            `SELECT * FROM likes WHERE userid = $1`, 
+            [id]
+        );
+        res.json(likes.rows);
+    } catch (err) {
+        console.error("Error fetching user likes:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+// Get likes by post ID (URL parameter version)
+router.get('/likes/post/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const likes = await pool.query(
+            `SELECT likeid, userid FROM likes WHERE postid = $1`,
+            [id]
+        );
+        res.json(likes.rows);
+    } catch (err) {
+        console.error("Error fetching post likes:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+// Get likes by reply ID
+router.get('/likes/reply/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const likes = await pool.query(
+            `SELECT likeid, userid FROM likes WHERE replyid = $1`,
+            [id]
+        );
+        res.json(likes.rows);
+    } catch (err) {
+        console.error("Error fetching reply likes:", err);
+        res.status(500).json({ error: "Server error" });
     }
 });
 
