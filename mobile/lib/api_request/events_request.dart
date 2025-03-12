@@ -6,7 +6,6 @@ import 'package:coffee_card/api_request/config.dart';
 
 String urlAddress = "http://10.0.2.2:5000/api/events";
 
-
 Future<void> createEvent(
     String eventName,
     String eventDate,
@@ -45,7 +44,6 @@ Future<List<EventsModel>> getAllEvents() async {
     final response = await get(Uri.parse(urlAddress));
 
     if (response.statusCode == 200) {
-      
       final List<dynamic> jsonList = jsonDecode(response.body);
       // Map JSON list to a list of Post objects
       return jsonList.map((json) => EventsModel.fromJson(json)).toList();
@@ -53,7 +51,7 @@ Future<List<EventsModel>> getAllEvents() async {
       throw Exception('Failed to fetch events: ${response.statusCode}');
     }
   } catch (e) {
-    throw Exception('Error fetching posts: $e');
+    throw Exception('Error fetching events: $e');
   }
 }
 
@@ -71,8 +69,8 @@ Future<EventsModel> getEventById(String id) async {
   }
 }
 
-Future<void> updateEvent(int id, String eventName,
-    String eventDescription, String eventDate, String eventLocation) async {
+Future<void> updateEvent(int id, String eventName, String eventDescription,
+    String eventDate, String eventLocation) async {
   try {
     final response = await put(
       Uri.parse("$urlAddress/$id"),
@@ -98,4 +96,65 @@ Future<void> updateEvent(int id, String eventName,
 Future<bool> deleteEvent(int id) async {
   final response = await delete(Uri.parse("$urlAddress/$id"));
   return response.statusCode == 200;
+}
+
+Future<void> registerForEvent(String eventId, String userId) async {
+  try {
+    final response = await post(
+      Uri.parse('$urlAddress/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'eventid': eventId, 'userid': userId}),
+    );
+    if (response.statusCode == 200) {
+      log('Registered successfully: ${response.body}');
+    } else {
+      log('Error registering: ${response.body}');
+    }
+  } catch (e) {
+    log(e.toString());
+  }
+}
+
+Future<bool> unregisterFromEvent(String eventId, String userId) async {
+  final response = await delete(
+    Uri.parse('$urlAddress/unregister/$eventId/$userId'),
+  );
+  if (response.statusCode == 200) {
+    log('Unregister successfully: ${response.body}');
+    return true;
+  } else {
+    throw Exception('Failed to check registration status');
+  }
+}
+
+Future<List<EventsModel>> getUserRegisteredEvents(String userId) async {
+  try {
+    final response = await get(Uri.parse('$urlAddress/my-events/$userId'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      // Map JSON list to a list of Post objects
+      return jsonList.map((json) => EventsModel.fromJson(json)).toList();
+    } else {
+      throw Exception(
+          'Failed to fetch registered events: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error fetching registered events: $e');
+  }
+}
+
+Future<bool> isUserRegisteredForEvent(String eventId, String userId) async {
+  try {
+    final response =
+        await get(Uri.parse('$urlAddress/is-registered/$eventId/$userId'));
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body.toString())['registered'].toString();
+      return data == 'true';
+    } else {
+      throw Exception('Failed check: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error checking: $e');
+  }
 }

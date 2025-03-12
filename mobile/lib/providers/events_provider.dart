@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 
 class EventsProvider extends ChangeNotifier {
   List<EventsModel> _events = [];
+  List<EventsModel> _registeredevents = [];
   String? _userid;
   bool _isLoading = true;
 
   List<EventsModel> get events => _events;
+   List<EventsModel> get registeredevents => _registeredevents;
   String? get userId => _userid;
   bool get isLoading => _isLoading;
 
@@ -19,9 +21,11 @@ class EventsProvider extends ChangeNotifier {
     try {
       _events = await getAllEvents();
       _userid = await getUserID();
+      _registeredevents = await getUserRegisteredEvents(userId!);
     } catch (e) {
       _events = [];
       _userid = '';
+      _registeredevents = [];
     }
 
     _isLoading = false;
