@@ -5,6 +5,7 @@ import 'package:coffee_card/providers/events_info_provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
+import 'package:coffee_card/providers/user_provider.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/screens/calendar_screen.dart';
 import 'package:coffee_card/screens/eventCreation.dart';
@@ -24,6 +25,7 @@ import 'package:coffee_card/screens/forumcreation_screen.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
 import 'package:coffee_card/screens/listofevents_screen.dart';
 import 'package:coffee_card/screens/userprofile_screen.dart';
+import 'package:coffee_card/screens/users_list.dart';
 import 'package:coffee_card/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -36,6 +38,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
+    name: 'SD27',
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await Notifications.intsance.initialize();
@@ -50,6 +53,7 @@ void main() async {
         ChangeNotifierProvider(
             create: (_) => AnnouncementProvider()..fetchAnnouncements()),
         ChangeNotifierProvider(create: (_) => AnnouncementInfoProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
         // Add more providers here if needed
       ],
       child: const MyApp(),
@@ -81,6 +85,7 @@ class MyApp extends StatelessWidget {
         '/events': (context) => const EventsListScreen(),
         '/createEvent': (context) => const CreateEvent(),
         '/scores': (context) => const GolfScoreScreen(),
+        '/users': (context) => const UserList(),
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
         EventInfo.routeName: (context) => const EventInfo(),
         PostCreationForm.routeName: (context) => const PostCreationForm(),

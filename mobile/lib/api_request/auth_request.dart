@@ -73,9 +73,12 @@ Future<void> loginUser({
 
       // Save userID to shared preferences
       await storage.write(key: 'userId', value: data['user']['id'].toString());
+      await storage.write(key: 'userRole', value: data['user']['role'].toString());
       await storage.write(key: 'token', value: data['token'].toString());
       String? userId = await storage.read(key: 'userId');
+       String? role = await storage.read(key: 'userRole');
       log('User ID cached: $userId');
+      log('User ID cached: $role');
       log('Login successfully');
 
       if (context.mounted) Navigator.pushNamed(context, '/mainMenu');
@@ -89,6 +92,10 @@ Future<void> loginUser({
 
 Future<String?> getUserID() async {
   return await storage.read(key: 'userId');
+}
+
+Future<String?> getRoleId() async {
+  return await storage.read(key: 'userRole');
 }
 
 Future<void> logoutUser() async {

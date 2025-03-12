@@ -12,8 +12,10 @@ class ReplyWidget extends StatelessWidget {
   final String? content;
   final int? replyId;
   final int postId;
+  final int createdBy;
   final int userId;
   final Map<int,int> likes;
+  final String? roleNum;
 
   const ReplyWidget({
     super.key,
@@ -23,14 +25,16 @@ class ReplyWidget extends StatelessWidget {
     required this.replyId,
     required this.postId,
     required this.userId,
+    required this.createdBy,
     required this.likes,
+    required this.roleNum
   });
 
   @override
   Widget build(BuildContext context) {
     String formattedDate =
         DateFormat('MMM d, yyyy').format(DateTime.parse(createDate!));
-
+        bool match = createdBy == userId || roleNum == '5';
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
       child: Card(
@@ -70,64 +74,65 @@ class ReplyWidget extends StatelessWidget {
                     style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                   const Spacer(),
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert),
-                    onSelected: (value) {
-                      // Handle menu actions
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: "delete",
-                        child: InkWell(
-                          onTap: () async {
-                            Navigator.of(context)
-                                .pop(); // Close the popup before action
-                            final forumProvider = Provider.of<PostProvider>(
-                                context,
-                                listen: false);
-
-                            await forumProvider.deleteReplyAndRefresh(
-                                replyId.toString(), postId.toString());
-
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text("Reply deleted successfully")),
-                              );
-                            }
-                          },
-                          child: const Text("Delete Reply"),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: "update",
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.of(context)
-                                .pop();
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(20)),
-                              ),
-                              builder: (context) {
-                                return AddCommentSheet(
-                                  replyId: replyId.toString(),
-                                  postId: postId.toString(),
-                                  userId: '',
-                                  content: content!,
-                                  isUpdate: true,
+                  Visibility(
+                    visible: match,
+                    child: PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert),
+                      onSelected: (value) {
+                        // Handle menu actions
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: "delete",
+                          child: InkWell(
+                            onTap: () async {
+                              Navigator.of(context)
+                                  .pop(); // Close the popup before action
+                              final forumProvider = Provider.of<PostProvider>(
+                                  context,
+                                  listen: false);
+                                await forumProvider.deleteReplyAndRefresh(
+                                  replyId.toString(), postId.toString());
+                                if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text("Reply deleted successfully")),
                                 );
-                              },
-                            );
-                          },
-                          child: const Text("Update Reply"),
+                              }
+                            },
+                            child: const Text("Delete Reply"),
+                          ),
                         ),
-                      ),
-                    ],
+                        PopupMenuItem(
+                          value: "update",
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context)
+                                  .pop();
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
+                                ),
+                                builder: (context) {
+                                  return AddCommentSheet(
+                                    replyId: replyId.toString(),
+                                    postId: postId.toString(),
+                                    userId: '',
+                                    content: content!,
+                                    isUpdate: true,
+                                  );
+                                },
+                              );
+                            },
+                            child: const Text("Update Reply"),
+                          ),
+                        ),
+                      ],
+                    )
                   ),
                 ],
               ),

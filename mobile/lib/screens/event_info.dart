@@ -70,7 +70,7 @@ class _EventInfo extends State<EventInfo> {
             return const Center(child: CircularProgressIndicator());
           }
           return Column(
-            children: <Widget>[EventInfoWidget(event: provider.eventsDetails, user: provider.creationUser,)],
+            children: <Widget>[EventInfoWidget(event: provider.eventsDetails, user: provider.creationUser, cachedUser: int.parse(provider.userId!), roleid: provider.roleid,)],
           );
         },
       ),
@@ -81,14 +81,17 @@ class _EventInfo extends State<EventInfo> {
 class EventInfoWidget extends StatelessWidget {
   final EventsModel? event;
   final UserModel? user;
+  final int? cachedUser;
+  final String? roleid;
 
-  const EventInfoWidget({super.key, required this.event, required this.user});
+  const EventInfoWidget({super.key, required this.event, required this.user,required this.cachedUser,required this.roleid});
 
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as EventsArgument;
     String formattedDate =
         DateFormat('MMM d, yyyy').format(DateTime.parse(event!.eventdate!));
+        bool match = cachedUser == event?.createdbyuserid || roleid == '5';
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -136,58 +139,61 @@ class EventInfoWidget extends StatelessWidget {
                 ],
               ),
                const Spacer(),
-                      PopupMenuButton<String>(
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            child: InkWell(
-                              onTap: () async {
-                                Navigator.of(context).pop();
-                                final eventProvider =
-                                    Provider.of<EventsProvider>(context,
-                                        listen: false);
-                                EventProvider provider =
-                                    Provider.of<EventProvider>(context,
-                                        listen: false);
-                                await deleteEvent(args.id);
-                                if (context.mounted) {
+                      Visibility(
+                        visible: match,
+                        child: PopupMenuButton<String>(
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              child: InkWell(
+                                onTap: () async {
                                   Navigator.of(context).pop();
-                                }
-                                await eventProvider.fetchEvents();
-                                provider.removEvent(
-                                    DateTime.parse(event!.eventdate!), args.id);
-                              },
-                              child: const Text("Delete Event"),
+                                  final eventProvider =
+                                      Provider.of<EventsProvider>(context,
+                                          listen: false);
+                                  EventProvider provider =
+                                      Provider.of<EventProvider>(context,
+                                          listen: false);
+                                  await deleteEvent(args.id);
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                  }
+                                  await eventProvider.fetchEvents();
+                                  provider.removEvent(
+                                      DateTime.parse(event!.eventdate!), args.id);
+                                },
+                                child: const Text("Delete Event"),
+                              ),
                             ),
-                          ),
-                          PopupMenuItem(
-                            child: InkWell(
-                              onTap: () async {
-                                final eventInfoProvider =
-                                    Provider.of<EventsInfoProvider>(context,
-                                        listen: false);
-                                final eventListProvider =
-                                    Provider.of<EventsProvider>(context,
-                                        listen: false);
-                                await Navigator.pushNamed(
-                                    context, CreateEvent.routeName,
-                                    arguments: EventCreateArgument(
-                                        true,                                       
-                                        args.id,
-                                        event!.eventname!,
-                                        event!.eventdescription!,
-                                        event!.eventlocation!,
-                                        event!.eventtype!,
-                                        event!.requiresregistration!,
-                                        event!.eventdate!));
-                                if (context.mounted) Navigator.of(context).pop();
-                                eventInfoProvider
-                                    .fetchEventDetails(args.id.toString());
-                                eventListProvider.fetchEvents();
-                              },
-                              child: const Text("Update Event"),
+                            PopupMenuItem(
+                              child: InkWell(
+                                onTap: () async {
+                                  final eventInfoProvider =
+                                      Provider.of<EventsInfoProvider>(context,
+                                          listen: false);
+                                  final eventListProvider =
+                                      Provider.of<EventsProvider>(context,
+                                          listen: false);
+                                  await Navigator.pushNamed(
+                                      context, CreateEvent.routeName,
+                                      arguments: EventCreateArgument(
+                                          true,                                       
+                                          args.id,
+                                          event!.eventname!,
+                                          event!.eventdescription!,
+                                          event!.eventlocation!,
+                                          event!.eventtype!,
+                                          event!.requiresregistration!,
+                                          event!.eventdate!));
+                                  if (context.mounted) Navigator.of(context).pop();
+                                  eventInfoProvider
+                                      .fetchEventDetails(args.id.toString());
+                                  eventListProvider.fetchEvents();
+                                },
+                                child: const Text("Update Event"),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        )
                       )
             ],
           ),

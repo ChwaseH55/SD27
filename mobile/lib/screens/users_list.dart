@@ -1,7 +1,9 @@
 import 'package:coffee_card/arguments/announcement_create_arg.dart';
 import 'package:coffee_card/arguments/announcementargument.dart';
 import 'package:coffee_card/models/announcement_model.dart';
+import 'package:coffee_card/models/user_model.dart';
 import 'package:coffee_card/providers/announcement_provider.dart';
+import 'package:coffee_card/providers/user_provider.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';
@@ -10,54 +12,34 @@ import 'package:coffee_card/widgets/announcement_widget.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
 import 'package:provider/provider.dart';
 
-class AnnouncementListScreen extends StatefulWidget {
-  const AnnouncementListScreen({super.key});
+class UserList extends StatefulWidget {
+  const UserList({super.key});
 
   @override
-  State<AnnouncementListScreen> createState() => _AnnouncementListScreen();
+  State<UserList> createState() => _UserList();
 }
 
-class _AnnouncementListScreen extends State<AnnouncementListScreen> {
-  late AnnouncementProvider announcementProvider;
+class _UserList extends State<UserList> {
+  late UserProvider userProvider;
   TextEditingController searchController = TextEditingController();
   String searchQuery = "";
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    announcementProvider =
-        Provider.of<AnnouncementProvider>(context, listen: false);
-    announcementProvider.fetchAnnouncements();
+    userProvider =
+        Provider.of<UserProvider>(context, listen: false);
+    userProvider.getUsers();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Golf Announcements',
+        title: const Text('Users',
             style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-        actions: [
-          Visibility(
-            visible: announcementProvider.roleid == '5',
-            child: TextButton(
-              style: ButtonStyle(
-                foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
-              ),
-              onPressed: () async {
-                await Navigator.pushNamed(
-                  context,
-                  AnnouncementCreationScreen.routeName,
-                  arguments: AnnouncementCreateArg(false, AnnouncementModel()),
-                );
-                // Force refresh after returning from create post screen
-                announcementProvider.fetchAnnouncements();
-              },
-              child: const Text('+ Create'),
-            )
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -71,7 +53,7 @@ class _AnnouncementListScreen extends State<AnnouncementListScreen> {
                       color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
                   borderRadius: BorderRadius.circular(25.0),
                 ),
-                labelText: 'Search Events',
+                labelText: 'Search Users',
                 labelStyle: const TextStyle(color: Colors.black),
                 prefixIcon: const Icon(Icons.search),
                 border: const OutlineInputBorder(),
@@ -84,41 +66,36 @@ class _AnnouncementListScreen extends State<AnnouncementListScreen> {
             ),
           ),
           Expanded(
-            child: Consumer<AnnouncementProvider>(
-              builder: (context, announcementProvider, child) {
-                if (announcementProvider.isLoading) {
+            child: Consumer<UserProvider>(
+              builder: (context, userprovider, child) {
+                if (userprovider.isLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final filteredAnnouncements =
-                    announcementProvider.announcements.where((announcement) {
-                  return announcement.title!
+                final filteredUsers =
+                    userprovider.users.where((user) {
+                  return user.username
                       .toLowerCase()
                       .contains(searchQuery);
                 }).toList();
 
-                if (filteredAnnouncements.isEmpty) {
+                if (filteredUsers.isEmpty) {
                   return const Center(
-                      child: Text('No matching announcements found.'));
+                      child: Text('No matching users found.'));
                 }
 
                 return ListView.builder(
-                  itemCount: filteredAnnouncements.length,
+                  itemCount: filteredUsers.length,
                   itemBuilder: (context, index) {
-                    final announcement = filteredAnnouncements[index];
+                    final user = filteredUsers[index];
                     return InkWell(
                       onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          AnnouncementInfo.routeName,
-                          arguments: AnnouncementArgument(
-                              announcement.announcementid!),
-                        );
+                        
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: AnnouncementWidget(
-                          announcement: announcement,
+                        child: UserWidget(
+                        user: user ,
                         ),
                       ),
                     );
@@ -132,3 +109,48 @@ class _AnnouncementListScreen extends State<AnnouncementListScreen> {
     );
   }
 }
+
+class UserWidget extends StatelessWidget {
+  final UserModel user;
+
+  const UserWidget(
+      {super.key, required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 8, left: 5, right: 5),
+        child: GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/pos');
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black, width: 1.5),
+                  borderRadius: const BorderRadius.all(Radius.circular(20))),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 8, bottom: 10),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, bottom: 5),
+                      child: Row(
+                        children: <Widget>[
+                          Text(
+                            user.username,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 20),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(user.email.toString())),
+                  ],
+                ),
+              ),
+            )));
+  }
+}
+

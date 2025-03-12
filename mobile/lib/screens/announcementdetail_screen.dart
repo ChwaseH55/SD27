@@ -15,14 +15,9 @@ class AnnouncementdetailScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: const AnnouncementdetailsWidget(
-        posterName: 'Nathan',
-        posterRole: 'Role',
-        anncDate:'Date/Date/Date' ,
-        anncTitle: 'Title',
-        anncMessage: 'Message',
-      ),
-    );
+      
+      );
+    
   }
 }
 

@@ -7,17 +7,19 @@ import 'package:flutter/material.dart';
 
 class UserProvider extends ChangeNotifier {
   UserModel? _user;
+  List<UserModel> _users = [];
   bool _isLoading = true;
 
   UserModel? get user => _user;
+  List<UserModel> get users => _users;
   bool get isLoading => _isLoading;
 
-  Future<void> getUserName(String userId) async {
+  Future<void> getUsers() async {
     _isLoading = true;
     //notifyListeners();
 
     try {
-      _user = await getUser(userId: userId);
+      _users = await getAllUsers();
     } catch (e) {
       _user;
     }

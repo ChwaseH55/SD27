@@ -68,19 +68,23 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
           }
 
           final resPost = provider.postDetails!;
-          final userInfo = provider.postUser!;
+          final postUser = provider.postUser!;
+          final cachedUser = provider.cacheUser!;
           final replies = resPost.replies;
           final likesNum = provider.likes;
+          final roleNum = provider.roleid;
 
           return Column(
             children: <Widget>[
               PostinfoWidget(
-                username: userInfo.username,
+                roleNum: roleNum,
+                username: postUser.username,
                 posttitle: resPost.post?.title,
                 postContent: resPost.post?.content,
                 likes: likesNum,
                 postId: resPost.post!.postid.toString(),
-                userId: userInfo.id,
+                userId: cachedUser.id,
+                createdBy: postUser.id,
                 createDate: resPost.post!.createddate,
               ),
               Expanded(child: ListofReplies(postId: resPost.post!.postid, replies: replies)),
@@ -97,7 +101,7 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
                       return AddCommentSheet(
                         replyId: '',
                         postId: resPost.post!.postid.toString(),
-                        userId: resPost.post!.userid.toString(),
+                        userId: cachedUser.id.toString(),
                         content: '',
                         isUpdate: false,
                       );
@@ -148,9 +152,11 @@ class ListofReplies extends StatelessWidget {
                 createDate: reply?.createddate,
                 content: reply?.content,
                 postId: postId!,
-                userId: provider.user!.id,
+                userId: int.parse(provider.userId!),
                 replyId: reply?.replyid,
                 likes: provider.likes,
+                createdBy: provider.user!.id,
+                roleNum: provider.roleid,
               );
             },
           ),

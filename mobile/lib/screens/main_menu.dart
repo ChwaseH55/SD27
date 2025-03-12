@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:flutter/material.dart';
 
 class MainMenu extends StatelessWidget {
@@ -6,6 +9,8 @@ class MainMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    
     return Scaffold(
       backgroundColor: Colors.white,
         appBar: AppBar(
@@ -78,13 +83,26 @@ class MainMenu extends StatelessWidget {
                 onTap: () {
                   Navigator.pushNamed(context, '/events');
                 },
-              )
+              ),
+              Visibility(
+                visible: true,
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.train,
+                  ),
+                  title: const Text('User'),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/users');
+                  },
+                )
+              ),
             ],
           ),
         ),
         body: const HomePage());
   }
 }
+
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

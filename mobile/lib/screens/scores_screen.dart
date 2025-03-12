@@ -40,8 +40,13 @@ class ScoresForm extends StatefulWidget {
 }
 
 class _ScoresForm extends State<ScoresForm> {
-  final titleController = TextEditingController();
-  final descriptionController = TextEditingController();
+  final scoreController = TextEditingController();
+
+  @override
+  void dispose() {
+    scoreController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,11 +85,12 @@ class _ScoresForm extends State<ScoresForm> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: scoreController,
+                    decoration: const InputDecoration(
                       hintText: "Enter your score",
                       border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.arrow_drop_down),
+  
                     ),
                     keyboardType: TextInputType.number,
                   ),
@@ -98,7 +104,7 @@ class _ScoresForm extends State<ScoresForm> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: () {scoreController.clear();},
                       child: const Text(
                         "Submit Score",
                         style: TextStyle(fontSize: 16, color: Colors.black),

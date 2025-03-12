@@ -1,4 +1,5 @@
 import 'package:coffee_card/arguments/eventsargument.dart';
+import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/utils.dart';
 import 'package:flutter/material.dart';
@@ -115,11 +116,15 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                               EventProvider provider =
                                   Provider.of<EventProvider>(context,
                                       listen: false);
+                                      final listProvider =
+                                    Provider.of<EventsProvider>(context,
+                                        listen: false);
                               provider.removEvent(
                                   _selectedDay!,
                                   eventProvider
                                       .getEventsForDay(_selectedDay!)[index]
                                       .id);
+                                      listProvider.fetchEvents();
                             },
                           ),
                         )));

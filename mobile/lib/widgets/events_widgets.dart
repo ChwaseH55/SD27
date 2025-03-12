@@ -23,6 +23,7 @@ class EventsWidgets extends StatefulWidget {
 
 class _EventsWidgetsState extends State<EventsWidgets> {
   late bool _isRegistered;
+  bool _isAddedToCalendar = false;
 
   @override
   void initState() {
@@ -33,11 +34,12 @@ class _EventsWidgetsState extends State<EventsWidgets> {
   Future<void> _toggleRegistration() async {
     if (_isRegistered) {
       // Call API to unregister
-      await unregisterFromEvent(widget.event.eventid.toString(), widget.userId.toString());
-
+      await unregisterFromEvent(
+          widget.event.eventid.toString(), widget.userId.toString());
     } else {
       // Call API to register
-      await registerForEvent(widget.event.eventid.toString(), widget.userId.toString());
+      await registerForEvent(
+          widget.event.eventid.toString(), widget.userId.toString());
     }
 
     setState(() {
@@ -45,9 +47,22 @@ class _EventsWidgetsState extends State<EventsWidgets> {
     });
   }
 
+  void _addToCalendar() {
+    EventProvider provider = Provider.of<EventProvider>(context, listen: false);
+    DateTime eventDate = DateTime.parse(widget.event.eventdate!);
+    provider.addEvent(eventDate, widget.event.eventname!, widget.event.eventid!);
+    setState(() {
+      _isAddedToCalendar = true;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Event added to calendar!")),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('MMM d, yyyy').format(DateTime.parse(widget.event.eventdate!));
+    String formattedDate = DateFormat('MMM d, yyyy')
+        .format(DateTime.parse(widget.event.eventdate!));
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -66,7 +81,8 @@ class _EventsWidgetsState extends State<EventsWidgets> {
                   Expanded(
                     child: Text(
                       widget.event.eventname!,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -87,41 +103,29 @@ class _EventsWidgetsState extends State<EventsWidgets> {
               const SizedBox(height: 10),
               Row(
                 children: <Widget>[
-                  Padding(
-                  padding: const EdgeInsets.only(right: 7),
-                  child: Visibility(
-                      visible: widget.event.createdbyuserid == int.parse(widget.userId!),
+                  if (widget.event.createdbyuserid == int.parse(widget.userId!))
+                    Padding(
+                      padding: const EdgeInsets.only(right: 7),
                       child: SizedBox(
                         height: 30,
                         child: ElevatedButton(
-                          onPressed: () {
-                            EventProvider provider = Provider.of<EventProvider>(
-                                context,
-                                listen: false);
-                            DateTime eventDate = DateTime.parse(
-                                widget.event.eventdate!); // Convert date to DateTime
-                            provider.addEvent(eventDate, widget.event.eventname!,
-                                widget.event.eventid!); // Add event to kEvents
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("Event added to calendar!")),
-                            );
-                          },
+                          onPressed: _isAddedToCalendar ? null : _addToCalendar,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromRGBO(186, 155, 55, 1),
+                            backgroundColor: _isAddedToCalendar
+                                ? Colors.grey
+                                : const Color.fromRGBO(186, 155, 55, 1),
                             padding: const EdgeInsets.symmetric(horizontal: 5),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text(
-                            'Add to Calendar',
-                            style: TextStyle(fontSize: 12, color: Colors.black),
+                          child: Text(
+                            _isAddedToCalendar ? 'Added to Calendar' : 'Add to Calendar',
+                            style: const TextStyle(fontSize: 12, color: Colors.black),
                           ),
                         ),
-                      ))
-                ),
+                      ),
+                    ),
                   // Register / Unregister button
                   SizedBox(
                     height: 30,
@@ -149,4 +153,3 @@ class _EventsWidgetsState extends State<EventsWidgets> {
     );
   }
 }
-

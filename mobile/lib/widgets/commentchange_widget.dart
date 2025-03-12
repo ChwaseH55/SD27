@@ -31,7 +31,8 @@ class _AddCommentSheet extends State<AddCommentSheet> {
   void initState() {
     super.initState();
     // Initialize controller with existing content if updating
-    commentController = TextEditingController(text: widget.isUpdate ? widget.content : '');
+    commentController =
+        TextEditingController(text: widget.isUpdate ? widget.content : '');
   }
 
   @override
@@ -58,10 +59,15 @@ class _AddCommentSheet extends State<AddCommentSheet> {
           ),
           const SizedBox(height: 10),
           TextField(
-            controller: commentController,  // Always use the initialized controller
+            controller:
+                commentController, // Always use the initialized controller
             decoration: const InputDecoration(
               hintText: "Enter your comment here",
               border: OutlineInputBorder(),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                    color:  Color.fromRGBO(186, 155, 55, 1), width: 2.0), // Highlight color
+              ),
             ),
             maxLines: 3,
           ),
@@ -70,9 +76,10 @@ class _AddCommentSheet extends State<AddCommentSheet> {
             onPressed: () async {
               final forumProvider =
                   Provider.of<PostProvider>(context, listen: false);
-              
+
               if (widget.isUpdate) {
-                updateReply(replyId: widget.replyId, content: commentController.text);
+                updateReply(
+                    replyId: widget.replyId, content: commentController.text);
               } else {
                 if (commentController.text.trim().isEmpty) {
                   return;
@@ -91,7 +98,17 @@ class _AddCommentSheet extends State<AddCommentSheet> {
                 Navigator.of(context).pop();
               }
             },
-            child: const Text("Submit"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              "Submit",
+              style: TextStyle(color: Colors.black),
+            ),
           ),
         ],
       ),

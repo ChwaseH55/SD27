@@ -8,10 +8,12 @@ import 'package:flutter/material.dart';
 class AnnouncementProvider extends ChangeNotifier {
   List<AnnouncementModel> _announcements = [];
   String? _userid;
+  String? _roleid;
   bool _isLoading = true;
 
   List<AnnouncementModel> get announcements => _announcements;
   String? get userId => _userid;
+   String? get roleid => _roleid;
   bool get isLoading => _isLoading;
 
   Future<void> fetchAnnouncements() async {
@@ -21,6 +23,7 @@ class AnnouncementProvider extends ChangeNotifier {
     try {
       _announcements = await getAllAnnouncements();
       _userid = await getUserID();
+      _roleid = await getRoleId();
     } catch (e) {
       _announcements = [];
       _userid = '';

@@ -34,7 +34,7 @@ class AnnouncementWidget extends StatelessWidget {
                 ],
               ),
               const Row(
-                children: <Widget>[Text("Role")],
+                children: <Widget>[],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

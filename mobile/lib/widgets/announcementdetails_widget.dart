@@ -6,6 +6,9 @@ class AnnouncementdetailsWidget extends StatelessWidget {
   final String anncDate;
   final String anncTitle;
   final String anncMessage;
+  final String? roleNum;
+  final int? userId;
+  final int? createdBy;
 
   const AnnouncementdetailsWidget({
     super.key,
@@ -14,6 +17,9 @@ class AnnouncementdetailsWidget extends StatelessWidget {
     required this.anncDate,
     required this.anncTitle,
     required this.anncMessage,
+    required this.createdBy,
+      required this.roleNum,
+      required this.userId
   });
 
   void handleClick(int item) {

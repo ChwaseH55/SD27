@@ -37,11 +37,11 @@ class _EventsListScreenState extends State<EventsListScreen> {
             eventsProvider.fetchEvents();                    
   }
 
-  void _showAnotherWidget() {
+  void _showAnotherWidget() async {
     setState(() {
       _selectedWidget = const RegisteredEventsWidget(); 
     });
-    eventsProvider.fetchEvents();    
+    await eventsProvider.fetchEvents();    
   }
 
   @override
@@ -53,17 +53,20 @@ class _EventsListScreenState extends State<EventsListScreen> {
           centerTitle: true,
           backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
           actions: [
-            TextButton(
-              style: ButtonStyle(
-                foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
-              ),
-              onPressed: () async {
-                await Navigator.pushNamed(context, CreateEvent.routeName,
-                    arguments: EventCreateArgument(
-                        false, 1, '', '', '', '', false, ''));
-                eventsProvider.fetchEvents();
-              },
-              child: const Text('+ New Event'),
+            Visibility(
+              visible: eventsProvider.roleid == '5',
+              child: TextButton(
+                style: ButtonStyle(
+                  foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+                ),
+                onPressed: () async {
+                  await Navigator.pushNamed(context, CreateEvent.routeName,
+                      arguments: EventCreateArgument(
+                          false, 1, '', '', '', '', false, ''));
+                  eventsProvider.fetchEvents();
+                },
+                child: const Text('+ New Event'),
+              )
             ),
           ],
         ),
@@ -171,7 +174,7 @@ class _AllEventsWidget extends State<AllEventsWidget> {
                 itemBuilder: (context, index) {
                   final event = filteredEvents[index];
                   return FutureBuilder<bool>(
-                    future: isUserRegisteredForEvent(event.eventid.toString(),
+                    future: checkReg(event.eventid.toString(),
                         eventsProvider.userId.toString()),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -202,6 +205,10 @@ class _AllEventsWidget extends State<AllEventsWidget> {
       ],
     );
   }
+}
+
+Future<bool> checkReg(eventid,userid) async {
+  return await isUserRegisteredForEvent(eventid,userid); 
 }
 
 class RegisteredEventsWidget extends StatefulWidget {

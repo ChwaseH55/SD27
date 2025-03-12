@@ -19,3 +19,19 @@ Future<UserModel> getUser({required String userId}) async {
     throw Exception('Error fetching user: $e');
   }
 }
+
+Future<List<UserModel>> getAllUsers() async {
+  try {
+    final url = Uri.parse('$urlAddress/');
+    final response = await get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((json) => UserModel.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to fetch user: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error fetching user: $e');
+  }
+}

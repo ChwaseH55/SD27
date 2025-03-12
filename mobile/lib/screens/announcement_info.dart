@@ -82,6 +82,8 @@ class _AnnouncementInfo extends State<AnnouncementInfo> {
               AnnouncementDetailsWidget(
                 announcement: provider.announcementDetails,
                 user: provider.creationUser,
+                cachedUser: int.parse(provider.userId!),
+                roleid: int.parse(provider.roleid!),
               )
             ],
           );
@@ -94,9 +96,15 @@ class _AnnouncementInfo extends State<AnnouncementInfo> {
 class AnnouncementDetailsWidget extends StatelessWidget {
   final AnnouncementModel? announcement;
   final UserModel? user;
+  final int cachedUser;
+  final int roleid;
 
   const AnnouncementDetailsWidget(
-      {super.key, required this.announcement, required this.user});
+      {super.key,
+      required this.announcement,
+      required this.user,
+      required this.cachedUser,
+      required this.roleid});
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +112,7 @@ class AnnouncementDetailsWidget extends StatelessWidget {
         ModalRoute.of(context)!.settings.arguments as AnnouncementArgument;
     String formattedDate = DateFormat('MMM d, yyyy')
         .format(DateTime.parse(announcement!.createddate!));
+        bool match = cachedUser == user?.id && roleid == 5;
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -152,45 +161,45 @@ class AnnouncementDetailsWidget extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              PopupMenuButton<String>(
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    child: InkWell(
-                      onTap: () async {
-                        Navigator.of(context).pop();
-                        final ancProvider = Provider.of<AnnouncementProvider>(
-                            context,
-                            listen: false);
-                        
-                        await deleteAnnouncement(args.id);
-                        if (context.mounted) {
+              Visibility(
+                visible: match,
+                child: PopupMenuButton<String>(
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: InkWell(
+                        onTap: () async {
                           Navigator.of(context).pop();
-                        }
-                        await ancProvider.fetchAnnouncements();
-                        
-                      },
-                      child: const Text("Delete Announcement"),
+                          final ancProvider = Provider.of<AnnouncementProvider>(
+                              context,
+                              listen: false);
+                            await deleteAnnouncement(args.id);
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                          }
+                          await ancProvider.fetchAnnouncements();
+                        },
+                        child: const Text("Delete Announcement"),
+                      ),
                     ),
-                  ),
-                  PopupMenuItem(
-                    child: InkWell(
-                      onTap: () async {
-                        final ancInfoProvider =
-                            Provider.of<AnnouncementInfoProvider>(context,
-                                listen: false);
-
-                        await Navigator.pushNamed(
-                            context, AnnouncementCreationScreen.routeName,
-                            arguments:
-                                AnnouncementCreateArg(true, announcement!));
-                        if (context.mounted) Navigator.of(context).pop();
-                        ancInfoProvider
-                            .fetchAnnouncementDetails(args.id.toString());
-                      },
-                      child: const Text("Update Announcement"),
+                    PopupMenuItem(
+                      child: InkWell(
+                        onTap: () async {
+                          final ancInfoProvider =
+                              Provider.of<AnnouncementInfoProvider>(context,
+                                  listen: false);
+                            await Navigator.pushNamed(
+                              context, AnnouncementCreationScreen.routeName,
+                              arguments:
+                                  AnnouncementCreateArg(true, announcement!));
+                          if (context.mounted) Navigator.of(context).pop();
+                          ancInfoProvider
+                              .fetchAnnouncementDetails(args.id.toString());
+                        },
+                        child: const Text("Update Announcement"),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                )
               )
             ],
           ),

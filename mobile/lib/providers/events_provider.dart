@@ -7,11 +7,13 @@ class EventsProvider extends ChangeNotifier {
   List<EventsModel> _events = [];
   List<EventsModel> _registeredevents = [];
   String? _userid;
+  String? _roleid;
   bool _isLoading = true;
 
   List<EventsModel> get events => _events;
    List<EventsModel> get registeredevents => _registeredevents;
   String? get userId => _userid;
+  String? get roleid => _roleid;
   bool get isLoading => _isLoading;
 
   Future<void> fetchEvents() async {
@@ -21,6 +23,7 @@ class EventsProvider extends ChangeNotifier {
     try {
       _events = await getAllEvents();
       _userid = await getUserID();
+      _roleid = await getRoleId();
       _registeredevents = await getUserRegisteredEvents(userId!);
     } catch (e) {
       _events = [];
