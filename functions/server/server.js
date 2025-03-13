@@ -22,8 +22,9 @@ const corsOptions = {
 
 // Apply CORS middleware globally with the options
 app.use(cors(corsOptions));
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
-app.use(express.json()); // Parses incoming JSON
+app.use(express.json()); 
 
 // Test endpoint
 app.get('/api/test', (req, res) => {
