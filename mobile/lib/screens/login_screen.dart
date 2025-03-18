@@ -52,8 +52,8 @@ class _LoginForm extends State<LoginForm> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         SizedBox(
-            height: height * 0.45,
-            width: width * 0.45,
+            height: height * 0.4,
+            width: width * 0.4,
             child:
                 const Image(image: AssetImage('assets/images/golf_logo.jpg'))),
         // Username input
@@ -63,9 +63,16 @@ class _LoginForm extends State<LoginForm> {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: TextField(
               controller: userController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 hintText: 'Username/Email',
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Color.fromRGBO(186, 155, 55, 1),
+                      width: 2.0), // Highlight color
+                ),
               ),
             ),
           ),
@@ -79,9 +86,16 @@ class _LoginForm extends State<LoginForm> {
             child: TextField(
               controller: passController,
               obscureText: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 hintText: 'Password',
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Color.fromRGBO(186, 155, 55, 1),
+                      width: 2.0), // Highlight color
+                ),
               ),
             ),
           ),

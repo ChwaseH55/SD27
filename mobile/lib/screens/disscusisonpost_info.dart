@@ -48,6 +48,8 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.sizeOf(context).width;
+    double height = MediaQuery.sizeOf(context).height;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -87,38 +89,66 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
                 createdBy: postUser.id,
                 createDate: resPost.post!.createddate,
               ),
-              Expanded(child: ListofReplies(postId: resPost.post!.postid, replies: replies)),
-              ElevatedButton(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20)),
-                    ),
-                    builder: (context) {
-                      return AddCommentSheet(
-                        replyId: '',
-                        postId: resPost.post!.postid.toString(),
-                        userId: cachedUser.id.toString(),
-                        content: '',
-                        isUpdate: false,
-                      );
-                    },
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  ' + Add Comment',
-                  style: TextStyle(fontSize: 15, color: Colors.black),
-                ),
-              ),
+              Expanded(
+                  child: ListofReplies(
+                      postId: resPost.post!.postid, replies: replies)),
+              SizedBox(
+                  width: width,
+                  height: height * 0.06,
+                  child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                Colors.black.withOpacity(0.3), // Shadow color
+                            spreadRadius: 2, // Spread of shadow
+                            blurRadius: 8, // Blur effect
+                            offset: const Offset(
+                                0, -3), // Shadow positioned at the top
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                          child: SizedBox(
+                              width: width * 0.5,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20)),
+                                    ),
+                                    builder: (context) {
+                                      return AddCommentSheet(
+                                        replyId: '',
+                                        postId: resPost.post!.postid.toString(),
+                                        userId: cachedUser.id.toString(),
+                                        content: '',
+                                        isUpdate: false,
+                                      );
+                                    },
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      const Color.fromRGBO(186, 155, 55, 1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  ' + Add Comment',
+                                  style: TextStyle(
+                                      fontSize: 15, color: Colors.black),
+                                ),
+                              )))))
             ],
           );
         },
@@ -129,7 +159,7 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
 
 class ListofReplies extends StatelessWidget {
   final List<ReplyModel>? replies;
-    final int? postId;
+  final int? postId;
 
   const ListofReplies({super.key, required this.replies, required this.postId});
 
@@ -140,7 +170,8 @@ class ListofReplies extends StatelessWidget {
       itemBuilder: (context, index) {
         final reply = replies?[index];
         return ChangeNotifierProvider(
-          create: (_) => ReplyProvider(reply!.replyid.toString(), reply.userid.toString()),
+          create: (_) =>
+              ReplyProvider(reply!.replyid.toString(), reply.userid.toString()),
           child: Consumer<ReplyProvider>(
             builder: (context, provider, child) {
               if (provider.isLoading) {

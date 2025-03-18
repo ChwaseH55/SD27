@@ -34,14 +34,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
 void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    name: 'SD27',
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await Notifications.intsance.initialize();
+  // await Firebase.initializeApp(
+  //   name: 'SD27',
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+  // await Notifications.intsance.initialize();
   runApp(
     MultiProvider(
       providers: [
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorObservers: [routeObserver],
       title: 'Named Routes Demo',
       initialRoute: '/',
       routes: {
@@ -92,7 +94,7 @@ class MyApp extends StatelessWidget {
         CreateEvent.routeName: (context) => const CreateEvent(),
         AnnouncementInfo.routeName: (context) => const AnnouncementInfo(),
         AnnouncementCreationScreen.routeName: (context) =>
-            const AnnouncementCreationScreen(),
+        const AnnouncementCreationScreen(),
       },
     );
   }

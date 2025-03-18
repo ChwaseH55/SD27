@@ -29,12 +29,12 @@ class _EventsListScreenState extends State<EventsListScreen> {
     eventsProvider.fetchEvents();
   }
 
-    void _showAllEvents() {
+    void _showAllEvents() async {
     setState(() {
       _selectedWidget = const AllEventsWidget();
     });
    
-            eventsProvider.fetchEvents();                    
+            await eventsProvider.fetchEvents();                    
   }
 
   void _showAnotherWidget() async {
@@ -73,42 +73,42 @@ class _EventsListScreenState extends State<EventsListScreen> {
         floatingActionButton: const FloatingBtn(),
         body: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: _showAllEvents,
-                style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromRGBO(186, 155, 55, 1),
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text(
-                            'All Events',
-                            style: TextStyle(fontSize: 12, color: Colors.black),
-                          ),
-              ),
-              const SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: _showAnotherWidget,
-                style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromRGBO(186, 155, 55, 1),
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text(
-                            'Registered Event',
-                            style: TextStyle(fontSize: 12, color: Colors.black),
-                          ),
-              ),
-            ],
-          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     ElevatedButton(
+          //       onPressed: _showAllEvents,
+          //       style: ElevatedButton.styleFrom(
+          //                   backgroundColor:
+          //                       const Color.fromRGBO(186, 155, 55, 1),
+          //                   padding: const EdgeInsets.symmetric(horizontal: 5),
+          //                   shape: RoundedRectangleBorder(
+          //                     borderRadius: BorderRadius.circular(10),
+          //                   ),
+          //                 ),
+          //                 child: const Text(
+          //                   'All Events',
+          //                   style: TextStyle(fontSize: 12, color: Colors.black),
+          //                 ),
+          //     ),
+          //     const SizedBox(width: 10),
+          //     ElevatedButton(
+          //       onPressed: _showAnotherWidget,
+          //       style: ElevatedButton.styleFrom(
+          //                   backgroundColor:
+          //                       const Color.fromRGBO(186, 155, 55, 1),
+          //                   padding: const EdgeInsets.symmetric(horizontal: 5),
+          //                   shape: RoundedRectangleBorder(
+          //                     borderRadius: BorderRadius.circular(10),
+          //                   ),
+          //                 ),
+          //                 child: const Text(
+          //                   'Registered Event',
+          //                   style: TextStyle(fontSize: 12, color: Colors.black),
+          //                 ),
+          //     ),
+          //   ],
+          // ),
           Expanded(child: _selectedWidget),
         ],
       ),
@@ -129,83 +129,119 @@ class _AllEventsWidget extends State<AllEventsWidget> {
   String searchQuery = "";
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: searchController,
-            decoration: InputDecoration(
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(
-                    color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              labelText: 'Search Events',
-              labelStyle: const TextStyle(color: Colors.black),
-              prefixIcon: const Icon(Icons.search),
-              border: const OutlineInputBorder(),
+Widget build(BuildContext context) {
+  return Column(
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextField(
+          controller: searchController,
+          decoration: InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(
+                  color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+              borderRadius: BorderRadius.circular(25.0),
             ),
-            onChanged: (value) {
-              setState(() {
-                searchQuery = value.toLowerCase();
-              });
-            },
+            labelText: 'Search Events',
+            labelStyle: const TextStyle(color: Colors.black),
+            prefixIcon: const Icon(Icons.search),
+            border: const OutlineInputBorder(),
           ),
+          onChanged: (value) {
+            setState(() {
+              searchQuery = value.toLowerCase();
+            });
+          },
         ),
-        Expanded(
-          child: Consumer<EventsProvider>(
-            builder: (context, eventsProvider, child) {
-              if (eventsProvider.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              final filteredEvents = eventsProvider.events.where((event) {
-                return event.eventname!.toLowerCase().contains(searchQuery);
-              }).toList();
-
-              if (filteredEvents.isEmpty) {
-                return const Center(child: Text('No matching events found.'));
-              }
-
-              return ListView.builder(
-                itemCount: filteredEvents.length,
-                itemBuilder: (context, index) {
-                  final event = filteredEvents[index];
-                  return FutureBuilder<bool>(
-                    future: checkReg(event.eventid.toString(),
-                        eventsProvider.userId.toString()),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      }
-                      
-                      return InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            EventInfo.routeName,
-                            arguments: EventsArgument(event.eventid!),
-                          );
-                        },
-                        child: EventsWidgets(
-                          isReg: snapshot.data,
-                          event: event,
-                          userId: eventsProvider.userId,
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
+      ),
+      // Add the buttons here
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () => context.findAncestorStateOfType<_EventsListScreenState>()?._showAllEvents(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'All Events',
+              style: TextStyle(fontSize: 12, color: Colors.black),
+            ),
           ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            onPressed: () => context.findAncestorStateOfType<_EventsListScreenState>()?._showAnotherWidget(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Registered Event',
+              style: TextStyle(fontSize: 12, color: Colors.black),
+            ),
+          ),
+        ],
+      ),
+      Expanded(
+        child: Consumer<EventsProvider>(
+          builder: (context, eventsProvider, child) {
+            if (eventsProvider.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final filteredEvents = eventsProvider.events.where((event) {
+              return event.eventname!.toLowerCase().contains(searchQuery);
+            }).toList();
+
+            if (filteredEvents.isEmpty) {
+              return const Center(child: Text('No matching events found.'));
+            }
+
+            return ListView.builder(
+              itemCount: filteredEvents.length,
+              itemBuilder: (context, index) {
+                final event = filteredEvents[index];
+                return FutureBuilder<bool>(
+                  future: checkReg(event.eventid.toString(), eventsProvider.userId.toString()),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    
+                    return InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          EventInfo.routeName,
+                          arguments: EventsArgument(event.eventid!),
+                        );
+                      },
+                      child: EventsWidgets(
+                        isReg: snapshot.data,
+                        event: event,
+                        userId: eventsProvider.userId,
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }
+
+  }
+
 
 Future<bool> checkReg(eventid,userid) async {
   return await isUserRegisteredForEvent(eventid,userid); 
@@ -223,84 +259,119 @@ class _RegisteredEventsWidget extends State<RegisteredEventsWidget> {
   TextEditingController searchController = TextEditingController();
   String searchQuery = "";
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: searchController,
-            decoration: InputDecoration(
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(
-                    color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              labelText: 'Search Events',
-              labelStyle: const TextStyle(color: Colors.black),
-              prefixIcon: const Icon(Icons.search),
-              border: const OutlineInputBorder(),
+   @override
+Widget build(BuildContext context) {
+  return Column(
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextField(
+          controller: searchController,
+          decoration: InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(
+                  color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+              borderRadius: BorderRadius.circular(25.0),
             ),
-            onChanged: (value) {
-              setState(() {
-                searchQuery = value.toLowerCase();
-              });
-            },
+            labelText: 'Search Events',
+            labelStyle: const TextStyle(color: Colors.black),
+            prefixIcon: const Icon(Icons.search),
+            border: const OutlineInputBorder(),
           ),
+          onChanged: (value) {
+            setState(() {
+              searchQuery = value.toLowerCase();
+            });
+          },
         ),
-        Expanded(
-          child: Consumer<EventsProvider>(
-            builder: (context, eventsProvider, child) {
-              if (eventsProvider.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              final filteredEvents = eventsProvider.registeredevents.where((event) {
-                return event.eventname!.toLowerCase().contains(searchQuery);
-              }).toList();
-
-              if (filteredEvents.isEmpty) {
-                return const Center(child: Text('No matching events found.'));
-              }
-
-              return ListView.builder(
-                itemCount: filteredEvents.length,
-                itemBuilder: (context, index) {
-                  final event = filteredEvents[index];
-                  return FutureBuilder<bool>(
-                    future: isUserRegisteredForEvent(event.eventid.toString(),
-                        eventsProvider.userId.toString()),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      }
-                      
-                      return InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            EventInfo.routeName,
-                            arguments: EventsArgument(event.eventid!),
-                          );
-                        },
-                        child: EventsWidgets(
-                          isReg: snapshot.data,
-                          event: event,
-                          userId: eventsProvider.userId,
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
+      ),
+      // Add the buttons here
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () => context.findAncestorStateOfType<_EventsListScreenState>()?._showAllEvents(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'All Events',
+              style: TextStyle(fontSize: 12, color: Colors.black),
+            ),
           ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            onPressed: () => context.findAncestorStateOfType<_EventsListScreenState>()?._showAnotherWidget(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Registered Event',
+              style: TextStyle(fontSize: 12, color: Colors.black),
+            ),
+          ),
+        ],
+      ),
+      Expanded(
+        child: Consumer<EventsProvider>(
+          builder: (context, eventsProvider, child) {
+            if (eventsProvider.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final filteredEvents = eventsProvider.registeredevents.where((event) {
+              return event.eventname!.toLowerCase().contains(searchQuery);
+            }).toList();
+
+            if (filteredEvents.isEmpty) {
+              return const Center(child: Text('No matching events found.'));
+            }
+
+            return ListView.builder(
+              itemCount: filteredEvents.length,
+              itemBuilder: (context, index) {
+                final event = filteredEvents[index];
+                return FutureBuilder<bool>(
+                  future: checkReg(event.eventid.toString(), eventsProvider.userId.toString()),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    
+                    return InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          EventInfo.routeName,
+                          arguments: EventsArgument(event.eventid!),
+                        );
+                      },
+                      child: EventsWidgets(
+                        isReg: snapshot.data,
+                        event: event,
+                        userId: eventsProvider.userId,
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }
+
+  }
 
 class FloatingBtn extends StatelessWidget {
   const FloatingBtn({super.key});
