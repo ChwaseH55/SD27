@@ -1,134 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'store_state.dart';
 
-class ShopScreen extends StatelessWidget {
-  const ShopScreen({Key? key}) : super(key: key);
+class ShopScreen extends StatefulWidget {
+  @override
+  _StoreScreenState createState() => _StoreScreenState();
+}
+
+class _StoreScreenState extends State<ShopScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final storeState = Provider.of<StoreState>(context, listen: false);
+    storeState.user = User("123"); // Replace with actual user info
+    if (storeState.user != null) {
+      storeState.fetchProducts(storeState.user!.id);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Shop Screen'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Item 1
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                                'https://picsum.photos/id/237/200/300'), // Replace with your image URL
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+      appBar: AppBar(title: Text('Store')),
+      body: Consumer<StoreState>(
+        builder: (context, storeState, child) {
+          if (storeState.loading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: storeState.products.length,
+                  itemBuilder: (context, index) {
+                    final product = storeState.products[index];
+                    return ListTile(
+                      title: Text(product['name']),
+                      subtitle: Text(product['price'] != null ? '\$${product['price'].toStringAsFixed(2)}' : 'Price not available'),
+                      trailing: ElevatedButton(
+                        onPressed: () => storeState.addToCart(product),
+                        child: Text('Add to Cart'),
                       ),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Item 1',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8.0),
-                            Text('Description for Item 1', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8.0),
-                            Text('Price: \$19.99', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // Item 2
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                                'https://picsum.photos/id/237/200/300'), // Replace with your image URL
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Item 2',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8.0),
-                            Text('Description for Item 2', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8.0),
-                            Text('Price: \$14.50', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                ElevatedButton(
+                  onPressed: () => storeState.handleCheckout(storeState.user!.id),
+                  child: Text('Checkout'),
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // Item 3
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                                'https://picsum.photos/id/237/200/300'), // Replace with your image URL
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Item 3',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8.0),
-                            Text('Description for Item 3', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8.0),
-                            Text('Price: \$24.95', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
