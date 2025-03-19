@@ -103,15 +103,7 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
                   itemCount: filteredPosts.length,
                   itemBuilder: (context, index) {
                     final post = filteredPosts[index];
-                    return FutureBuilder<Map<int, int>>(
-                        future:
-                            forumProvider.getLikesCount(post.postid.toString()),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          }
-                          return GestureDetector(
+                    return GestureDetector(
                             onTap: () async {
                               Navigator.pushNamed(
                                 context,
@@ -124,14 +116,13 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
                               child: PostWidget(
                                 date: post.createddate,
                                 postName: post.title,
-                                likeNumber: snapshot.data!,
+                                likeNumber: forumProvider.likes[post.postid]!,
                                 postId: post.postid.toString(),
                                 replyId: '',
                                 userId: forumProvider.cacheUser!,
                               ),
                             ),
                           );
-                        });
                   },
                 );
               },

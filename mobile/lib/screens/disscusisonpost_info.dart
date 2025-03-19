@@ -92,12 +92,13 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
               Expanded(
                   child: ListofReplies(
                       postId: resPost.post!.postid, replies: replies)),
+                      const SizedBox(height:10),
               SizedBox(
                   width: width,
                   height: height * 0.06,
                   child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.red,
+                        color: Colors.white,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(20),
                           topRight: Radius.circular(20),
@@ -115,7 +116,7 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
                       ),
                       child: Center(
                           child: SizedBox(
-                              width: width * 0.5,
+                              width: width * 0.4,
                               child: ElevatedButton(
                                 onPressed: () {
                                   showModalBottomSheet(

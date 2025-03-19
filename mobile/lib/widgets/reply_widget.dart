@@ -35,135 +35,130 @@ class ReplyWidget extends StatelessWidget {
     String formattedDate =
         DateFormat('MMM d, yyyy').format(DateTime.parse(createDate!));
         bool match = createdBy == userId || roleNum == '5';
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 2, color: Colors.black),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              /// **User & Date Row**
-              Row(
-                children: <Widget>[
-                  CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.grey[300],
+    return Column(
+      children: <Widget>[
+        SizedBox(height: 9, child: Container(color: const Color.fromARGB(255, 224, 224, 224),)),
+       Padding(
+        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 6),
+        
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                /// **User & Date Row**
+                Row(
+                  children: <Widget>[
+                    CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.grey[300],
+                        child: Text(
+                          userName[0].toUpperCase(),
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    const SizedBox(width: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
                       child: Text(
-                        userName[0].toUpperCase(),
+                        userName,
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
-                  const SizedBox(width: 8),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Text(
-                      userName,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
+                    Text(
+                      formattedDate,
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
-                  ),
-                  Text(
-                    formattedDate,
-                    style: const TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                  const Spacer(),
-                  Visibility(
-                    visible: match,
-                    child: PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert),
-                      onSelected: (value) {
-                        // Handle menu actions
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: "delete",
-                          child: InkWell(
-                            onTap: () async {
-                              Navigator.of(context)
-                                  .pop(); // Close the popup before action
-                              final forumProvider = Provider.of<PostProvider>(
-                                  context,
-                                  listen: false);
-                                await forumProvider.deleteReplyAndRefresh(
-                                  replyId.toString(), postId.toString());
-                                if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text("Reply deleted successfully")),
-                                );
-                              }
-                            },
-                            child: const Text("Delete Reply"),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: "update",
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.of(context)
-                                  .pop();
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20)),
-                                ),
-                                builder: (context) {
-                                  return AddCommentSheet(
-                                    replyId: replyId.toString(),
-                                    postId: postId.toString(),
-                                    userId: '',
-                                    content: content!,
-                                    isUpdate: true,
+                    const Spacer(),
+                    Visibility(
+                      visible: match,
+                      child: PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (value) {
+                          // Handle menu actions
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: "delete",
+                            child: InkWell(
+                              onTap: () async {
+                                Navigator.of(context)
+                                    .pop(); // Close the popup before action
+                                final forumProvider = Provider.of<PostProvider>(
+                                    context,
+                                    listen: false);
+                                  await forumProvider.deleteReplyAndRefresh(
+                                    replyId.toString(), postId.toString());
+                                  if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content:
+                                            Text("Reply deleted successfully")),
                                   );
-                                },
-                              );
-                            },
-                            child: const Text("Update Reply"),
+                                }
+                              },
+                              child: const Text("Delete Reply"),
+                            ),
                           ),
-                        ),
-                      ],
-                    )
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 8),
-
-              /// **Reply Content**
-              Text(
-                content!,
-                style: const TextStyle(fontSize: 14, height: 1.5),
-                textAlign: TextAlign.justify,
-              ),
-
-              const SizedBox(height: 6),
-
-              /// **Like Button**
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  LikeButton(
-                    isPost: false,
-                    likes: likes,
-                    id: replyId.toString(),
-                    userId: userId,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+                          PopupMenuItem(
+                            value: "update",
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.of(context)
+                                    .pop();
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(20)),
+                                  ),
+                                  builder: (context) {
+                                    return AddCommentSheet(
+                                      replyId: replyId.toString(),
+                                      postId: postId.toString(),
+                                      userId: '',
+                                      content: content!,
+                                      isUpdate: true,
+                                    );
+                                  },
+                                );
+                              },
+                              child: const Text("Update Reply"),
+                            ),
+                          ),
+                        ],
+                      )
+                    ),
+                  ],
+                ),
+                  const SizedBox(height: 8),
+                  /// **Reply Content**
+                Text(
+                  content!,
+                  style: const TextStyle(fontSize: 14, height: 1.5),
+                  textAlign: TextAlign.justify,
+                ),
+                  const SizedBox(height: 6),
+                  /// **Like Button**
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    LikeButton(
+                      isPost: false,
+                      likes: likes,
+                      id: replyId.toString(),
+                      userId: userId,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+    ),
+     
+      ]);
   }
 }
