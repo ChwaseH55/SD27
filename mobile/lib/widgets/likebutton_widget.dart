@@ -110,7 +110,7 @@ void didChangeDependencies() {
     return GestureDetector(
         onTap: toggleLike,
         child: SizedBox(
-            width: 60,
+            width: 50,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
@@ -139,12 +139,14 @@ void didChangeDependencies() {
                           key: ValueKey<bool>(
                               isLiked), // Important for animation to trigger
                           color: isLiked ? const Color.fromRGBO(186, 155, 55, 1) : Colors.black,
-                          size: 25,
+                          size: 20,
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
-                        child: Text(likeCount.toString()),
+                        child: Text(likeCount.toString(),style: TextStyle( color: isLiked
+                        ? const Color.fromRGBO(186, 155, 55, 1)
+                        : Colors.black,),),
                       )
                     ],
                   )),

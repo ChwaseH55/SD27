@@ -37,7 +37,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
 void main() async {
   await dotenv.load(fileName: ".env");
-  WidgetsFlutterBinding.ensureInitialized();
+  // WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp(
   //   name: 'SD27',
   //   options: DefaultFirebaseOptions.currentPlatform,
@@ -68,6 +68,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
+      theme:  ThemeData(scaffoldBackgroundColor:  const Color.fromARGB(255, 235, 235, 235)),
       navigatorObservers: [routeObserver],
       title: 'Named Routes Demo',
       initialRoute: '/',

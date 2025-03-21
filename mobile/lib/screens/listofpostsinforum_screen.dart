@@ -36,28 +36,31 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('UCF Post',
-            style: TextStyle(fontWeight: FontWeight.w900)),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-        actions: [
-          TextButton(
-            style: ButtonStyle(
-              foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(35.0),
+        child: AppBar(
+          title: const Text('UCF Post',
+              style: TextStyle(fontWeight: FontWeight.w900)),
+          centerTitle: true,
+          backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+          actions: [
+            TextButton(
+              style: ButtonStyle(
+                foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+              ),
+              onPressed: () async {
+                await Navigator.pushNamed(
+                  context,
+                  PostCreationForm.routeName,
+                  arguments: CreateArgument(false, -1, '', ''),
+                );
+                // Force refresh after returning from create post screen
+                forumProvider.fetchPosts();
+              },
+              child: const Text('+ Create Post'),
             ),
-            onPressed: () async {
-              await Navigator.pushNamed(
-                context,
-                PostCreationForm.routeName,
-                arguments: CreateArgument(false, -1, '', ''),
-              );
-              // Force refresh after returning from create post screen
-              forumProvider.fetchPosts();
-            },
-            child: const Text('+ Create Post'),
-          ),
-        ],
+          ],
+        )
       ),
       body: Column(
         children: [
@@ -66,8 +69,14 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
                 top: 13.0, left: 8.0, right: 8.0, bottom: 8.0),
             child: TextField(
               controller: searchController,
+              cursorColor: Colors.black,
               decoration: InputDecoration(
+                
+                fillColor: Colors.white,
+                filled: true,
+                
                 focusedBorder: OutlineInputBorder(
+                  
                   borderSide: const BorderSide(
                       color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
                   borderRadius: BorderRadius.circular(25.0),
@@ -160,6 +169,7 @@ class PostWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Card(
+        color: Colors.white,
         elevation: 4,
         shape: RoundedRectangleBorder(
           side: const BorderSide(width: 3.0, color: Colors.black),
@@ -351,7 +361,9 @@ class _LikeButtonForPost extends State<LikeButtonForPost> with RouteAware {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
-                        child: Text(likeCount.toString()),
+                        child: Text(likeCount.toString(), style: TextStyle(color: isLiked
+                        ? const Color.fromRGBO(186, 155, 55, 1)
+                        : Colors.black,),),
                       )
                     ],
                   )),

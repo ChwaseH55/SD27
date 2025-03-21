@@ -14,35 +14,31 @@ class ReplyWidget extends StatelessWidget {
   final int postId;
   final int createdBy;
   final int userId;
-  final Map<int,int> likes;
+  final Map<int, int> likes;
   final String? roleNum;
 
-  const ReplyWidget({
-    super.key,
-    required this.userName,
-    required this.createDate,
-    required this.content,
-    required this.replyId,
-    required this.postId,
-    required this.userId,
-    required this.createdBy,
-    required this.likes,
-    required this.roleNum
-  });
+  const ReplyWidget(
+      {super.key,
+      required this.userName,
+      required this.createDate,
+      required this.content,
+      required this.replyId,
+      required this.postId,
+      required this.userId,
+      required this.createdBy,
+      required this.likes,
+      required this.roleNum});
 
   @override
   Widget build(BuildContext context) {
     String formattedDate =
         DateFormat('MMM d, yyyy').format(DateTime.parse(createDate!));
-        bool match = createdBy == userId || roleNum == '5';
-    return Column(
-      children: <Widget>[
-        SizedBox(height: 9, child: Container(color: const Color.fromARGB(255, 224, 224, 224),)),
-       Padding(
-        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 6),
-        
+    bool match = createdBy == userId || roleNum == '5';
+    return Column(children: <Widget>[
+      Padding(
+          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(9),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -50,21 +46,21 @@ class ReplyWidget extends StatelessWidget {
                 Row(
                   children: <Widget>[
                     CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.grey[300],
-                        child: Text(
-                          userName[0].toUpperCase(),
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
+                      radius: 12,
+                      backgroundColor: Colors.grey[300],
+                      child: Text(
+                        userName[0].toUpperCase(),
+                        style: const TextStyle(color: Colors.black,
+                            fontSize: 15, fontWeight: FontWeight.bold),
                       ),
+                    ),
                     const SizedBox(width: 8),
                     Padding(
                       padding: const EdgeInsets.only(right: 10),
                       child: Text(
                         userName,
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                            fontWeight: FontWeight.bold, fontSize: 12),
                       ),
                     ),
                     Text(
@@ -73,78 +69,80 @@ class ReplyWidget extends StatelessWidget {
                     ),
                     const Spacer(),
                     Visibility(
-                      visible: match,
-                      child: PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert),
-                        onSelected: (value) {
-                          // Handle menu actions
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: "delete",
-                            child: InkWell(
-                              onTap: () async {
-                                Navigator.of(context)
-                                    .pop(); // Close the popup before action
-                                final forumProvider = Provider.of<PostProvider>(
-                                    context,
-                                    listen: false);
+                        visible: match,
+                        child: PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert),
+                          onSelected: (value) {
+                            // Handle menu actions
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: "delete",
+                              child: InkWell(
+                                onTap: () async {
+                                  Navigator.of(context)
+                                      .pop(); // Close the popup before action
+                                  final forumProvider =
+                                      Provider.of<PostProvider>(context,
+                                          listen: false);
                                   await forumProvider.deleteReplyAndRefresh(
-                                    replyId.toString(), postId.toString());
+                                      replyId.toString(), postId.toString());
                                   if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content:
-                                            Text("Reply deleted successfully")),
-                                  );
-                                }
-                              },
-                              child: const Text("Delete Reply"),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: "update",
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.of(context)
-                                    .pop();
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(20)),
-                                  ),
-                                  builder: (context) {
-                                    return AddCommentSheet(
-                                      replyId: replyId.toString(),
-                                      postId: postId.toString(),
-                                      userId: '',
-                                      content: content!,
-                                      isUpdate: true,
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Reply deleted successfully")),
                                     );
-                                  },
-                                );
-                              },
-                              child: const Text("Update Reply"),
+                                  }
+                                },
+                                child: const Text("Delete Reply"),
+                              ),
                             ),
-                          ),
-                        ],
-                      )
-                    ),
+                            PopupMenuItem(
+                              value: "update",
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20)),
+                                    ),
+                                    builder: (context) {
+                                      return AddCommentSheet(
+                                        replyId: replyId.toString(),
+                                        postId: postId.toString(),
+                                        userId: '',
+                                        content: content!,
+                                        isUpdate: true,
+                                      );
+                                    },
+                                  );
+                                },
+                                child: const Text("Update Reply"),
+                              ),
+                            ),
+                          ],
+                        )),
                   ],
                 ),
-                  const SizedBox(height: 8),
-                  /// **Reply Content**
+                const SizedBox(height: 2),
+
+                /// **Reply Content**
                 Text(
                   content!,
                   style: const TextStyle(fontSize: 14, height: 1.5),
                   textAlign: TextAlign.justify,
+                  softWrap: true, // Ensures text wraps properly
+                  maxLines: null, // Allows unlimited lines
                 ),
-                  const SizedBox(height: 6),
-                  /// **Like Button**
+                const SizedBox(height: 2),
+
+                /// **Like Button**
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     LikeButton(
                       isPost: false,
@@ -156,9 +154,7 @@ class ReplyWidget extends StatelessWidget {
                 ),
               ],
             ),
-          )
-    ),
-     
-      ]);
+          )),
+    ]);
   }
 }

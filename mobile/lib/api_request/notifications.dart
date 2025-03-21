@@ -1,6 +1,9 @@
 import 'dart:developer';
 
+import 'package:coffee_card/main.dart';
+import 'package:coffee_card/screens/listofevents_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 @pragma('vm:entry-point')
@@ -27,6 +30,7 @@ Future<void> initialize() async {
   await _setupMessageHandlers();
   final token = await _messaging.getToken();
   log('FCM Token: $token');
+  subscribeToTopic('all_devices');
 }
 
   Future<void> _requestPermission() async {
@@ -66,14 +70,20 @@ Future<void> initialize() async {
     //   },
     // );
 
-    final initializationSettings = InitializationSettings(
+    const initializationSettings = InitializationSettings(
       android: initializationSettingAndroid,
     );
 
     //flutter notification setup
     await localNotification.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (details) {},
+      onDidReceiveNotificationResponse: (details) {
+        if(details.payload == 'events') {
+          navigatorKey.currentState?.push(MaterialPageRoute(
+            builder: (context) => const EventsListScreen(),
+            ));
+        }
+      },
     );
 
     _isFlutterLocalNotificationsInitialized = true;
@@ -87,7 +97,7 @@ Future<void> initialize() async {
         notification.hashCode,
         notification.title,
         notification.body,
-        NotificationDetails(
+        const NotificationDetails(
           android: AndroidNotificationDetails(
             'high_importance_channel',
             'High Importance Notifications',
@@ -120,8 +130,15 @@ Future<void> initialize() async {
 }
 
 void _handleBackgroundMessage(RemoteMessage message) {
-  if(message.data['type'] == 'chat') {
+  if(message.data['type'] == 'events') {
     //open thing
+    navigatorKey.currentState?.push(MaterialPageRoute(
+            builder: (context) => const EventsListScreen(),
+            ));
   }
+}
+Future<void> subscribeToTopic(String topic) async {
+  await FirebaseMessaging.instance.subscribeToTopic(topic);
+  log("Subscribed to $topic");
 }
 }
