@@ -8,7 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-String urlAddress = "http://10.0.2.2:5000/api/auth";
+String urlAddress = "http://11.22.13.70:5000/api/auth";
 const FlutterSecureStorage storage = FlutterSecureStorage();
 Dio dio = ApiService.dio;
 

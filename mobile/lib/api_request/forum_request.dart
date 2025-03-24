@@ -5,7 +5,7 @@ import 'package:http/http.dart';
 import 'package:coffee_card/models/post_model.dart';
 import 'package:coffee_card/models/postwithreplies_model.dart';
 
-String urlAddress = "http://10.0.2.2:5000/api/forum/";
+String urlAddress = "http://10.32.19.48:5000/api/forum/";
 
 
 

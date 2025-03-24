@@ -9,7 +9,7 @@ const pool = require("../db");
 const router = express.Router();
 
 // create post
-router.post("/posts", async (req, res) => {
+router.post("/poop", async (req, res) => {
   const {title, content, userid} = req.body;
   try {
     const newPost = await pool.query(

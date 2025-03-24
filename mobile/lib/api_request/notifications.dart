@@ -28,6 +28,7 @@ Future<void> initialize() async {
 
   // Setup message handlers
   await _setupMessageHandlers();
+  await setupFlutterNotifications();
   final token = await _messaging.getToken();
   log('FCM Token: $token');
   subscribeToTopic('all_devices');
@@ -61,7 +62,7 @@ Future<void> initialize() async {
         ?.createNotificationChannel(channel);
 
     const initializationSettingAndroid =
-        AndroidInitializationSettings('@mipamp/ic_launcher');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     //ios
     // final initializationSettingsDarwin = DarwinInitializationSettings(
@@ -77,13 +78,8 @@ Future<void> initialize() async {
     //flutter notification setup
     await localNotification.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (details) {
-        if(details.payload == 'events') {
-          navigatorKey.currentState?.push(MaterialPageRoute(
-            builder: (context) => const EventsListScreen(),
-            ));
-        }
-      },
+      onDidReceiveNotificationResponse: (NotificationResponse details) =>
+      _handleBackgroundMessage(details.payload!),
     );
 
     _isFlutterLocalNotificationsInitialized = true;
@@ -108,7 +104,7 @@ Future<void> initialize() async {
             icon: '@mipmap/ic_launcher',
           ),
         ),
-        payload: message.data.toString(),
+        payload: message.data['type'].toString(),
       );
     }
   }
@@ -120,17 +116,19 @@ Future<void> initialize() async {
   });
 
   //background message
-  FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+  FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    _handleBackgroundMessage(message.data['type']);
+  });
 
   //opened app
-  final initialMessage = await _messaging.getInitialMessage();
+  final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
   if (initialMessage != null) {
-    _handleBackgroundMessage(initialMessage);
+    _handleBackgroundMessage(initialMessage.data['type']);
   }
 }
 
-void _handleBackgroundMessage(RemoteMessage message) {
-  if(message.data['type'] == 'events') {
+void _handleBackgroundMessage(String message) {
+  if(message == 'events') {
     //open thing
     navigatorKey.currentState?.push(MaterialPageRoute(
             builder: (context) => const EventsListScreen(),

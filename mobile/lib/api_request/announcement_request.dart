@@ -3,8 +3,10 @@ import 'dart:developer';
 import 'package:coffee_card/models/announcement_model.dart';
 import 'package:http/http.dart';
 
+String homeAddress =
+    "http://11.22.13.70:5000/api/announcements";
 String urlAddress =
-    "http://10.0.2.2:5000/api/announcements"; // Replace with your backend URL
+    "http://10.32.19.48/api/announcements"; // Replace with your backend URL
 
 // Create an announcement
 Future<void> createAnnouncement(

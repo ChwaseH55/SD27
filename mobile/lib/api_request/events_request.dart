@@ -4,7 +4,7 @@ import 'package:http/http.dart';
 import 'dart:developer';
 import 'package:coffee_card/api_request/config.dart';
 
-String urlAddress = "http://10.0.2.2:5000/api/events";
+String urlAddress = "http://10.32.19.48:5000/api/events";
 
 Future<void> createEvent(
     String eventName,

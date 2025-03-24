@@ -8,15 +8,20 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'UCF',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(35.0),
+        child: AppBar(
+          title: const Text(
+            'UCF',
+            style: TextStyle(fontWeight: FontWeight.w900),
+          ),
+          centerTitle: true,
+          backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+        )
       ),
-      body: const LoginForm(),
+      body: const SingleChildScrollView(
+        child: LoginForm()
+      ),
     );
   }
 }

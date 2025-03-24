@@ -80,7 +80,6 @@ class MyApp extends StatelessWidget {
         '/dis': (context) => const DiscussionForum(),
         '/createFor': (context) => const CreateForum(),
         '/pos': (context) => const ForumpostScreen(),
-        '/tou': (context) => const TournamentList(),
         '/annc': (context) => const AnnouncementListScreen(),
         '/anncDetail': (context) => const AnnouncementdetailScreen(),
         '/tes': (context) => const DisscusisonpostInfoScreen(),

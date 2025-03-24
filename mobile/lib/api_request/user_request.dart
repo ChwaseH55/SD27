@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:coffee_card/models/user_model.dart';
 
-String urlAddress = "http://10.0.2.2:5000/api/users";
+String urlAddress = "http://10.32.19.48:5000/api/users";
 
 Future<UserModel> getUser({required String userId}) async {
   try {

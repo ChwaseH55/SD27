@@ -143,6 +143,11 @@ router.get("/scores", async (req, res) => {
   }
 });
 
+router.get("/api/scores/test", (req, res) => {
+  res.json({message: "o from the server!"});
+});
+
+
 // Get all approved scores
 router.get("/scores/approved", async (req, res) => {
   try {

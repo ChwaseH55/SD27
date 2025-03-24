@@ -1,3 +1,6 @@
+/* eslint-disable linebreak-style */
+/* eslint-disable new-cap */
+/* eslint-disable linebreak-style */
 module.exports = {
   env: {
     es6: true,
