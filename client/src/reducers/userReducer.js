@@ -1,5 +1,4 @@
-// client/src/reducers/userReducer.js
-import axios from 'axios';
+import { api } from '../config';
 
 // Action types
 const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
@@ -8,43 +7,57 @@ const LOGOUT = 'LOGOUT';
 
 // Initial state
 const initialState = {
-  user: null,              // Stores user data (e.g., username, email, etc.)
-  isAuthenticated: false,  // Boolean to track if user is logged in
+  user: JSON.parse(localStorage.getItem('user')) || null,  // Get user data from localStorage if available
+  isAuthenticated: !!localStorage.getItem('token'),      // Check if token exists to set auth state
 };
+console.log("Initial localStorage user:", JSON.parse(localStorage.getItem('user')));
 
 // Action creators
-export const loginSuccess = (userData) => ({
-  type: LOGIN_SUCCESS,
-  payload: userData,
-});
+export const loginSuccess = (userData) => {
+  console.log("Login Success - userData:", userData);  // Check userData here
+  localStorage.setItem('token', userData.token);
+  localStorage.setItem('user', JSON.stringify(userData.user));  // Save user data along with the token
+  return {
+    type: LOGIN_SUCCESS,
+    payload: userData.user,
+  };
+};
 
-export const registerSuccess = (userData) => ({
-  type: REGISTER_SUCCESS,
-  payload: userData,
-});
+export const registerSuccess = (userData) => {
+  localStorage.setItem('token', userData.token);
+  localStorage.setItem('user', JSON.stringify(userData));  // Save user data along with the token
+  return {
+    type: REGISTER_SUCCESS,
+    payload: userData,
+  };
+};
 
-export const logout = () => ({
-  type: LOGOUT,
-});
+export const logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');  // Remove user data from localStorage
+  return {
+    type: LOGOUT,
+  };
+};
 
 // Async action to handle login
 export const login = (username, password) => async (dispatch) => {
   try {
-    const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
-    dispatch(loginSuccess(response.data)); // Dispatch login success with user data
-    return { user: response.data }; // Return the user data
+    console.log('Attempting login with:', { username });
+    const response = await api.post('/auth/login', { username, password });
+    console.log('Login response:', response.data);
+    dispatch(loginSuccess(response.data));
+    return { user: response.data };
   } catch (error) {
     console.error('Login failed:', error);
-    // Return an object with an error property
     return { error: { message: error.response?.data?.message || 'Login failed' } };
   }
 };
 
-
 // Async action to handle registration
 export const register = ({ username, email, password, firstName, lastName }) => async (dispatch) => {
   try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {           
+      const response = await api.post('/auth/register', {           
         username, 
         email, 
         password, 
@@ -59,10 +72,8 @@ export const register = ({ username, email, password, firstName, lastName }) => 
   }
 };
 
-
 // Async action to handle logout
 export const logoutUser = () => (dispatch) => {
-  // Clear any client-side storage if needed (like JWT in local storage)
   dispatch(logout());  // Dispatch logout action
 };
 
@@ -77,6 +88,8 @@ const userReducer = (state = initialState, action) => {
         isAuthenticated: true,
       };
     case LOGOUT:
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       return {
         ...state,
         user: null,

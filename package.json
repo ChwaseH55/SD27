@@ -1,15 +1,25 @@
 {
   "dependencies": {
+    "@google-cloud/secret-manager": "^5.6.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-redux": "^9.1.2",
+    "react-scripts": "^5.0.1",
     "react-toastify": "^10.0.6",
-    "redux": "^5.0.1"
+    "redux": "^5.0.1",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   }
 }

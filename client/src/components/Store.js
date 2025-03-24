@@ -1,46 +1,89 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { api } from '../config';
+
+// Initialize Stripe with your public key
+const stripePromise = loadStripe("pk_test_51PzZ4xRs4YZmhcoeiINiWfKCCh0sC5gpVqxfhtT24PzY7OPcUAlZuxyldOm7kKOejlZxi1wIwwbzMPVLVAS2pz2f00zNR0YmWR");
 
 const Store = () => {
   const navigate = useNavigate();
-
-  // Access the logged-in user from Redux state
   const { user } = useSelector((state) => state.user);
 
+  // State for cart and products
+  const [cartItems, setCartItems] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   // Redirect to login if the user is not logged in
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) {
       navigate("/login");
     }
   }, [user, navigate]);
 
-  const products = [
-    {
-      id: 1,
-      name: "UCF Golf Hat",
-      price: "$25",
-      image: "/assets/clublogo.png",
-    },
-    {
-      id: 2,
-      name: "UCF Golf Polo",
-      price: "$40",
-      image: "/assets/clublogo.png",
-    },
-    {
-      id: 3,
-      name: "UCF Golf Club Dues",
-      price: "$100",
-      image: "/assets/clublogo.png",
-    },
-  ];
+  // Fetch products from the backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get(`/stripe/productlist?userId=${user.id}`);
+        setProducts(response.data);
+        console.log(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [user]);
+
+  const handleCheckout = async () => {
+    const lineItems = cartItems.map((item) => ({
+      price: item.priceId,
+      quantity: item.quantity,
+      name: item.name
+    }));
+  
+    try {
+      const response = await api.post("/stripe/create-checkout-session", {
+        cartItems: lineItems,
+        userId: user.id
+      });
+    
+      // Check if the URL exists and redirect
+      if (response.data.url) {
+        window.location.href = response.data.url;  // Redirect to the Stripe Checkout URL
+      } else {
+        console.error("Error: No URL returned from Stripe session creation.");
+      }
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+    }
+  };
+  
+
+  const addToCart = (product) => {
+    const existingItem = cartItems.find((item) => item.id === product.id);
+    if (existingItem) {
+      setCartItems(
+        cartItems.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
+    } else {
+      setCartItems([...cartItems, { ...product, quantity: 1 }]);
+    }
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      {user && ( // Only show the page if the user is logged in
+      {user && (
         <>
-          {/* Add padding to account for navbar height */}
           <div className="pt-20">
             {/* Store Header */}
             <div className="bg-ucfBlack text-white py-12 text-center shadow-md">
@@ -55,44 +98,66 @@ const Store = () => {
               <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">
                 Shop Merchandise
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="bg-white shadow-lg rounded-lg overflow-hidden hover:scale-105 transition transform duration-200 ease-in-out"
-                  >
-                    <div className="relative w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="object-contain h-32"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-500 mb-4">{product.price}</p>
-                      <button className="w-full bg-ucfGold text-white py-3 rounded-lg font-medium hover:bg-ucfGold-dark transition">
-                        Add to Cart
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
+              {loading ? (
+                <p className="text-center">Loading products...</p>  // Display loading message
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                  {products.length === 0 ? (
+                    <p className="text-center">No products available.</p>  // Handle empty product list
+                  ) : (
+                    products.map((product) => (
+                      <div
+                        key={product.id}
+                        className="bg-white shadow-lg rounded-lg overflow-hidden hover:scale-105 transition transform duration-200 ease-in-out"
+                      >
+                        <div className="relative w-full h-48 bg-gray-200 flex items-center justify-center">
+                          <img
+                            src={"/assets/clublogo.png"}  // Handle missing images
+                            alt={product.name}
+                            className="object-contain h-32"
+                          />
+                        </div>
+                        <div className="p-6">
+                          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                            {product.name}
+                          </h3>
+                          <p className="text-gray-500 mb-4">
+                            {product.price ? `$${(product.price).toFixed(2)}` : "Price not available"}
+                          </p>
+                          <button
+                            onClick={() => addToCart(product)}
+                            className="w-full bg-ucfGold text-white py-3 rounded-lg font-medium hover:bg-ucfGold-dark transition"
+                          >
+                            Add to Cart
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Club Dues Section */}
+            {/* Cart Section */}
             <div className="bg-ucfGold py-16">
               <div className="max-w-7xl mx-auto text-center px-4 sm:px-6 lg:px-8">
                 <h2 className="text-3xl font-bold text-white mb-6">
-                  Pay Your Club Dues
+                  Cart ({cartItems.length} items)
                 </h2>
-                <p className="text-lg text-gray-100 mb-10">
-                  Stay active in the UCF Golf Club by paying your annual dues.
-                </p>
-                <button className="bg-white text-ucfGold py-3 px-6 rounded-lg text-lg font-semibold hover:bg-gray-100 transition shadow-md">
-                  Pay Dues - $100
+                <div className="space-y-4 mb-8">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex justify-between">
+                      <span>{item.name}</span>
+                      <span>Quantity: {item.quantity}</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={handleCheckout}
+                  className="bg-white text-ucfGold py-3 px-6 rounded-lg text-lg font-semibold hover:bg-gray-100 transition shadow-md"
+                >
+                  Checkout - Pay Now
                 </button>
               </div>
             </div>

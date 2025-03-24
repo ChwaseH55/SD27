@@ -2,7 +2,7 @@
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
+import { api } from './config';
 import Register from './components/Register';
 import Login from './components/Login';
 import Landing from './components/Landing';
@@ -13,8 +13,13 @@ import Forum from './components/Forum';
 import AdminDash from './components/AdminDash';
 import EventsPage from './components/Events';
 import ScoresPage from './components/Scores';
-import Store from './components/Store'; // Ensure this import exists
+import Store from './components/Store'; 
+import CalendarPage from './components/Calendar';
 import { logout } from './reducers/userReducer';
+import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe("pk_test_51PzZ4xRs4YZmhcoeiINiWfKCCh0sC5gpVqxfhtT24PzY7OPcUAlZuxyldOm7kKOejlZxi1wIwwbzMPVLVAS2pz2f00zNR0YmWR");
 
 function App() {
   const [data, setData] = useState(null);
@@ -26,8 +31,8 @@ function App() {
   const { user } = useSelector((state) => state.user);
 
   useEffect(() => {
-    axios
-      .get('http://localhost:5000/api/test')
+    api
+      .get('/test')
       .then((response) => setData(response.data.message))
       .catch((error) => console.error(error));
   }, []);
@@ -42,16 +47,29 @@ function App() {
       {!isLandingPage && <Nav onLogout={handleLogout} isLoggedIn={!!user} />}
       <div className="flex flex-col min-h-screen">
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Landing />} />
-          <Route path="/home" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole={3}>
+                <AdminDash />
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Other Public or User Routes */}
+          <Route path="/home" element={<Home />} />
           <Route path="/account" element={<Account />} />
           <Route path="/forum" element={<Forum />} />
-          <Route path="/admin" element={<AdminDash />} />
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/scores" element={<ScoresPage />} />
-          <Route path="/store" element={<Store />} /> {/* Correct route */}
+          <Route path="/store" element={<Store />} />
         </Routes>
         {data && (
           <p className="absolute bottom-4 text-center w-full text-sm text-gray-600">
