@@ -27,8 +27,9 @@ const Store = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get("/stripe/productlist");
+        const response = await api.get(`/stripe/productlist?userId=${user.id}`);
         setProducts(response.data);
+        console.log(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -37,17 +38,19 @@ const Store = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [user]);
 
   const handleCheckout = async () => {
     const lineItems = cartItems.map((item) => ({
       price: item.priceId,
       quantity: item.quantity,
+      name: item.name
     }));
   
     try {
       const response = await api.post("/stripe/create-checkout-session", {
-        cartItems: lineItems
+        cartItems: lineItems,
+        userId: user.id
       });
     
       // Check if the URL exists and redirect
