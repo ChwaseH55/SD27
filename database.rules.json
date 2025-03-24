@@ -1,0 +1,25 @@
+{
+  "rules": {
+    "chats": {
+      ".read": "auth != null",
+      "$chatId": {
+        ".write": "auth != null && (!data.exists() || data.child('participants').child(auth.uid).val() == true)",
+        "participants": {
+          ".write": "auth != null && (!data.exists() || data.parent().child('participants').child(auth.uid).val() == true)"
+        },
+        "messages": {
+          ".write": "auth != null && root.child('chats').child($chatId).child('participants').child(auth.uid).val() == true"
+        }
+      }
+    },
+    "messages": {
+      "$chatId": {
+        ".read": "auth != null && root.child('chats').child($chatId).child('participants').child(auth.uid).val() == true",
+        ".write": "auth != null && root.child('chats').child($chatId).child('participants').child(auth.uid).val() == true",
+        "$messageId": {
+          ".validate": "newData.hasChildren(['text', 'senderId', 'timestamp']) && newData.child('senderId').val() == auth.uid && newData.child('text').isString() && newData.child('timestamp').isNumber()"
+        }
+      }
+    }
+  }
+} 

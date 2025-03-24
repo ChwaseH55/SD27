@@ -4,8 +4,10 @@ import { logoutUser } from '../reducers/userReducer'; // Adjust the path if nece
 import { useNavigate } from 'react-router-dom';
 import { AccessLevels } from '../utils/constants';
 import Nav from './Nav'; // Import the Nav component
-import clubLogo from '../assets/clublogo.png';
+import UserAvatar from './UserAvatar';
 import { api } from '../config'; // Update the import path for the api instance
+import { storage } from '../firebase';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const accessLevelLabels = {
   [AccessLevels.GUEST]: 'Guest',
@@ -28,15 +30,25 @@ const Account = () => {
   const [newUsername, setNewUsername] = useState(user.user.username || '');
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        // Use the correct endpoint for fetching user's registered events
-        const eventsResponse = await api.get(`/events/my-events/${user.user.id}`);
+        // Fetch user's current data including profile picture
+        const userResponse = await api.get(`users/${user.user.id}`);
+        if (userResponse.data.profilePicture) {
+          dispatch({ 
+            type: 'UPDATE_USER_PROFILE_PICTURE', 
+            payload: userResponse.data.profilePicture 
+          });
+        }
+
+        // Fetch events and announcements
+        const eventsResponse = await api.get(`events/my-events/${user.user.id}`);
         setRegisteredEvents(eventsResponse.data);
 
-        const announcementsResponse = await api.get('/announcements');
+        const announcementsResponse = await api.get('announcements');
         setAnnouncements(announcementsResponse.data);
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -44,7 +56,7 @@ const Account = () => {
     };
 
     fetchUserDetails();
-  }, [user.user.id]);
+  }, [user.user.id, dispatch]);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -85,6 +97,43 @@ const Account = () => {
     }
   };
 
+  const handleProfilePictureUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploadingPhoto(true);
+      
+      // Create a storage reference with the user's ID
+      const imageRef = storageRef(storage, `profile_pictures/${user.user.id}/${file.name}`);
+      
+      // Upload the file
+      const snapshot = await uploadBytes(imageRef, file);
+      console.log('Uploaded file snapshot:', snapshot);
+      
+      // Get the download URL
+      const downloadURL = await getDownloadURL(imageRef);
+      console.log('Download URL:', downloadURL);
+      
+      // Update the user's profile in the database
+      await api.put(`users/${user.user.id}`, {
+        profilePicture: downloadURL
+      });
+
+      // Update Redux store
+      dispatch({ 
+        type: 'UPDATE_USER_PROFILE_PICTURE', 
+        payload: downloadURL 
+      });
+
+      setUploadingPhoto(false);
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      setUploadingPhoto(false);
+      alert('Failed to upload profile picture. Please try again.');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       {/* Navbar */}
@@ -101,16 +150,20 @@ const Account = () => {
             <div className="space-y-8">
               {/* Profile Picture Section */}
               <div className="flex flex-col items-center">
-                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                  {/* Placeholder for User Picture */}
-                  <span className="text-gray-400">Upload</span>
-                </div>
-                <button
-                  className="mt-2 text-sm text-blue-500 hover:underline"
-                  onClick={() => alert('Upload functionality coming soon!')}
+                <UserAvatar user={user.user} size="lg" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePictureUpload}
+                  className="hidden"
+                  id="profile-picture-input"
+                />
+                <label
+                  htmlFor="profile-picture-input"
+                  className="mt-2 cursor-pointer text-sm text-blue-500 hover:underline"
                 >
-                  Upload Picture
-                </button>
+                  {uploadingPhoto ? 'Uploading...' : 'Upload Picture'}
+                </label>
               </div>
 
               {/* User Information */}

@@ -88,6 +88,17 @@ const Nav = ({ isLoggedIn, onLogout }) => {
                 Shop
               </button>
             </Link>
+            <Link to="/chat">
+              <button
+                className={`px-4 py-2 border rounded ${
+                  isActive('/chat')
+                    ? 'bg-yellow-500 text-white'
+                    : 'bg-transparent border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white transition'
+                }`}
+              >
+                Chat
+              </button>
+            </Link>
             {/* Conditionally render the admin dashboard link */}
             {user.user.roleid > 2 && (
               <Link to="/admin">
