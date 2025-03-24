@@ -1,20 +1,24 @@
 require('dotenv').config();
 const functions = require("firebase-functions");
-// Access the Stripe secret key using process.env.FIREBASE_CONFIG
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = require('stripe')(stripeSecretKey);
+const { defineSecret } = require("firebase-functions/params");
+
+// Define secrets securely
+const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
+const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
+
+const stripe = require('stripe')(STRIPE_SECRET_KEY.value());
 const express = require('express');
 const router = express.Router();
 const pool = require("../db");
-require('dotenv').config({ path: `${__dirname}/../.env` });
+//require('dotenv').config({ path: `${__dirname}/../.env` });
 //console.log('Loaded Environment Variables:', process.env);
 //console.log('Stripe Secret Key:', process.env.STRIPE_SECRET_KEY);
 
-const YOUR_DOMAIN = 'http://localhost:5001';
+const YOUR_DOMAIN = 'https://sd27-87d55.web.app';
 
 // Test Route
 router.get('/test', (req, res) => {
-    res.json({ message: "Stripe API is working!" });
+    res.json({ message: "Stripe API is working!", secretKey: STRIPE_SECRET_KEY.value() });
 });
 
 router.get('/productlist', async (req, res) => {
@@ -130,7 +134,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     console.log("✅ webhook received");
 
     try {
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+        event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET.value());
     } catch (err) {
         console.error("❌ Webhook signature verification failed:", err.message);
         return res.status(400).send(`Webhook Error: ${err.message}`);

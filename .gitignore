@@ -45,3 +45,6 @@ client/build/
 server/node_modules/
 server/dist/
 server/build/
+
+# Ignore Firebase service key
+/functions/firebase-service-key.json
