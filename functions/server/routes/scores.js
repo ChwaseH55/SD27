@@ -2,24 +2,46 @@ const express = require('express');
 const multer = require('multer');
 const pool = require("../db");
 const router = express.Router();
+const path = require('path');
+const admin = require('../../firebaseAdmin'); 
 
+// Set up Multer to store file in memory
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+// Helper to upload image to Firebase and return URL
+const uploadScoreImageToFirebase = async (file, eventid) => {
+    const bucket = admin.storage().bucket();
+    const fileExtension = path.extname(file.originalname);
+    const fileName = `score_images/${eventid}/${Date.now()}${fileExtension}`;
+    const firebaseFile = bucket.file(fileName);
+
+    await firebaseFile.save(file.buffer, {
+        metadata: {
+            contentType: file.mimetype,
+        },
+        public: true,
+    });
+
+    return `https://storage.googleapis.com/${bucket.name}/${firebaseFile.name}`;
+};
+
 //create score
 /*
     This api allows player to include multiple player in the score
 */
 router.post('/scores', upload.single('scoreimage'), async(req, res) =>{
     const { eventid, userids } = req.body; //userids should be an array of user IDS or a string with userids seperated by commas
-    const scoreimage = req.file ? req.file.buffer : null; //get the image file as binary data 
+    const file = req.file;
     
-
-    if (!eventid || !userids || !scoreimage) {
+    if (!eventid || !userids || !file) {
         return res.status(400).json({ message: "Missing required fields: eventid, userids, or scoreimage" });
     }
     
+
     try{
         const userIdArray = Array.isArray(userids) ? userids : userids.split(',');
+        const scoreImageUrl = await uploadScoreImageToFirebase(file, eventid);
         
         //Inserting a score for each userid that is submitted
         const insertedScores = [];
@@ -27,7 +49,7 @@ router.post('/scores', upload.single('scoreimage'), async(req, res) =>{
             try {
                 const newScore = await pool.query(
                     'INSERT INTO score_submissions (eventid, userid, scoreimage, approvalstatus) VALUES ($1, $2, $3, $4) RETURNING *',
-                    [eventid, userid, scoreimage, 'Pending']
+                    [eventid, userid, scoreImageUrl, 'Pending']
                 );
                 insertedScores.push(newScore.rows[0]);
             } catch (err) {
@@ -130,7 +152,7 @@ router.put('/scores/not-approve', async (req, res) => {
 //Get all scores (approved, pending and non-approved) 
 router.get('/scores', async(req, res) => {
     try{
-        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser FROM score_submissions");
+        const scores = await pool.query("SELECT * FROM score_submissions");
         res.json(scores.rows);
     }catch (err){
         console.error(err.message);
@@ -141,7 +163,7 @@ router.get('/scores', async(req, res) => {
 //Get all approved scores
 router.get('/scores/approved', async(req, res) => {
     try{
-        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser FROM score_submissions WHERE approvalstatus = 'Approved'");
+        const scores = await pool.query("SELECT * WHERE approvalstatus = 'Approved'");
         res.json(scores.rows);
     }catch (err) {
         console.error(err.message);
@@ -152,7 +174,7 @@ router.get('/scores/approved', async(req, res) => {
 //Get all not approved scores
 router.get('/scores/not-approved', async(req, res) => {
     try{
-        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser FROM score_submissions WHERE approvalstatus = 'Not Approved'");
+        const scores = await pool.query("SELECT * FROM score_submissions WHERE approvalstatus = 'Not Approved'");
         res.json(scores.rows);
     }catch (err) {
         console.error(err.message);
@@ -163,7 +185,7 @@ router.get('/scores/not-approved', async(req, res) => {
 //get all pending scores
 router.get('/scores/pending', async(req, res) => {
     try{
-        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser FROM score_submissions WHERE approvalstatus = 'Pending'");
+        const scores = await pool.query("SELECT * FROM score_submissions WHERE approvalstatus = 'Pending'");
         res.json(scores.rows);
     }catch (err) {
         console.error(err.message);
@@ -175,7 +197,7 @@ router.get('/scores/pending', async(req, res) => {
 router.get('/scores/player/:id', async (req, res) => {
     const { userid } = req.params;
     try {
-        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser FROM score_submissions WHERE userid = $1", [userid]);
+        const scores = await pool.query("SELECT * FROM score_submissions WHERE userid = $1", [userid]);
         res.json(scores.rows);
     } catch (err){
         console.error(err.message);
@@ -187,7 +209,7 @@ router.get('/scores/player/:id', async (req, res) => {
 router.get('/scores/approved-by/:id', async (req, res) => {
     const { approvedbyuser } = req.params;
     try {
-        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser FROM score_submissions WHERE approvedbyuser = $1", [approvedbyuser]);
+        const scores = await pool.query("SELECT * FROM score_submissions WHERE approvedbyuser = $1", [approvedbyuser]);
         res.json(scores.rows);
     } catch (err) {
         console.error(err.message);
