@@ -92,14 +92,7 @@ router.put('/:id/profile-picture', upload.single('profilePicture'), async (req, 
 //update user info
 router.put('/:id', upload.single('profilepicture'), async (req, res) => {
     const { id } = req.params;
-<<<<<<< HEAD
     const { username, firstname, lastname, roleid } = req.body;
-=======
-    const { username, firstname, lastname } = req.body;
-    const file = req.file;
-
-    console.log("Uploaded file:", req.file);
->>>>>>> a1bb154d06943efd61cfab5977d214e2a7e34044
 
     try {
         let profilePictureUrl = null;
@@ -121,7 +114,6 @@ router.put('/:id', upload.single('profilepicture'), async (req, res) => {
         }
 
         const updateQuery = `
-<<<<<<< HEAD
             UPDATE users
             SET
                 username = COALESCE($1, username),
@@ -130,27 +122,12 @@ router.put('/:id', upload.single('profilepicture'), async (req, res) => {
                 roleid = COALESCE($4, roleid)
             WHERE id = $5
             RETURNING *;`;
-=======
-          UPDATE users
-          SET
-            username = COALESCE($1, username),
-            firstname = COALESCE($2, firstname),
-            lastname = COALESCE($3, lastname),
-            profilepicture = COALESCE($4, profilepicture)
-          WHERE id = $5
-          RETURNING *;
-        `;
->>>>>>> a1bb154d06943efd61cfab5977d214e2a7e34044
 
         const updateResult = await pool.query(updateQuery, [
             username || null,
             firstname || null,
             lastname || null,
-<<<<<<< HEAD
             roleid || null,
-=======
-            profilePictureUrl || null,
->>>>>>> a1bb154d06943efd61cfab5977d214e2a7e34044
             id
         ]);
 

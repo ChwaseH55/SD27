@@ -152,31 +152,8 @@ router.put('/scores/not-approve', async (req, res) => {
 //Get all scores (approved, pending and non-approved) 
 router.get('/scores', async(req, res) => {
     try{
-<<<<<<< HEAD
         const scores = await pool.query("SELECT * FROM score_submissions");
         res.json(scores.rows);
-=======
-        const scores = await pool.query(`
-            SELECT 
-                s.*,
-                u.firstname,
-                u.lastname,
-                u.username,
-                u.profilepicture
-            FROM score_submissions s
-            LEFT JOIN users u ON s.userid = u.id
-            ORDER BY s.createdat DESC
-        `);
-        
-        // Convert binary scoreimage data to base64 for each score
-        const scoresWithBase64 = scores.rows.map(score => ({
-            ...score,
-            scoreimage: score.scoreimage ? score.scoreimage.toString('base64') : null,
-            userName: `${score.firstname} ${score.lastname}`,
-            userProfilePicture: score.profilepicture
-        }));
-        res.json(scoresWithBase64);
->>>>>>> origin/images-and-chat
     }catch (err){
         console.error(err.message);
         res.status(500).send("Server error");
@@ -186,34 +163,8 @@ router.get('/scores', async(req, res) => {
 //Get all approved scores
 router.get('/scores/approved', async(req, res) => {
     try{
-<<<<<<< HEAD
         const scores = await pool.query("SELECT * WHERE approvalstatus = 'Approved'");
         res.json(scores.rows);
-=======
-        const scores = await pool.query(`
-            SELECT 
-                s.scoreid, 
-                s.eventid, 
-                s.userid, 
-                s.approvalstatus, 
-                s.approvedbyuser,
-                u.firstname,
-                u.lastname,
-                u.username,
-                u.profilepicture
-            FROM score_submissions s
-            LEFT JOIN users u ON s.userid = u.id
-            WHERE s.approvalstatus = 'Approved'
-            ORDER BY s.createdat DESC
-        `);
-        
-        const scoresWithUserInfo = scores.rows.map(score => ({
-            ...score,
-            userName: `${score.firstname} ${score.lastname}`,
-            userProfilePicture: score.profilepicture
-        }));
-        res.json(scoresWithUserInfo);
->>>>>>> origin/images-and-chat
     }catch (err) {
         console.error(err.message);
         res.status(500).send("Server error");
@@ -223,34 +174,8 @@ router.get('/scores/approved', async(req, res) => {
 //Get all not approved scores
 router.get('/scores/not-approved', async(req, res) => {
     try{
-<<<<<<< HEAD
         const scores = await pool.query("SELECT * FROM score_submissions WHERE approvalstatus = 'Not Approved'");
         res.json(scores.rows);
-=======
-        const scores = await pool.query(`
-            SELECT 
-                s.scoreid, 
-                s.eventid, 
-                s.userid, 
-                s.approvalstatus, 
-                s.approvedbyuser,
-                u.firstname,
-                u.lastname,
-                u.username,
-                u.profilepicture
-            FROM score_submissions s
-            LEFT JOIN users u ON s.userid = u.id
-            WHERE s.approvalstatus = 'Not Approved'
-            ORDER BY s.createdat DESC
-        `);
-        
-        const scoresWithUserInfo = scores.rows.map(score => ({
-            ...score,
-            userName: `${score.firstname} ${score.lastname}`,
-            userProfilePicture: score.profilepicture
-        }));
-        res.json(scoresWithUserInfo);
->>>>>>> origin/images-and-chat
     }catch (err) {
         console.error(err.message);
         res.status(500).send("Server error");
@@ -260,34 +185,8 @@ router.get('/scores/not-approved', async(req, res) => {
 //get all pending scores
 router.get('/scores/pending', async(req, res) => {
     try{
-<<<<<<< HEAD
         const scores = await pool.query("SELECT * FROM score_submissions WHERE approvalstatus = 'Pending'");
         res.json(scores.rows);
-=======
-        const scores = await pool.query(`
-            SELECT 
-                s.scoreid, 
-                s.eventid, 
-                s.userid, 
-                s.approvalstatus, 
-                s.approvedbyuser,
-                u.firstname,
-                u.lastname,
-                u.username,
-                u.profilepicture
-            FROM score_submissions s
-            LEFT JOIN users u ON s.userid = u.id
-            WHERE s.approvalstatus = 'Pending'
-            ORDER BY s.createdat DESC
-        `);
-        
-        const scoresWithUserInfo = scores.rows.map(score => ({
-            ...score,
-            userName: `${score.firstname} ${score.lastname}`,
-            userProfilePicture: score.profilepicture
-        }));
-        res.json(scoresWithUserInfo);
->>>>>>> origin/images-and-chat
     }catch (err) {
         console.error(err.message);
         res.status(500).send("Server error");
