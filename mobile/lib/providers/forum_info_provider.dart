@@ -30,9 +30,9 @@ class PostProvider extends ChangeNotifier {
       _postDetails = await getPostWithReplies(postId: postId);
       if (_postDetails?.post != null) {
         _postUser =
-            await getUser(userId: _postDetails!.post!.userid.toString());
+            await getSingleUser(userId: _postDetails!.post!.userid.toString());
             var temp = await getUserID();
-            _cacheUser = await getUser(userId: temp!);
+            _cacheUser = await getSingleUser(userId: temp!);
             _roleid = await getRoleId();
           _likes = await getLikes(postId: postId, replyId: null);
       

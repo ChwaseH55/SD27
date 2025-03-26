@@ -8,7 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-String urlAddress = "http://11.22.13.70:5000/api/auth";
+String urlAddress = "https://sd27-87d55.web.app/api/auth";
 const FlutterSecureStorage storage = FlutterSecureStorage();
 Dio dio = ApiService.dio;
 
@@ -73,7 +73,7 @@ Future<void> loginUser({
 
       // Save userID to shared preferences
       await storage.write(key: 'userId', value: data['user']['id'].toString());
-      await storage.write(key: 'userRole', value: data['user']['role'].toString());
+      await storage.write(key: 'userRole', value: data['user']['roleid'].toString());
       await storage.write(key: 'token', value: data['token'].toString());
       String? userId = await storage.read(key: 'userId');
        String? role = await storage.read(key: 'userRole');
@@ -81,7 +81,7 @@ Future<void> loginUser({
       log('User ID cached: $role');
       log('Login successfully');
 
-      if (context.mounted) Navigator.pushNamed(context, '/mainMenu');
+      if (context.mounted) Navigator.pushReplacementNamed(context, '/mainMenu');
     } else {
       log('Login failed');
     }

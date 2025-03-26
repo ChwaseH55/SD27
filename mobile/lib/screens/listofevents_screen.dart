@@ -1,5 +1,6 @@
 import 'package:coffee_card/api_request/events_request.dart';
 import 'package:coffee_card/arguments/eventcreateargument.dart';
+import 'package:coffee_card/arguments/regOrAllargument.dart';
 import 'package:coffee_card/screens/eventcreation.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,8 @@ import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';
 
 class EventsListScreen extends StatefulWidget {
+
+  static const routeName = '/extractIsRegOrAll';
   const EventsListScreen({super.key});
 
   @override
@@ -18,14 +21,22 @@ class EventsListScreen extends StatefulWidget {
 
 class _EventsListScreenState extends State<EventsListScreen> {
   late EventsProvider eventsProvider;
-  Widget _selectedWidget = const AllEventsWidget();
-  bool isAllEvents = true;
+  Widget? _selectedWidget;
+  bool? isAllEvents;
   TextEditingController searchController = TextEditingController();
   String searchQuery = "";
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final args = ModalRoute.of(context)!.settings.arguments as IsAllOrReg;
+    if(args.boolean) {
+    _selectedWidget = const AllEventsWidget();
+    isAllEvents = true;
+    } else {
+      _selectedWidget = const RegisteredEventsWidget();
+      isAllEvents = false;
+    }
     eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     eventsProvider.fetchEvents();
   }
@@ -51,6 +62,28 @@ class _EventsListScreenState extends State<EventsListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
+              children: [
+                SizedBox(width: 14),
+                Icon(Icons.arrow_back_ios,
+                    color: Colors.black, size: 16), // Reduce size if needed
+          
+                Text(
+                  'Back',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+        ),
         title: const Text('UCF Events',
             style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
@@ -77,7 +110,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
           Column(
   children: [
     const SizedBox(height: 50), 
-    Expanded(child: _selectedWidget), 
+    Expanded(child: _selectedWidget!), 
   ],
 ));
     
@@ -294,8 +327,7 @@ class _RegisteredEventsWidget extends State<RegisteredEventsWidget> {
               child: ElevatedButton.icon(
                 icon: context
                             .findAncestorStateOfType<_EventsListScreenState>()
-                            ?.isAllEvents ==
-                        true
+                            ?.isAllEvents == true
                     ? const Icon(Icons.check, color: Colors.black)
                     : Container(),
                 onPressed: () => context

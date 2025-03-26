@@ -8,6 +8,28 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
+              children: [
+                SizedBox(width: 14),
+                Icon(Icons.arrow_back_ios,
+                    color: Colors.black, size: 16), // Reduce size if needed
+          
+                Text(
+                  'Back',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+        ),
         title: const Text(
           'UCF',
           style: TextStyle(fontWeight: FontWeight.w900),

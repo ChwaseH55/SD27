@@ -52,16 +52,37 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
     double height = MediaQuery.sizeOf(context).height;
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(35.0),
-        child: AppBar(
-          title: const Text(
-            'Post',
-            style: TextStyle(fontWeight: FontWeight.w900),
-          ),
-          centerTitle: true,
-          backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-        )
-      ),
+          preferredSize: const Size.fromHeight(35.0),
+          child: AppBar(
+            leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
+              children: [
+                SizedBox(width: 14),
+                Icon(Icons.arrow_back_ios,
+                    color: Colors.black, size: 16), // Reduce size if needed
+          
+                Text(
+                  'Back',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+        ),
+            title: const Text(
+              'Post',
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
+            centerTitle: true,
+            backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+          )),
       body: Consumer<PostProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
@@ -80,93 +101,90 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
           final roleNum = provider.roleid;
 
           return Container(
-            decoration:  BoxDecoration(
-                     
-                       border: Border.all(color: Colors.black,width: 0)
-                    ),
-            
-            child: Column(
-              children: <Widget>[
-                Container(
-                    decoration:  const BoxDecoration(
-                      color: Colors.white,
-                       border: Border(bottom: BorderSide(color: Colors.black,width: 3),top: BorderSide(color: Colors.black,width: 3))
-                    ),
-                    child: PostinfoWidget(
-                      roleNum: roleNum,
-                      username: postUser.username,
-                      posttitle: resPost.post?.title,
-                      postContent: resPost.post?.content,
-                      likes: likesNum,
-                      postId: resPost.post!.postid.toString(),
-                      userId: cachedUser.id,
-                      createdBy: postUser.id,
-                      createDate: resPost.post!.createddate,
-                    )),
-                Expanded(
-                    child: ListofReplies(
-                        postId: resPost.post!.postid, replies: replies)),
-                
-                SizedBox(
-                    width: width,
-                    height: height * 0.06,
-                    child: Container(
-                        decoration: BoxDecoration(
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black, width: 0)),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                      decoration: const BoxDecoration(
                           color: Colors.white,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  Colors.black.withOpacity(0.3), // Shadow color
-                              spreadRadius: 3, // Spread of shadow
-                              blurRadius: 8, // Blur effect
-                              offset: const Offset(
-                                  0, -3), // Shadow positioned at the top
+                          border: Border(
+                              bottom: BorderSide(color: Colors.black, width: 3),
+                              top: BorderSide(color: Colors.black, width: 3))),
+                      child: PostinfoWidget(
+                        roleNum: roleNum,
+                        username: postUser.username,
+                        posttitle: resPost.post?.title,
+                        postContent: resPost.post?.content,
+                        likes: likesNum,
+                        postId: resPost.post!.postid.toString(),
+                        userId: cachedUser.id,
+                        createdBy: postUser.id,
+                        createDate: resPost.post!.createddate,
+                      )),
+                  Expanded(
+                      child: ListofReplies(
+                          postId: resPost.post!.postid, replies: replies)),
+                  SizedBox(
+                      width: width,
+                      height: height * 0.06,
+                      child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
                             ),
-                          ],
-                        ),
-                        child: Center(
-                            child: SizedBox(
-                                width: width * 0.4,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      isScrollControlled: true,
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(20)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black
+                                    .withOpacity(0.3), // Shadow color
+                                spreadRadius: 3, // Spread of shadow
+                                blurRadius: 8, // Blur effect
+                                offset: const Offset(
+                                    0, -3), // Shadow positioned at the top
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                              child: SizedBox(
+                                  width: width * 0.4,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(20)),
+                                        ),
+                                        builder: (context) {
+                                          return AddCommentSheet(
+                                            replyId: '',
+                                            postId:
+                                                resPost.post!.postid.toString(),
+                                            userId: cachedUser.id.toString(),
+                                            content: '',
+                                            isUpdate: false,
+                                          );
+                                        },
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          const Color.fromRGBO(186, 155, 55, 1),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      builder: (context) {
-                                        return AddCommentSheet(
-                                          replyId: '',
-                                          postId: resPost.post!.postid.toString(),
-                                          userId: cachedUser.id.toString(),
-                                          content: '',
-                                          isUpdate: false,
-                                        );
-                                      },
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        const Color.fromRGBO(186, 155, 55, 1),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  ),
-                                  child: const Text(
-                                    ' + Add Comment',
-                                    style: TextStyle(
-                                        fontSize: 15, color: Colors.black),
-                                  ),
-                                )))))
-              ],
-            )
-          );
+                                    child: const Text(
+                                      ' + Add Comment',
+                                      style: TextStyle(
+                                          fontSize: 15, color: Colors.black),
+                                    ),
+                                  )))))
+                ],
+              ));
         },
       ),
     );
@@ -196,26 +214,21 @@ class ListofReplies extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              return Column(
-                children: <Widget>[
-                  
-                 Container(
-                  
-                  width: width,
-                  color: Colors.white,
-                  child: ReplyWidget(
-                    userName: provider.user?.username ?? "Unknown",
-                    createDate: reply?.createddate,
-                    content: reply?.content,
-                    postId: postId!,
-                    userId: int.parse(provider.userId!),
-                    replyId: reply?.replyid,
-                    likes: provider.likes,
-                    createdBy: provider.user!.id,
-                    roleNum: provider.roleid,
-                  )
-                  
-                ),
+              return Column(children: <Widget>[
+                Container(
+                    width: width,
+                    color: Colors.white,
+                    child: ReplyWidget(
+                      userName: provider.user?.username ?? "Unknown",
+                      createDate: reply?.createddate,
+                      content: reply?.content,
+                      postId: postId!,
+                      userId: int.parse(provider.userId!),
+                      replyId: reply?.replyid,
+                      likes: provider.likes,
+                      createdBy: provider.user!.id,
+                      roleNum: provider.roleid,
+                    )),
                 const SizedBox(height: 7)
               ]);
             },

@@ -23,7 +23,7 @@ class EventsInfoProvider extends ChangeNotifier {
 
     try {
       _eventsDetails = await getEventById(id);
-      _creationUser = await getUser(userId: eventsDetails!.createdbyuserid.toString());
+      _creationUser = await getSingleUser(userId: eventsDetails!.createdbyuserid.toString());
       _userid = await getUserID();
       _roleid = await getRoleId();
     } catch (e) {

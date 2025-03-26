@@ -34,29 +34,51 @@ class _AnnouncementListScreen extends State<AnnouncementListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Row(
+            mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
+            children: [
+              SizedBox(width: 14),
+              Icon(Icons.arrow_back_ios,
+                  color: Colors.black, size: 16), // Reduce size if needed
+
+              Text(
+                'Back',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
         title: const Text('Golf Announcements',
             style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
         actions: [
           Visibility(
-            visible: announcementProvider.roleid == '5',
-            child: TextButton(
-              style: ButtonStyle(
-                foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
-              ),
-              onPressed: () async {
-                await Navigator.pushNamed(
-                  context,
-                  AnnouncementCreationScreen.routeName,
-                  arguments: AnnouncementCreateArg(false, AnnouncementModel()),
-                );
-                // Force refresh after returning from create post screen
-                announcementProvider.fetchAnnouncements();
-              },
-              child: const Text('+ Create'),
-            )
-          ),
+              visible: announcementProvider.roleid == '5',
+              child: TextButton(
+                style: ButtonStyle(
+                  foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+                ),
+                onPressed: () async {
+                  await Navigator.pushNamed(
+                    context,
+                    AnnouncementCreationScreen.routeName,
+                    arguments:
+                        AnnouncementCreateArg(false, AnnouncementModel()),
+                  );
+                  // Force refresh after returning from create post screen
+                  announcementProvider.fetchAnnouncements();
+                },
+                child: const Text('+ Create'),
+              )),
         ],
       ),
       body: Column(
@@ -106,22 +128,48 @@ class _AnnouncementListScreen extends State<AnnouncementListScreen> {
                   itemCount: filteredAnnouncements.length,
                   itemBuilder: (context, index) {
                     final announcement = filteredAnnouncements[index];
-                    return InkWell(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          AnnouncementInfo.routeName,
-                          arguments: AnnouncementArgument(
-                              announcement.announcementid!),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: AnnouncementWidget(
-                          announcement: announcement,
+                    if (index == filteredAnnouncements.length - 1) {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            AnnouncementInfo.routeName,
+                            arguments: AnnouncementArgument(
+                                announcement.announcementid!),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 0),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: Colors.black),
+                              ),
+                            ),
+                            child: AnnouncementWidget(
+                              announcement: announcement,
+                            ),
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    } else {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            AnnouncementInfo.routeName,
+                            arguments: AnnouncementArgument(
+                                announcement.announcementid!),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 0),
+                          child: AnnouncementWidget(
+                            announcement: announcement,
+                          ),
+                        ),
+                      );
+                    }
                   },
                 );
               },

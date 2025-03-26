@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:coffee_card/models/likes_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:coffee_card/models/post_model.dart';
 import 'package:coffee_card/models/postwithreplies_model.dart';
 
-String urlAddress = "http://10.32.19.48:5000/api/forum/";
-
-
+String urlAddress = "https://sd27-87d55.web.app/api/forum";
+const FlutterSecureStorage _storage = FlutterSecureStorage();
 
 Future<void> createPost({
   required String title,
@@ -15,11 +15,13 @@ Future<void> createPost({
   required String? userId,
 }) async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/posts');
     final response = await post(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ${token!}',
       },
       body: jsonEncode(<String, dynamic>{
         "title": title,
@@ -40,8 +42,10 @@ Future<void> createPost({
 
 Future<List<PostModel>> getAllPosts() async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/posts');
-    final response = await get(url);
+    final response =
+        await get(url, headers: {'Authorization': 'Bearer ${token!}'});
 
     if (response.statusCode == 200) {
       // Parse JSON response
@@ -58,14 +62,17 @@ Future<List<PostModel>> getAllPosts() async {
 
 Future<PostResponse> getPostWithReplies({required String postId}) async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/posts/$postId');
-    final response = await get(url);
+    final response =
+        await get(url, headers: {'Authorization': 'Bearer ${token!}'});
 
     if (response.statusCode == 200) {
       final res = PostResponse.fromJson(json.decode(response.body));
       return res;
     } else {
-      throw Exception('Failed to fetch posts and replies: ${response.statusCode}');
+      throw Exception(
+          'Failed to fetch posts and replies: ${response.statusCode}');
     }
   } catch (e) {
     throw Exception('Error fetching post and replies: $e');
@@ -78,11 +85,13 @@ Future<void> updatePost({
   required String content,
 }) async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/posts/$postId');
     final response = await put(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ${token!}',
       },
       body: jsonEncode(<String, String>{
         "title": title,
@@ -102,8 +111,10 @@ Future<void> updatePost({
 
 Future<void> deletePost({required String postId}) async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/posts/$postId');
-    final response = await delete(url);
+    final response =
+        await delete(url, headers: {'Authorization': 'Bearer ${token!}'});
 
     if (response.statusCode == 200) {
       log('Post deleted successfully: ${response.body}');
@@ -121,11 +132,13 @@ Future<void> addReply({
   required String userId,
 }) async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/posts/$postId/replies');
     final response = await post(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ${token!}',
       },
       body: jsonEncode(<String, dynamic>{
         "content": content,
@@ -148,11 +161,13 @@ Future<void> updateReply({
   required String content,
 }) async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/replies/$replyId');
     final response = await put(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ${token!}',
       },
       body: jsonEncode(<String, String>{
         "content": content,
@@ -171,8 +186,10 @@ Future<void> updateReply({
 
 Future<void> deleteReply({required String replyId}) async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/replies/$replyId');
-    final response = await delete(url);
+    final response =
+        await delete(url, headers: {'Authorization': 'Bearer ${token!}'});
 
     if (response.statusCode == 200) {
       log('Reply deleted successfully: ${response.body}');
@@ -190,11 +207,13 @@ Future<void> addLike({
   required String? userId,
 }) async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/likes');
     final response = await post(
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ${token!}',
       },
       body: jsonEncode(<String, dynamic>{
         "postid": postId,
@@ -217,6 +236,7 @@ Future<void> addLike({
 Future<Map<int, int>> getLikes(
     {required String? postId, required String? replyId}) async {
   try {
+    final token = await _storage.read(key: 'token');
     Uri url;
     if (postId != null) {
       url = Uri.parse('$urlAddress/likes?postid=$postId');
@@ -224,7 +244,8 @@ Future<Map<int, int>> getLikes(
       url = Uri.parse('$urlAddress/likes?replyid=$replyId');
     }
 
-    final response = await get(url);
+    final response =
+        await get(url, headers: {'Authorization': 'Bearer ${token!}'});
 
     if (response.statusCode == 200) {
       log(response.statusCode.toString());
@@ -248,8 +269,10 @@ Future<Map<int, int>> getLikes(
 
 Future<void> deleteLike({required String likeId}) async {
   try {
+    final token = await _storage.read(key: 'token');
     final url = Uri.parse('$urlAddress/likes/$likeId');
-    final response = await delete(url);
+    final response =
+        await delete(url, headers: {'Authorization': 'Bearer ${token!}'});
 
     if (response.statusCode == 200) {
       log('Like deleted successfully: ${response.body}');

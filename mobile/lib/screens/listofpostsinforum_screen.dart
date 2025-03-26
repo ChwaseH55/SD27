@@ -39,6 +39,28 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(35.0),
         child: AppBar(
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
+              children: [
+                SizedBox(width: 14),
+                Icon(Icons.arrow_back_ios,
+                    color: Colors.black, size: 16), // Reduce size if needed
+          
+                Text(
+                  'Back',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+        ),
           title: const Text('UCF Post',
               style: TextStyle(fontWeight: FontWeight.w900)),
           centerTitle: true,

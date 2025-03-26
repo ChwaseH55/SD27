@@ -26,7 +26,7 @@ class AnnouncementInfoProvider extends ChangeNotifier {
     try {
       _announcementDetails = await getAnnouncementById(id);
       _creationUser =
-          await getUser(userId: _announcementDetails!.userid.toString());
+          await getSingleUser(userId: _announcementDetails!.userid.toString());
       _userid = await getUserID();
       _roleid = await getRoleId();
     } catch (e) {

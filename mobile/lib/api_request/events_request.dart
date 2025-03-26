@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'package:coffee_card/api_request/notifications.dart';
 import 'package:coffee_card/models/events_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'dart:developer';
 import 'package:coffee_card/api_request/config.dart';
 
-String urlAddress = "http://10.32.19.48:5000/api/events";
+String urlAddress = "https://sd27-87d55.web.app/api/events";
+const FlutterSecureStorage _storage = FlutterSecureStorage();
 
 Future<void> createEvent(
     String eventName,
@@ -15,9 +18,13 @@ Future<void> createEvent(
     int createdByUserId,
     String eventDescription) async {
   try {
+    final token = await _storage.read(key: 'token');
     final response = await post(
       Uri.parse('$urlAddress/'),
-      headers: {"Content-Type": "application/json"},
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': 'Bearer ${token!}'
+      },
       body: jsonEncode({
         "event_name": eventName,
         "event_date": eventDate,
@@ -30,6 +37,10 @@ Future<void> createEvent(
     );
 
     if (response.statusCode == 200) {
+      final res = EventsModel.fromJson(json.decode(response.body));
+      await Notifications.intsance
+          .sendNotification('Events', eventName, res.eventid.toString());
+
       log('Post created successfully: ${response.body}');
     } else {
       log('Error creating post: ${response.body}');
@@ -41,7 +52,9 @@ Future<void> createEvent(
 
 Future<List<EventsModel>> getAllEvents() async {
   try {
-    final response = await get(Uri.parse(urlAddress));
+    final token = await _storage.read(key: 'token');
+    final response = await get(Uri.parse(urlAddress),
+        headers: {'Authorization': 'Bearer ${token!}'});
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(response.body);
@@ -57,7 +70,9 @@ Future<List<EventsModel>> getAllEvents() async {
 
 Future<EventsModel> getEventById(String id) async {
   try {
-    final response = await get(Uri.parse("$urlAddress/$id"));
+    final token = await _storage.read(key: 'token');
+    final response = await get(Uri.parse("$urlAddress/$id"),
+        headers: {'Authorization': 'Bearer ${token!}'});
     if (response.statusCode == 200) {
       final res = EventsModel.fromJson(json.decode(response.body));
       return res;
@@ -72,9 +87,13 @@ Future<EventsModel> getEventById(String id) async {
 Future<void> updateEvent(int id, String eventName, String eventDescription,
     String eventDate, String eventLocation) async {
   try {
+    final token = await _storage.read(key: 'token');
     final response = await put(
       Uri.parse("$urlAddress/$id"),
-      headers: <String, String>{"Content-Type": "application/json"},
+      headers: <String, String>{
+        "Content-Type": "application/json",
+        'Authorization': 'Bearer ${token!}'
+      },
       body: jsonEncode({
         "event_name": eventName,
         "event_description": eventDescription,
@@ -94,15 +113,21 @@ Future<void> updateEvent(int id, String eventName, String eventDescription,
 }
 
 Future<bool> deleteEvent(int id) async {
-  final response = await delete(Uri.parse("$urlAddress/$id"));
+  final token = await _storage.read(key: 'token');
+  final response = await delete(Uri.parse("$urlAddress/$id"),
+      headers: {'Authorization': 'Bearer ${token!}'});
   return response.statusCode == 200;
 }
 
 Future<void> registerForEvent(String eventId, String userId) async {
   try {
+    final token = await _storage.read(key: 'token');
     final response = await post(
       Uri.parse('$urlAddress/register'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token!}'
+      },
       body: jsonEncode({'eventid': eventId, 'userid': userId}),
     );
     if (response.statusCode == 200) {
@@ -116,8 +141,10 @@ Future<void> registerForEvent(String eventId, String userId) async {
 }
 
 Future<bool> unregisterFromEvent(String eventId, String userId) async {
+  final token = await _storage.read(key: 'token');
   final response = await delete(
     Uri.parse('$urlAddress/unregister/$eventId/$userId'),
+    headers: {'Authorization': 'Bearer ${token!}'},
   );
   if (response.statusCode == 200) {
     log('Unregister successfully: ${response.body}');
@@ -129,7 +156,9 @@ Future<bool> unregisterFromEvent(String eventId, String userId) async {
 
 Future<List<EventsModel>> getUserRegisteredEvents(String userId) async {
   try {
-    final response = await get(Uri.parse('$urlAddress/my-events/$userId'));
+    final token = await _storage.read(key: 'token');
+    final response = await get(Uri.parse('$urlAddress/my-events/$userId'),
+        headers: {'Authorization': 'Bearer ${token!}'});
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(response.body);
@@ -146,8 +175,10 @@ Future<List<EventsModel>> getUserRegisteredEvents(String userId) async {
 
 Future<bool> isUserRegisteredForEvent(String eventId, String userId) async {
   try {
-    final response =
-        await get(Uri.parse('$urlAddress/is-registered/$eventId/$userId'));
+    final token = await _storage.read(key: 'token');
+    final response = await get(
+        Uri.parse('$urlAddress/is-registered/$eventId/$userId'),
+        headers: {'Authorization': 'Bearer ${token!}'});
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body.toString())['registered'].toString();
       return data == 'true';

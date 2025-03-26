@@ -5,6 +5,7 @@ import 'package:coffee_card/arguments/announcement_create_arg.dart';
 import 'package:coffee_card/arguments/announcementargument.dart';
 import 'package:coffee_card/models/announcement_model.dart';
 import 'package:coffee_card/providers/announcement_provider.dart';
+import 'package:coffee_card/providers/scores_provider.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/widgets/announcement_widget.dart';
@@ -18,7 +19,30 @@ class GolfScoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
         appBar: AppBar(
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
+              children: [
+                SizedBox(width: 14),
+                Icon(Icons.arrow_back_ios,
+                    color: Colors.black, size: 16), // Reduce size if needed
+          
+                Text(
+                  'Back',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+        ),
           title: const Text(
             'Scores',
             style: TextStyle(fontWeight: FontWeight.w900),
@@ -113,14 +137,7 @@ class _TournamentList extends State<TournamentList> {
                   itemBuilder: (context, index) {
                     final announcement = filteredAnnouncements[index];
                     return InkWell(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          AnnouncementInfo.routeName,
-                          arguments: AnnouncementArgument(
-                              announcement.announcementid!),
-                        );
-                      },
+                      onTap: () {},
                       child: const Padding(
                         padding: EdgeInsets.only(top: 8),
                         child: PostWidget(
@@ -177,9 +194,11 @@ class _PostWidget extends State<PostWidget> {
               ]),
               const SizedBox(height: 12),
               ElevatedButton(
-                onPressed: () async {showDialog<void>(
+                onPressed: () async {
+                  showDialog<void>(
                       context: context,
-                      builder: (context) => const DialogWid());},
+                      builder: (context) => const DialogWid());
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
                   shape: RoundedRectangleBorder(
@@ -230,64 +249,68 @@ class _DialogWid extends State<DialogWid> {
     double height = MediaQuery.sizeOf(context).height;
 
     return AlertDialog(
-      title: const Text("Input Scores"),
+        title: const Text("Input Scores"),
         content: Stack(clipBehavior: Clip.none, children: <Widget>[
-      Positioned(
-        left: -30,
-        top: -80,
-        child: InkResponse(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: const CircleAvatar(
-            backgroundColor: Colors.white,
-            radius: 18,
-            child: Icon(Icons.close, size: 18),
+          Positioned(
+            left: -30,
+            top: -80,
+            child: InkResponse(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: const CircleAvatar(
+                backgroundColor: Colors.white,
+                radius: 18,
+                child: Icon(Icons.close, size: 18),
+              ),
+            ),
           ),
-        ),
-      ),
-      SizedBox(
-          
-          child: Form(
-              key: _formKey,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                        height: height * 0.4,
-                        constraints: BoxConstraints(maxHeight: height * 0.55),
-                        child: ListView(
-                          scrollDirection: Axis.vertical,
-                          children: extractedChildren,
-                        )),
-                    Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: IconButton(
-                            icon: const Icon(Icons.add, size: 20,),
-                            onPressed: () {
-                              _addNewContactRow();
-                            })),
-                    Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: ElevatedButton(
-                            child: const Text('Submitß'), onPressed: () {})),
-                    ElevatedButton(
-                      onPressed: () async {
-                        result = await FilePicker.platform
-                            .pickFiles(allowMultiple: true);
-                        if (result == null) {
-                          log("No file selected");
-                        } else {
-                          setState(() {});
-                          for (var element in result!.files) {
-                            log(element.name);
-                          }
-                        }
-                      },
-                      child: const Text("File Picker"),
-                    ),
-                  ])))
-    ]));
+          SizedBox(
+              child: Form(
+                  key: _formKey,
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                            height: height * 0.4,
+                            constraints:
+                                BoxConstraints(maxHeight: height * 0.55),
+                            child: ListView(
+                              scrollDirection: Axis.vertical,
+                              children: extractedChildren,
+                            )),
+                        Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: IconButton(
+                                icon: const Icon(
+                                  Icons.add,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  _addNewContactRow();
+                                })),
+                        Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: ElevatedButton(
+                                child: const Text('Submitß'),
+                                onPressed: () {})),
+                        ElevatedButton(
+                          onPressed: () async {
+                            result = await FilePicker.platform
+                                .pickFiles(allowMultiple: true);
+                            if (result == null) {
+                              log("No file selected");
+                            } else {
+                              setState(() {});
+                              for (var element in result!.files) {
+                                log(element.name);
+                              }
+                            }
+                          },
+                          child: const Text("File Picker"),
+                        ),
+                      ])))
+        ]));
   }
 }
 
@@ -299,7 +322,15 @@ class ScoresForm extends StatefulWidget {
 }
 
 class _ScoresForm extends State<ScoresForm> {
+  late ScoresProvider scoreProvider;
   final scoreController = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    scoreProvider = Provider.of<ScoresProvider>(context, listen: false);
+    scoreProvider.getUsers();
+  }
 
   @override
   void dispose() {
@@ -317,14 +348,15 @@ class _ScoresForm extends State<ScoresForm> {
         children: [
           DropdownMenu<String>(
             menuHeight: height * 0.3,
-            initialSelection: "Item 1",
-            dropdownMenuEntries: List.generate(
-              10,
-              (index) => DropdownMenuEntry(
-                value: "Item ${index + 1}",
-                label: "Item ${index + 1}",
-              ),
-            ),
+            initialSelection: scoreProvider.users.isNotEmpty
+                ? scoreProvider.users.first.username
+                : null, // Set initial selection
+            dropdownMenuEntries: scoreProvider.users.map((user) {
+              return DropdownMenuEntry(
+                value: user.username, // Use user ID or another unique field
+                label: user.username, // Display user name
+              );
+            }).toList(),
             onSelected: (value) {
               setState(() {});
             },

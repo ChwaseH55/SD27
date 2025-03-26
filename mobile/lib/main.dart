@@ -5,6 +5,7 @@ import 'package:coffee_card/providers/events_info_provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
+import 'package:coffee_card/providers/scores_provider.dart';
 import 'package:coffee_card/providers/user_provider.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/screens/calendar_screen.dart';
@@ -12,7 +13,7 @@ import 'package:coffee_card/screens/eventCreation.dart';
 import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/screens/login_screen.dart';
 import 'package:coffee_card/screens/main_menu.dart';
-import 'package:coffee_card/screens/listofforums_screen.dart';
+
 import 'package:coffee_card/screens/listofpostsinforum_screen.dart';
 import 'package:coffee_card/screens/announcement_list.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
@@ -20,7 +21,7 @@ import 'package:coffee_card/screens/scores_screen.dart';
 import 'package:coffee_card/screens/tournament_list.dart';
 import 'package:coffee_card/screens/register_screen.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
-import 'package:coffee_card/screens/announcementdetail_screen.dart';
+
 import 'package:coffee_card/screens/forumcreation_screen.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
 import 'package:coffee_card/screens/listofevents_screen.dart';
@@ -37,12 +38,13 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
 void main() async {
   await dotenv.load(fileName: ".env");
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(
-  //   name: 'SD27',
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
-  // await Notifications.intsance.initialize();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    name: 'SD27',
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await Notifications.intsance.initialize();
+  
   runApp(
     MultiProvider(
       providers: [
@@ -51,6 +53,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => EventsProvider()..fetchEvents()),
         ChangeNotifierProvider(create: (_) => EventsInfoProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => ScoresProvider()),
         ChangeNotifierProvider(
             create: (_) => AnnouncementProvider()..fetchAnnouncements()),
         ChangeNotifierProvider(create: (_) => AnnouncementInfoProvider()),
@@ -77,20 +80,19 @@ class MyApp extends StatelessWidget {
         '/': (context) => const LoginScreen(),
         '/reg': (context) => const RegisterScreen(),
         '/mainMenu': (context) => const MainMenu(),
-        '/dis': (context) => const DiscussionForum(),
         '/createFor': (context) => const CreateForum(),
         '/pos': (context) => const ForumpostScreen(),
         '/annc': (context) => const AnnouncementListScreen(),
-        '/anncDetail': (context) => const AnnouncementdetailScreen(),
+        
         '/tes': (context) => const DisscusisonpostInfoScreen(),
         '/pro': (context) => const UserProfileScreen(),
         '/calendar': (context) => const TableEventsExample(),
-        '/events': (context) => const EventsListScreen(),
         '/createEvent': (context) => const CreateEvent(),
         '/scores': (context) => const GolfScoreScreen(),
         '/users': (context) => const UserList(),
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
         EventInfo.routeName: (context) => const EventInfo(),
+        EventsListScreen.routeName: (context) => const EventsListScreen(),
         PostCreationForm.routeName: (context) => const PostCreationForm(),
         CreateEvent.routeName: (context) => const CreateEvent(),
         AnnouncementInfo.routeName: (context) => const AnnouncementInfo(),
