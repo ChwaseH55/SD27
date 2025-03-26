@@ -15,6 +15,7 @@ import EventsPage from './components/Events';
 import ScoresPage from './components/Scores';
 import Store from './components/Store'; 
 import CalendarPage from './components/Calendar';
+import Chat from './components/Chat';
 import { logout } from './reducers/userReducer';
 import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
 import { loadStripe } from "@stripe/stripe-js";
@@ -26,9 +27,9 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.user);
 
   const isLandingPage = location.pathname === '/';
-  const { user } = useSelector((state) => state.user);
 
   useEffect(() => {
     api
@@ -44,7 +45,7 @@ function App() {
 
   return (
     <div>
-      {!isLandingPage && <Nav onLogout={handleLogout} isLoggedIn={!!user} />}
+      {!isLandingPage && <Nav isLoggedIn={!!user} onLogout={handleLogout} />}
       <div className="flex flex-col min-h-screen">
         <Routes>
           {/* Public Routes */}
@@ -116,6 +117,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Store />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <Chat />
               </ProtectedRoute>
             }
           />

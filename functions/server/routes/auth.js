@@ -83,6 +83,7 @@ router.post('/login', corsMiddleware, async (req, res) => {
                         lastName: user.rows[0].lastname,
                         roleid: user.rows[0].roleid,
                         paymentStatus: user.rows[0].paymentstatus,
+                        profilePicture: user.rows[0].profilepicture
                     }
                 });
             } else {
