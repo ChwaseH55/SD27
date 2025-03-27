@@ -31,7 +31,7 @@ const uploadScoreImageToFirebase = async (file, eventid) => {
     This api allows player to include multiple player in the score
 */
 router.post('/scores', upload.single('scoreimage'), async(req, res) =>{
-    const { eventid, userids } = req.body; //userids should be an array of user IDS or a string with userids seperated by commas
+    const { eventid, userids, score } = req.body; //userids should be an array of user IDS or a string with userids seperated by commas
     const file = req.file;
     
     if (!eventid || !userids || !file) {
@@ -48,8 +48,8 @@ router.post('/scores', upload.single('scoreimage'), async(req, res) =>{
         for(const userid of userIdArray){
             try {
                 const newScore = await pool.query(
-                    'INSERT INTO score_submissions (eventid, userid, scoreimage, approvalstatus) VALUES ($1, $2, $3, $4) RETURNING *',
-                    [eventid, userid, scoreImageUrl, 'Pending']
+                    'INSERT INTO score_submissions (eventid, userid, score, scoreimage, approvalstatus) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+                    [eventid, userid, score, scoreImageUrl, 'Pending']
                 );
                 insertedScores.push(newScore.rows[0]);
             } catch (err) {
@@ -66,7 +66,7 @@ router.post('/scores', upload.single('scoreimage'), async(req, res) =>{
     }
 });
 
-//update a score (once it has been approved you cannot update the score.)
+//update a score (once it has been approved you cannot update the score.) need to update score and scoreimage
 router.put('/scores/:scoreid', async (req, res) => {
     const { scoreid } = req.params;
     const { eventid, scoreimage } = req.body; 

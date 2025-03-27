@@ -4,7 +4,6 @@ const pool = require('../db'); // Assuming you have a db connection setup
 const multer = require('multer');
 const { getStorage } = require('firebase-admin/storage');
 const router = express.Router();
-const multer = require('multer');
 const path = require('path');
 const admin = require('../../firebaseAdmin'); 
 
