@@ -2,6 +2,9 @@ import 'dart:developer';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:coffee_card/api_request/auth_request.dart';
+import 'package:coffee_card/api_request/notifications.dart';
+import 'package:coffee_card/arguments/regOrAllargument.dart';
+import 'package:coffee_card/screens/listofevents_screen.dart';
 import 'package:flutter/material.dart';
 
 class MainMenu extends StatelessWidget {
@@ -9,16 +12,13 @@ class MainMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    
     return Scaffold(
-      backgroundColor: Colors.white,
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text(
             'UCF Golf Club',
             style: TextStyle(fontWeight: FontWeight.w900),
           ),
-          
           centerTitle: true,
           backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
           actions: <Widget>[
@@ -33,76 +33,42 @@ class MainMenu extends StatelessWidget {
             )
           ],
         ),
-        drawer: Drawer(
-          child: ListView(
-            // Important: Remove any padding from the ListView.
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                ),
-                child: Text(
-                  'UCF',
-                  style: TextStyle(color: Colors.white, fontSize: 24),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.forum_rounded,
-                ),
-                title: const Text('Disscussions'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/pos');
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.announcement,
-                ),
-                title: const Text('Announcements'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/annc');
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.score,
-                ),
-                title: const Text('Scores'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/scores');
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.list_alt,
-                ),
-                title: const Text('Events'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/events');
-                },
-              ),
-              Visibility(
-                visible: true,
-                child: ListTile(
-                  leading: const Icon(
-                    Icons.people,
-                  ),
-                  title: const Text('Users'),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/users');
-                  },
-                )
-              ),
-            ],
-          ),
-        ),
         body: const HomePage());
   }
 }
 
+class GridTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  const GridTile(
+      {super.key,
+      required this.icon,
+      required this.title,
+      required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 30, color: Colors.black87),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -135,32 +101,83 @@ class HomePage extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
+            
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: GridView.count(
+                  crossAxisCount: 3, // Adjust the number of columns
+                  crossAxisSpacing: 5.0,
+                  mainAxisSpacing: 5.0,
+                  children: [
+                    GridTile(
+                        icon: Icons.forum_rounded,
+                        title: "Discussions",
+                        onTap: () {
+                          Navigator.pushNamed(context, '/pos');
+                        }),
+                    GridTile(
+                        icon: Icons.announcement,
+                        title: "Announcements",
+                        onTap: () {
+                          Navigator.pushNamed(context, '/annc');
+                        }),
+                    GridTile(
+                        icon: Icons.score,
+                        title: "Scores",
+                        onTap: () {
+                          Navigator.pushNamed(context, '/scores');
+                        }),
+                    GridTile(
+                        icon: Icons.list_alt,
+                        title: "Events",
+                        onTap: () async {
+                          await Navigator.pushNamed(
+                              context, EventsListScreen.routeName,
+                              arguments: IsAllOrReg(true));
+                        }),
+                    GridTile(
+                        icon: Icons.people,
+                        title: "Users",
+                        onTap: () {
+                          Navigator.pushNamed(context, '/users');
+                        }),
+                        GridTile(
+                        icon: Icons.nature_people,
+                        title: "Score Approval",
+                        onTap: () {
+                          Navigator.pushNamed(context, '/adminscores');
+                        }),
+                  ],
+                ),
+              ),
+            ),
 
             // CarouselSlider(
-        //   items: [
-        //     Container(
-        //       margin: const EdgeInsets.all(6.0),
-        //       child: const Text('Message'),
-        //     ),
-        //     //1st Image of Slider
-        //     Container(
-        //       margin: const EdgeInsets.all(6.0),
-        //       child: const Text('Message'),
-        //     ),
-        //   ],
+            //   items: [
+            //     Container(
+            //       margin: const EdgeInsets.all(6.0),
+            //       child: const Text('Message'),
+            //     ),
+            //     //1st Image of Slider
+            //     Container(
+            //       margin: const EdgeInsets.all(6.0),
+            //       child: const Text('Message'),
+            //     ),
+            //   ],
 
-        //   //Slider Container properties
-        //   options: CarouselOptions(
-        //     height: 180.0,
-        //     enlargeCenterPage: true,
-        //     autoPlay: true,
-        //     aspectRatio: 16 / 9,
-        //     autoPlayCurve: Curves.fastOutSlowIn,
-        //     enableInfiniteScroll: true,
-        //     autoPlayAnimationDuration: const Duration(milliseconds: 800),
-        //     viewportFraction: 0.8,
-        //   ),
-        // ),
+            //   //Slider Container properties
+            //   options: CarouselOptions(
+            //     height: 180.0,
+            //     enlargeCenterPage: true,
+            //     autoPlay: true,
+            //     aspectRatio: 16 / 9,
+            //     autoPlayCurve: Curves.fastOutSlowIn,
+            //     enableInfiniteScroll: true,
+            //     autoPlayAnimationDuration: const Duration(milliseconds: 800),
+            //     viewportFraction: 0.8,
+            //   ),
+            // ),
           ],
         ),
       ),

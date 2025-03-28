@@ -7,6 +7,7 @@ class UserModel {
   final String? lastname; // Nullable
   final int roleid;
   final bool paymentstatus;
+  final String? profilepicture;
 
   const UserModel({
     required this.id,
@@ -17,6 +18,7 @@ class UserModel {
     this.lastname,
     required this.roleid,
     required this.paymentstatus,
+    required this.profilepicture
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class UserModel {
       lastname: json['lastname'],
       roleid: json['roleid'],
       paymentstatus: json['paymentstatus'],
+      profilepicture: json['profilepicture'],
     );
   }
 }

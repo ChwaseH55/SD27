@@ -1,3 +1,4 @@
+import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,8 @@ class EventsWidgets extends StatefulWidget {
 class _EventsWidgetsState extends State<EventsWidgets> {
   late bool _isRegistered;
   bool _isAddedToCalendar = false;
+  late EventsProvider eventsProvider = eventsProvider = Provider.of<EventsProvider>(context, listen: false);
+    
 
   @override
   void initState() {
@@ -36,10 +39,13 @@ class _EventsWidgetsState extends State<EventsWidgets> {
       // Call API to unregister
       await unregisterFromEvent(
           widget.event.eventid.toString(), widget.userId.toString());
+          eventsProvider.fetchEvents();
+          
     } else {
       // Call API to register
       await registerForEvent(
           widget.event.eventid.toString(), widget.userId.toString());
+         eventsProvider.fetchEvents();
     }
 
     setState(() {

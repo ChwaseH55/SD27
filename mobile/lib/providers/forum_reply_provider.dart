@@ -29,7 +29,7 @@ class ReplyProvider extends ChangeNotifier {
     try {
       _likes = await getLikes(postId: null, replyId: replyId);
 
-      _user = await getUser(userId: userId);
+      _user = await getSingleUser(userId: userId);
       _userid = await getUserID();
             _roleid = await getRoleId();
       

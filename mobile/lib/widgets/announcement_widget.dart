@@ -5,46 +5,58 @@ import 'package:intl/intl.dart';
 class AnnouncementWidget extends StatelessWidget {
   final AnnouncementModel announcement;
 
-  const AnnouncementWidget({
-    super.key,
-    required this.announcement
-  });
+  const AnnouncementWidget({super.key, required this.announcement});
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate =
-        DateFormat('MMM d, yyyy').format(DateTime.parse(announcement.createddate!));
-        
+    String formattedDate = DateFormat('MMM d, yyyy')
+        .format(DateTime.parse(announcement.createddate!));
+
     return Container(
-        decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: Colors.black),
-            bottom: BorderSide(color: Colors.black),
-          ),
+      decoration: const BoxDecoration(
+        border: Border(
+          top: BorderSide(color: Colors.black),
+          
         ),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 20, right: 8, bottom: 10, top: 5),
-          child: Column(
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Text(announcement.title!, style: const TextStyle(fontWeight: FontWeight.w700,),),
-                  const Spacer(),
-                  Text(formattedDate),
-                ],
-              ),
-              const Row(
-                children: <Widget>[],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[Text(announcement.content!)],
-              ),
-            ],
-          ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20, right: 8, bottom: 10, top: 5),
+        child: Column(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Text(
+                  announcement.title!,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Text(formattedDate),
+              ],
+            ),
+            const Row(
+              children: <Widget>[],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  // Wrap text in Expanded
+                  child: Text(
+                    announcement.content!,
+                    maxLines: 1,
+                  
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            )
+          ],
         ),
-      
+      ),
     );
   }
 }

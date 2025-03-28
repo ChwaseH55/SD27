@@ -1,9 +1,11 @@
+/* eslint-disable linebreak-style */
+/* eslint-disable new-cap */
+/* eslint-disable linebreak-style */
 const admin = require("firebase-admin");
 const functions = require("firebase-functions");
-// const cors = require("cors");
 const express = require("express");
-// const jwt = require("jsonwebtoken");
-// require("dotenv").config();
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 // const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 // const stripe = require("stripe")(stripeSecretKey);
@@ -19,8 +21,8 @@ const usersRoutes = require("./server/routes/users");
 
 const app = express();
 admin.initializeApp();
-// app.use(cors());
-// app.use(express.json());
+
+app.use(express.json());
 
 // Detailed logging middleware
 app.use((req, res, next) => {
@@ -37,33 +39,33 @@ app.use((req, res, next) => {
 });
 
 // JWT Auth middleware
-// const authenticateUser = async (req, res, next) => {
-//   try {
-//     // Get the Authorization header
-//     const authHeader = req.headers.authorization;
-//     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-//       return res.status(401).json({error: "No token provided"});
-//     }
+const authenticateUser = async (req, res, next) => {
+  try {
+    // Get the Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({error: "No token provided"});
+    }
 
-//     // Get the token
-//     const token = authHeader.split("Bearer ")[1];
+    // Get the token
+    const token = authHeader.split("Bearer ")[1];
 
-//     if (!process.env.JWT_SECRET) {
-//       console.error("JWT_SECRET is not set in environment variables");
-//       return res.status(500).json({error: "Server configuration error"});
-//     }
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not set in environment variables");
+      return res.status(500).json({error: "Server configuration error"});
+    }
 
-//     // Verify the JWT token
-//     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify the JWT token
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-//     // Add the user to the request object
-//     req.user = decodedToken;
-//     next();
-//   } catch (error) {
-//     console.error("Auth Error:", error);
-//     res.status(401).json({error: "Invalid token"});
-//   }
-// };
+    // Add the user to the request object
+    req.user = decodedToken;
+    next();
+  } catch (error) {
+    console.error("Auth Error:", error);
+    res.status(401).json({error: "Invalid token"});
+  }
+};
 
 // Public routes (no authentication required)
 app.get("/api/test", (req, res) => {
@@ -79,13 +81,13 @@ app.get("/api/test", (req, res) => {
 app.use("/api/auth", authRoutes);
 
 // Protected routes (require authentication)
-app.use("/api/announcements", announcementsRoutes);
-app.use("/api/events", eventsRoutes);
-app.use("/api/forum", forumRoutes);
-// app.use("/api/products", productsRoutes);
-// app.use("/api/scores", scoresRoutes);
-// app.use("/api/stripe", stripeRoutes);
-app.use("/api/users", usersRoutes);
+app.use("/api/announcements", authenticateUser, announcementsRoutes);
+app.use("/api/events", authenticateUser, eventsRoutes);
+app.use("/api/forum", authenticateUser, forumRoutes);
+// app.use("/api/products", authenticateUser, productsRoutes);
+// app.use("/api/scores", authenticateUser, scoresRoutes);
+// app.use("/api/stripe", authenticateUser, stripeRoutes);
+app.use("/api/users", authenticateUser, usersRoutes);
 
 // 404 handler
 app.use((req, res) => {

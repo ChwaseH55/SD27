@@ -1,7 +1,9 @@
 import 'dart:developer';
 
 import 'package:coffee_card/api_request/forum_request.dart';
+import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LikeButton extends StatelessWidget {
   final bool isPost;
@@ -41,6 +43,7 @@ class LikeButtonForPost extends StatefulWidget {
 }
 
 class _LikeButtonForPost extends State<LikeButtonForPost> {
+   late ForumProvider forumProvider;
   bool isLiked = false;
   int counter = 0;
   late int likeCount; // Mutable variable to store the like count
@@ -53,6 +56,11 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
       isLiked = true;
     }
   }
+@override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+ forumProvider = Provider.of<ForumProvider>(context, listen: false);
+}
 
   @override
   void dispose() {
@@ -81,6 +89,7 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
 
         await deleteLike(likeId: likeId.toString());
       }
+      await forumProvider.fetchPosts();
     }
   }
 
@@ -101,8 +110,9 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
     return GestureDetector(
         onTap: toggleLike,
         child: SizedBox(
-            width: 60,
-            child: Container(
+            width: 50,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 border: Border.all(
@@ -117,13 +127,26 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
                   padding: const EdgeInsets.only(left: 5),
                   child: Row(
                     children: <Widget>[
-                      Icon(Icons.thumb_up_alt,
-                          color: isLiked
-                              ? const Color.fromRGBO(186, 155, 55, 1)
-                              : Colors.black),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        transitionBuilder: (child, animation) =>
+                            ScaleTransition(
+                          scale: animation,
+                          child: child,
+                        ),
+                        child: Icon(
+                          isLiked ? Icons.thumb_up : Icons.thumb_up_off_alt,
+                          key: ValueKey<bool>(
+                              isLiked), // Important for animation to trigger
+                          color: isLiked ? const Color.fromRGBO(186, 155, 55, 1) : Colors.black,
+                          size: 20,
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
-                        child: Text(likeCount.toString()),
+                        child: Text(likeCount.toString(),style: TextStyle( color: isLiked
+                        ? const Color.fromRGBO(186, 155, 55, 1)
+                        : Colors.black,),),
                       )
                     ],
                   )),

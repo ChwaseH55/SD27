@@ -50,3 +50,6 @@ client/build/
 server/node_modules/
 server/dist/
 server/build/
+serviceaccount.json
+generateToken.js
+sendNotif.js
