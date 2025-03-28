@@ -45,14 +45,21 @@ class _EventsListScreenState extends State<EventsListScreen> {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
         actions: [
-          if (eventsProvider.roleid == '5')
-            TextButton(
+          
+            ElevatedButton(
               onPressed: () async {
                 await Navigator.pushNamed(context, CreateEvent.routeName,
                     arguments: EventCreateArgument(false, 1, '', '', '', '', false, ''));
                 eventsProvider.fetchEvents();
               },
-              child: const Text('+ New Event', style: TextStyle(color: Colors.black)),
+              style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(12), // Change this value as needed
+              ),
+            ),
+              child: const Text('+ New Event', style: TextStyle(color: Colors.white)),
             ),
         ],
       ),
@@ -117,6 +124,7 @@ class ToggleButtons extends StatelessWidget {
             ? const Color.fromRGBO(186, 155, 55, 1)
             : const Color.fromARGB(255, 147, 122, 39),
       ),
+      
       child: Text(text, style: const TextStyle(color: Colors.black)),
     );
   }

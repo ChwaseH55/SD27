@@ -143,7 +143,7 @@ class HomePage extends StatelessWidget {
                           Navigator.pushNamed(context, '/users');
                         }),
                         GridTile(
-                        icon: Icons.people,
+                        icon: Icons.nature_people,
                         title: "Score Approval",
                         onTap: () {
                           Navigator.pushNamed(context, '/adminscores');
