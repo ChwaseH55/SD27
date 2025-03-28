@@ -76,9 +76,9 @@ Future<void> loginUser({
       await storage.write(key: 'userRole', value: data['user']['roleid'].toString());
       await storage.write(key: 'token', value: data['token'].toString());
       String? userId = await storage.read(key: 'userId');
-       String? role = await storage.read(key: 'userRole');
+      String? role = await storage.read(key: 'userRole');
       log('User ID cached: $userId');
-      log('User ID cached: $role');
+      log('User Role cached: $role');
       log('Login successfully');
 
       if (context.mounted) Navigator.pushReplacementNamed(context, '/mainMenu');

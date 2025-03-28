@@ -142,6 +142,12 @@ class HomePage extends StatelessWidget {
                         onTap: () {
                           Navigator.pushNamed(context, '/users');
                         }),
+                    GridTile(
+                        icon: Icons.shopping_cart,
+                        title: "Shop",
+                        onTap: () {
+                          Navigator.pushNamed(context, '/shop');
+                        }),
                   ],
                 ),
               ),
