@@ -1,3 +1,4 @@
+import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:coffee_card/api_request/events_request.dart';
 import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/arguments/regOrAllargument.dart';
@@ -21,20 +22,29 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreen extends State<UserProfileScreen> {
+  late UserProvider userProvider;
+  final nameController = TextEditingController();
+  final userNameController = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    userProvider = Provider.of<UserProvider>(context, listen: false);
+    userProvider.getUsers();
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    nameController.dispose();
+    userNameController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.sizeOf(context).height;
     List<String> role = ['One', 'Two', 'Three', 'Four', 'Five'];
-    final nameController = TextEditingController();
-    final userNameController = TextEditingController();
-
-    @override
-    void dispose() {
-      // Clean up the controller when the widget is disposed.
-      nameController.dispose();
-      userNameController.dispose();
-      super.dispose();
-    }
 
     return Scaffold(
         appBar: AppBar(
@@ -48,7 +58,7 @@ class _UserProfileScreen extends State<UserProfileScreen> {
                 SizedBox(width: 14),
                 Icon(Icons.arrow_back_ios,
                     color: Colors.black, size: 16), // Reduce size if needed
-          
+
                 Text(
                   'Back',
                   style: TextStyle(
@@ -66,6 +76,20 @@ class _UserProfileScreen extends State<UserProfileScreen> {
           ),
           centerTitle: true,
           backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 15),
+              child: TextButton(
+                onPressed: () async {
+                  logoutUser();
+                  Navigator.pushReplacementNamed(context, '/');
+                },
+                
+                child:
+                    const Text('Log out', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w900), ),
+              )
+            )
+          ],
         ),
         body: SingleChildScrollView(
             child: Column(
@@ -78,6 +102,12 @@ class _UserProfileScreen extends State<UserProfileScreen> {
                     builder: (context, userProvider, child) {
                   if (userProvider.isLoading) {
                     return const Center(child: CircularProgressIndicator());
+                  }
+                  ImageProvider<Object>? picture;
+                  if(userProvider.user!.profilepicture == null) {
+                    picture = const AssetImage('assets/images/golf_logo.jpg');
+                  } else {
+                    picture = NetworkImage(userProvider.user!.profilepicture!);
                   }
                   return Card(
                       elevation: 4,
@@ -105,15 +135,14 @@ class _UserProfileScreen extends State<UserProfileScreen> {
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       border: Border.all(
-                                        color: Colors.red,
+                                        color: Colors.black,
                                         width: 1.0,
                                       ),
                                       borderRadius: BorderRadius.circular(50),
                                     ),
-                                    child: const CircleAvatar(
+                                    child: CircleAvatar(
                                       radius: 25,
-                                      backgroundImage: NetworkImage(
-                                          "https://th.bing.com/th/id/OIP.ndT-4EGkuwqsyIN1rqYylQHaFJ?w=279&h=194&c=7&r=0&o=5&dpr=2&pid=1.7"),
+                                      backgroundImage: picture,
                                     ),
                                   ),
                                   TextButton(

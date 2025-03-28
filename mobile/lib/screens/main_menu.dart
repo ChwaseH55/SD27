@@ -142,6 +142,12 @@ class HomePage extends StatelessWidget {
                         onTap: () {
                           Navigator.pushNamed(context, '/users');
                         }),
+                        GridTile(
+                        icon: Icons.people,
+                        title: "Score Approval",
+                        onTap: () {
+                          Navigator.pushNamed(context, '/adminscores');
+                        }),
                   ],
                 ),
               ),

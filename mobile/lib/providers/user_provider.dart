@@ -1,7 +1,5 @@
 import 'package:coffee_card/api_request/auth_request.dart';
-import 'package:coffee_card/api_request/events_request.dart';
 import 'package:coffee_card/api_request/user_request.dart';
-import 'package:coffee_card/models/events_model.dart';
 import 'package:coffee_card/models/user_model.dart';
 import 'package:flutter/material.dart';
 

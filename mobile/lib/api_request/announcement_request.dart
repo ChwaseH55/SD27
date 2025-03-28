@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:coffee_card/api_request/notifications.dart';
 import 'package:coffee_card/models/announcement_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
+import 'package:http_status/http_status.dart';
 
 String homeAddress = "http://11.22.13.70:5000/api/announcements";
 String urlAddress = "https://sd27-87d55.web.app/api/announcements";
@@ -28,7 +30,11 @@ Future<void> createAnnouncement(
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode ==  201) {
+      final res = AnnouncementModel.fromJson(json.decode(response.body));
+      String id = res.announcementid.toString();
+      await Notifications.intsance
+          .sendNotification('Announcements', title, 'announcements:$id');
       log('Announcement created successfully: ${response.body}');
     } else {
       log('Error creating Announcement: ${response.body}');

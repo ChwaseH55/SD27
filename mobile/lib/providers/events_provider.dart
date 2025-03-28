@@ -39,4 +39,26 @@ class EventsProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  Future<void> testEvents() async {
+    _isLoading = true;
+    //notifyListeners();
+
+    try {
+      _events = await getAllEvents();
+      _userid = await getUserID();
+      for(var event in _events ) {
+        _isRegList[event.eventid!] = await isUserRegisteredForEvent(event.eventid.toString(), userId!);
+      }
+      _roleid = await getRoleId();
+      _registeredevents = await getUserRegisteredEvents(userId!);
+    } catch (e) {
+      _events = [];
+      _userid = '';
+      _registeredevents = [];
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
 }

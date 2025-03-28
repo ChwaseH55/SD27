@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:coffee_card/arguments/announcementargument.dart';
 import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/arguments/regOrAllargument.dart';
 import 'package:coffee_card/main.dart';
+import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/screens/listofevents_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -133,11 +135,23 @@ class Notifications {
   }
 
   void _handleBackgroundMessage(String type) {
+    List<String> parts = type.split(':');
+
+// Storing values in separate variables
+    String topic = parts[0]; // "event"
+    String value = parts.length > 1 ? parts[1] : ''; // res.eventid.toString()
     //open thing
-    navigatorKey.currentState?.pushNamed(
-      EventInfo.routeName,
-      arguments: EventsArgument(int.parse(type)),
-    );
+    if (topic == 'events') {
+      navigatorKey.currentState?.pushNamed(
+        EventInfo.routeName,
+        arguments: EventsArgument(int.parse(value)),
+      );
+    } else if (topic == 'announcements') {
+      navigatorKey.currentState?.pushNamed(
+        AnnouncementInfo.routeName,
+        arguments: AnnouncementArgument(int.parse(value)),
+      );
+    }
   }
 
   Future<void> subscribeToTopic(String topic) async {
@@ -147,7 +161,7 @@ class Notifications {
 
   Future<void> sendNotification(String title, String body, String type) async {
     String accessToken =
-        'ya29.c.c0ASRK0GZsNl0Nr8rSB59JweXbqB3XIlhW-Op5f-ZVnC8bX2eqGj5Hpk5zojsvYPg2cfRBBkGijnsx1-m1rFK1gR-YtEO4PY9uW5TMq4RrRqYDfWdvnShSTHpbb1lJSKijUt5QuTSb-7XnK78mZ7xFfF_DzD_8aOEWKcUjQkZFB76hJva5KWMjHu3-e86w-HBfHs6ZyTQv8dNae95qd261h1t_IkgeNu7Jyt86IDGmilL0wAgegrPsI4V6HD724r22nf96izAiNA_XIOVIGRQRmvXqvxQlZdERIVZd2u2YzjDZpBVt11ISI0h-Eu6M9DHV9n-vW__51kIELSLf5QmF_FhYtvTo_ANIiS7jgw822dF6lfSza1dokREH384Phhmkb6tbFnrhj_9huOe6bOZZI_8_0x6U1f3Z33ebJ_OxyUamnUqiayUfdnhqFbtce0QlklhW1mmOzObvzWR0eiY83x0Oen_q8cvYivJpY9B9x3x6lVUz2Xzz36veSVe7lidvRn2ZJj_zlm0qRjF9fbkxZUUvpe607UVOvyXlihgFJo5BmymnZsZB0oQjgva_eosvxYo-foonWeaaZR3B2VacfxuynJ69ldkMlsn3l3SmnyOoujR8idcvSWdm2k3Q7ZXlvq8zWISxYJ5YR51jJs-6xwVc57vpt0MfuQU8WIj_4YfIdbBMghvXkrsjQelneaj-B7dyenU6diwVxwg3z5F2wzVV39npWcnt7y4hWXF_8blVmmFMZ5l0X3mubBOpo5Raajx6rJzR-OtpaqQ5YQkrl2Yds-uFlYewWXuirz4jeOFx3z4rqYBJuRFbxWM0W7V5ZhtmujJXOZvjyi1R7Q-qxpn-xeWSdy9S-56r4JXvot2VIW3wBQfwqbZ16IBfSxkxqlnbmrX3IBQZMSFS-nb4_b_SBfx2SUfde_BfR1jjXFo70Sf0fg5fc2ypfVUzdohnR937di0UozxvgJ8UbyaXOXpW3nWrO0IktkJa2kklt6a2Bfg-JsdvhSJ';
+        'ya29.c.c0ASRK0GbsBm7AvxEAS8GGcQgb-_mrsDtRUVjOB1JhfHuO4je_55bNncx4hLAaf8JcT0m-zK3Q3BECUAx9qAkNTDM22v43bE5qLK4Rm5wqQcHsVYzozVxrvbWYC7d0nB7IrxIf1oI-JiKzmhYUCoPxOQDyuFoJxF_OtufNNvrdp7cs9CrNTVHjYZY9f1WNb1m877kUbVgYooPR9FZ1J-pnOOh94PQH2rAxOfKdywHMArJwDdSYatWdPCTHy535FT0ktkJDndV-X9bier6Ut44qTC30vyCCPa6-ON01lw1ErBzmdNTsB1hQOF8NwZUqti6IGtMipWDylJ_bI8wRqrLfG1iD_P30tkgCAFp0ky8fgj_qawfu2rdxjv8elQE387CVbrMi9OWw52Imy32s6jfUY-dc5kxFlfMx9v7qBgWV_xWlU8MgiakUj3eeXedrn-BO50plVhBzVwvj5rRgsX7M5rsQvsRoschdReQdiWSw34WdzwdSmh1OSdW94BJhmYh8pgtfvJXieWmn0q5f1i0gkzm3xk034R0rVOI1m2mhW75UZnz16fI7M8Q6WX348ysq2aR2jFVttxOiOFiRig3u6x-l1Xrivwz1erdf87satqzfzc_qi3J7muSgS28wFyyay1V0xIdWIs-FROU5UxuQXiV7c1mziBg9rOVi6rZJq--M971xFvlXg9bZI84Qur27gjI20YvhpzwzdSz8Z_x_11yqF491tb2h63j-YU2WxhqwIooogIW39qw81X70f7g79zkqW9v7-_dVU-ooiZMm017lBJ-b2JbvOeXZX8jlgrr8v8W0c110IOJ0ghRm_i8e7fMUY5yOqYwamyaBhf7X58nhYtxel_-nnl8OWM7Xiyssz11kjVu8qYMcn-1X0qVJy2axtzWxehQp4w2fwjXUzbM6hJquV3c9bVtFmp0nov42t8s2rc11hpUz2UWoV8Fg903_Q9z48rtJ0x7Szueeua_c6JeMBrUxlQiggjf54m07JqXbUWqlt6U';
     var messagePayload = {
       'message': {
         'topic': "all_devices",

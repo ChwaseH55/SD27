@@ -78,7 +78,7 @@ Future<void> loginUser({
       String? userId = await storage.read(key: 'userId');
        String? role = await storage.read(key: 'userRole');
       log('User ID cached: $userId');
-      log('User ID cached: $role');
+      log('Role ID cached: $role');
       log('Login successfully');
 
       if (context.mounted) Navigator.pushReplacementNamed(context, '/mainMenu');
@@ -100,6 +100,7 @@ Future<String?> getRoleId() async {
 
 Future<void> logoutUser() async {
   await storage.delete(key: 'userId');
+  await storage.delete(key: 'userRole');
   await storage.delete(key: 'token');
-  log('User logged out, ID removed');
+  log('User logged out, ID removed, token removed');
 }

@@ -1,15 +1,20 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:coffee_card/api_request/scores_request.dart';
 import 'package:coffee_card/arguments/announcement_create_arg.dart';
 import 'package:coffee_card/arguments/announcementargument.dart';
 import 'package:coffee_card/models/announcement_model.dart';
 import 'package:coffee_card/providers/announcement_provider.dart';
+import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/scores_provider.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
+import 'package:coffee_card/utils.dart';
 import 'package:coffee_card/widgets/announcement_widget.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +24,6 @@ class GolfScoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
         appBar: AppBar(
           leading: GestureDetector(
             onTap: () {
@@ -31,7 +35,7 @@ class GolfScoreScreen extends StatelessWidget {
                 SizedBox(width: 14),
                 Icon(Icons.arrow_back_ios,
                     color: Colors.black, size: 16), // Reduce size if needed
-          
+
                 Text(
                   'Back',
                   style: TextStyle(
@@ -42,7 +46,7 @@ class GolfScoreScreen extends StatelessWidget {
                 ),
               ],
             ),
-        ),
+          ),
           title: const Text(
             'Scores',
             style: TextStyle(fontWeight: FontWeight.w900),
@@ -89,6 +93,7 @@ class _TournamentList extends State<TournamentList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Column(
         children: [
           Padding(
@@ -114,34 +119,32 @@ class _TournamentList extends State<TournamentList> {
             ),
           ),
           Expanded(
-            child: Consumer<AnnouncementProvider>(
-              builder: (context, announcementProvider, child) {
-                if (announcementProvider.isLoading) {
+            child: Consumer<EventsProvider>(
+              builder: (context, eventProvider, child) {
+                if (eventProvider.isLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final filteredAnnouncements =
-                    announcementProvider.announcements.where((announcement) {
-                  return announcement.title!
-                      .toLowerCase()
-                      .contains(searchQuery);
+                final filteredEvents = eventProvider.events.where((event) {
+                  return event.eventname!.toLowerCase().contains('tour');
                 }).toList();
 
-                if (filteredAnnouncements.isEmpty) {
+                if (filteredEvents.isEmpty) {
                   return const Center(
                       child: Text('No matching announcements found.'));
                 }
 
                 return ListView.builder(
-                  itemCount: filteredAnnouncements.length,
+                  itemCount: filteredEvents.length,
                   itemBuilder: (context, index) {
-                    final announcement = filteredAnnouncements[index];
+                    final event = filteredEvents[index];
                     return InkWell(
                       onTap: () {},
-                      child: const Padding(
-                        padding: EdgeInsets.only(top: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8),
                         child: PostWidget(
-                          postName: 'Name',
+                          postName: event.eventname!,
+                          eventid: event.eventid!,
                         ),
                       ),
                     );
@@ -158,7 +161,8 @@ class _TournamentList extends State<TournamentList> {
 
 class PostWidget extends StatefulWidget {
   final String postName;
-  const PostWidget({super.key, required this.postName});
+  final int eventid;
+  const PostWidget({super.key, required this.postName, required this.eventid});
 
   @override
   State<PostWidget> createState() => _PostWidget();
@@ -197,7 +201,9 @@ class _PostWidget extends State<PostWidget> {
                 onPressed: () async {
                   showDialog<void>(
                       context: context,
-                      builder: (context) => const DialogWid());
+                      builder: (context) => DialogWid(
+                            eventid: widget.eventid,
+                          ));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
@@ -225,7 +231,8 @@ class _PostWidget extends State<PostWidget> {
 }
 
 class DialogWid extends StatefulWidget {
-  const DialogWid({super.key});
+  final int eventid;
+  const DialogWid({super.key, required this.eventid});
 
   @override
   State<DialogWid> createState() => _DialogWid();
@@ -233,89 +240,50 @@ class DialogWid extends StatefulWidget {
 
 class _DialogWid extends State<DialogWid> {
   final _formKey = GlobalKey<FormState>();
-  FilePickerResult? result;
-  int _count = 1;
-  void _addNewContactRow() {
-    setState(() {
-      _count = _count + 1;
-    });
-  }
+  //int _count = 4;
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> extractedChildren =
-        List.generate(_count, (int i) => const ScoresForm());
+    // List<Widget> extractedChildren =
+    //     List.generate(_count, (int i) => const ScoresForm());
     double width = MediaQuery.sizeOf(context).width;
     double height = MediaQuery.sizeOf(context).height;
 
-    return AlertDialog(
-        title: const Text("Input Scores"),
-        content: Stack(clipBehavior: Clip.none, children: <Widget>[
-          Positioned(
-            left: -30,
-            top: -80,
-            child: InkResponse(
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-              child: const CircleAvatar(
-                backgroundColor: Colors.white,
-                radius: 18,
-                child: Icon(Icons.close, size: 18),
+    return SingleChildScrollView(
+        child: AlertDialog(
+      title: const Text("Upload Score Card"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          SizedBox(
+            height: height * 0.55, // Adjust height to fit inside the dialog
+            child: SingleChildScrollView(
+              child: ScoresForm(
+                eventid: widget.eventid,
               ),
             ),
           ),
-          SizedBox(
-              child: Form(
-                  key: _formKey,
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
-                            height: height * 0.4,
-                            constraints:
-                                BoxConstraints(maxHeight: height * 0.55),
-                            child: ListView(
-                              scrollDirection: Axis.vertical,
-                              children: extractedChildren,
-                            )),
-                        Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: IconButton(
-                                icon: const Icon(
-                                  Icons.add,
-                                  size: 20,
-                                ),
-                                onPressed: () {
-                                  _addNewContactRow();
-                                })),
-                        Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: ElevatedButton(
-                                child: const Text('Submitß'),
-                                onPressed: () {})),
-                        ElevatedButton(
-                          onPressed: () async {
-                            result = await FilePicker.platform
-                                .pickFiles(allowMultiple: true);
-                            if (result == null) {
-                              log("No file selected");
-                            } else {
-                              setState(() {});
-                              for (var element in result!.files) {
-                                log(element.name);
-                              }
-                            }
-                          },
-                          child: const Text("File Picker"),
-                        ),
-                      ])))
-        ]));
+          const SizedBox(height: 10), // Adds spacing before buttons
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(); // Closes the dialog
+          },
+          child: const Text(
+            "Close",
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+      ],
+    ));
   }
 }
 
 class ScoresForm extends StatefulWidget {
-  const ScoresForm({super.key});
+  final int eventid;
+  const ScoresForm({super.key, required this.eventid});
 
   @override
   State<ScoresForm> createState() => _ScoresForm();
@@ -324,18 +292,32 @@ class ScoresForm extends StatefulWidget {
 class _ScoresForm extends State<ScoresForm> {
   late ScoresProvider scoreProvider;
   final scoreController = TextEditingController();
+  final scoreController2 = TextEditingController();
+  final scoreController3 = TextEditingController();
+  final scoreController4 = TextEditingController();
+  String val = '';
+  String val2 = '';
+  String val3 = '';
+  String val4 = '';
+  FilePickerResult? result;
+  List<String> resScores = [];
+  List<String> resIds = [];
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    scoreController.dispose();
+    scoreController2.dispose();
+    scoreController3.dispose();
+    scoreController4.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     scoreProvider = Provider.of<ScoresProvider>(context, listen: false);
     scoreProvider.getUsers();
-  }
-
-  @override
-  void dispose() {
-    scoreController.dispose();
-    super.dispose();
   }
 
   @override
@@ -346,6 +328,12 @@ class _ScoresForm extends State<ScoresForm> {
       padding: const EdgeInsets.only(top: 0),
       child: Column(
         children: [
+          const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Player 1',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )),
           DropdownMenu<String>(
             menuHeight: height * 0.3,
             initialSelection: scoreProvider.users.isNotEmpty
@@ -353,32 +341,285 @@ class _ScoresForm extends State<ScoresForm> {
                 : null, // Set initial selection
             dropdownMenuEntries: scoreProvider.users.map((user) {
               return DropdownMenuEntry(
-                value: user.username, // Use user ID or another unique field
+                value:
+                    user.id.toString(), // Use user ID or another unique field
                 label: user.username, // Display user name
               );
             }).toList(),
             onSelected: (value) {
-              setState(() {});
+              val = value!;
             },
           ),
           Padding(
             padding: const EdgeInsets.all(4),
-            child: TextFormField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
+            child: SizedBox(
+              width: width * 0.28,
+              child: TextFormField(
+                controller: scoreController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.black)),
+                  focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Colors.black)),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.greenAccent),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Colors.red),
+                    borderSide: const BorderSide(
+                        color: Color.fromRGBO(186, 155, 55, 1)),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.red),
+                  ),
                 ),
               ),
             ),
           ),
+          const SizedBox(height: 10),
+          const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Player 2',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )),
+          DropdownMenu<String>(
+            menuHeight: height * 0.3,
+            initialSelection: scoreProvider.users.isNotEmpty
+                ? scoreProvider.users.first.username
+                : null, // Set initial selection
+            dropdownMenuEntries: scoreProvider.users.map((user) {
+              return DropdownMenuEntry(
+                value:
+                    user.id.toString(), // Use user ID or another unique field
+                label: user.username, // Display user name
+              );
+            }).toList(),
+            onSelected: (value) {
+              val2 = value!;
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4),
+            child: SizedBox(
+              width: width * 0.28,
+              child: TextFormField(
+                controller: scoreController2,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.black)),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(
+                        color: Color.fromRGBO(186, 155, 55, 1)),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.red),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Player 3',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )),
+          DropdownMenu<String>(
+            menuHeight: height * 0.3,
+            initialSelection: scoreProvider.users.isNotEmpty
+                ? scoreProvider.users.first.username
+                : null, // Set initial selection
+            dropdownMenuEntries: scoreProvider.users.map((user) {
+              return DropdownMenuEntry(
+                value:
+                    user.id.toString(), // Use user ID or another unique field
+                label: user.username, // Display user name
+              );
+            }).toList(),
+            onSelected: (value) {
+              val3 = value!;
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4),
+            child: SizedBox(
+              width: width * 0.28,
+              child: TextFormField(
+                controller: scoreController3,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.black)),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(
+                        color: Color.fromRGBO(186, 155, 55, 1)),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.red),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Player 4',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              )),
+          DropdownMenu<String>(
+            menuHeight: height * 0.3,
+            initialSelection: scoreProvider.users.isNotEmpty
+                ? scoreProvider.users.first.username
+                : null, // Set initial selection
+            dropdownMenuEntries: scoreProvider.users.map((user) {
+              return DropdownMenuEntry(
+                value:
+                    user.id.toString(), // Use user ID or another unique field
+                label: user.username, // Display user name
+              );
+            }).toList(),
+            onSelected: (value) {
+              val4 = value!;
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(4),
+            child: SizedBox(
+              width: width * 0.28,
+              child: TextFormField(
+                controller: scoreController4,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.black)),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(
+                        color: Color.fromRGBO(186, 155, 55, 1)),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.red),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton.icon(
+            onPressed: () async {
+              result = await FilePicker.platform.pickFiles(allowMultiple: true);
+              if (result == null) {
+                log("No file selected");
+              } else {
+                setState(() {});
+                for (var element in result!.files) {
+                  log(element.name);
+                }
+              }
+            },
+            icon: const Icon(
+              Icons.upload_file_outlined,
+              color: Colors.black,
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(12), // Change this value as needed
+              ),
+            ),
+            label: const Text(
+              "File Picker",
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Padding(
+              padding: const EdgeInsets.all(4),
+              child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          12), // Change this value as needed
+                    ),
+                  ),
+                  onPressed: () async {
+                    if (scoreController.text == '' ||
+                        scoreController2.text == '' ||
+                        scoreController3.text == '' ||
+                        scoreController4.text == '') {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Fill out scores for all players')));
+                    } else {
+                      if (val == '' || val2 == '' || val3 == '' || val4 == '') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('For each score select a player')));
+                      } else if (result == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Please input a file')));
+                      } else {
+                        resScores = [
+                          scoreController.text,
+                          scoreController2.text,
+                          scoreController3.text,
+                          scoreController4.text
+                        ];
+                        resIds = [(val), val2, val3, val4];
+
+                        String? eventid = widget.eventid.toString();
+                        File file = File(result!.files.single.path!);
+                        String fileName =
+                            "${DateTime.now().millisecondsSinceEpoch}_${result!.files.single.name}";
+
+                        // 🟢 Step 2: Create Firebase Storage reference
+                        Reference storageRef = FirebaseStorage.instance
+                            .ref()
+                            .child("score_images/$eventid/$fileName");
+
+                        // 🟢 Step 3: Upload file
+                        UploadTask uploadTask = storageRef.putFile(file);
+                        TaskSnapshot snapshot = await uploadTask;
+
+                        // 🟢 Step 4: Get Download URL
+                        String downloadUrl =
+                            await snapshot.ref.getDownloadURL();
+                        log("File uploaded! Download URL: $downloadUrl");
+
+                        bool res = await uploadScore(
+                            eventId: widget.eventid.toString(),
+                            scores: resScores,
+                            userIds: resIds,
+                            scoreImage: downloadUrl);
+                        if (res) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Scores upload')));
+                            Navigator.pop(context);
+                          }
+                        }
+                      }
+                    }
+                  },
+                  child: const Text(
+                    'Submit Scores',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.black,
+                    ),
+                  )))
         ],
       ),
     );

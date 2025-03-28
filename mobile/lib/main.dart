@@ -5,8 +5,10 @@ import 'package:coffee_card/providers/events_info_provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
+import 'package:coffee_card/providers/scores_approval_provider.dart';
 import 'package:coffee_card/providers/scores_provider.dart';
 import 'package:coffee_card/providers/user_provider.dart';
+import 'package:coffee_card/screens/adminscorereview_screen.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/screens/calendar_screen.dart';
 import 'package:coffee_card/screens/eventCreation.dart';
@@ -21,7 +23,7 @@ import 'package:coffee_card/screens/scores_screen.dart';
 import 'package:coffee_card/screens/tournament_list.dart';
 import 'package:coffee_card/screens/register_screen.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:coffee_card/screens/forumcreation_screen.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
 import 'package:coffee_card/screens/listofevents_screen.dart';
@@ -83,13 +85,13 @@ class MyApp extends StatelessWidget {
         '/createFor': (context) => const CreateForum(),
         '/pos': (context) => const ForumpostScreen(),
         '/annc': (context) => const AnnouncementListScreen(),
-        
         '/tes': (context) => const DisscusisonpostInfoScreen(),
         '/pro': (context) => const UserProfileScreen(),
         '/calendar': (context) => const TableEventsExample(),
         '/createEvent': (context) => const CreateEvent(),
         '/scores': (context) => const GolfScoreScreen(),
         '/users': (context) => const UserList(),
+        '/adminscores': (context) => const ScoreListScreen(),
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
         EventInfo.routeName: (context) => const EventInfo(),
         EventsListScreen.routeName: (context) => const EventsListScreen(),

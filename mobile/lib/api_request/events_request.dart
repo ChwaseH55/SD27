@@ -38,8 +38,9 @@ Future<void> createEvent(
 
     if (response.statusCode == 200) {
       final res = EventsModel.fromJson(json.decode(response.body));
-      await Notifications.intsance
-          .sendNotification('Events', eventName, res.eventid.toString());
+      String id = res.eventid.toString();
+      await Notifications.intsance.sendNotification(
+          'Events', eventName,  'events:$id');
 
       log('Post created successfully: ${response.body}');
     } else {

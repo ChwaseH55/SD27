@@ -5,13 +5,13 @@ import 'package:http/http.dart';
 import 'package:coffee_card/models/user_model.dart';
 
 String urlAddress = "https://sd27-87d55.web.app/api/users";
-String devAddress = "http://11.22.13.70:5000/api/users/";
+String devAddress = "http://11.22.13.70:5000/api/users";
 const FlutterSecureStorage _storage = FlutterSecureStorage();
 
 Future<UserModel> getSingleUser({required String userId}) async {
   try {
     final token = await _storage.read(key: 'token');
-    final url = Uri.parse('$devAddress/$userId');
+    final url = Uri.parse('$urlAddress/$userId');
     final response =
         await get(url, headers: {'Authorization': 'Bearer ${token!}'});
 
