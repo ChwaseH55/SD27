@@ -1,3 +1,8 @@
+# js files
+sendNotif.js
+serviceaccount.json
+generateToken.js
+
 # Node modules
 node_modules/
 
