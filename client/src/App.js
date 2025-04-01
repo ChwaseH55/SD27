@@ -8,14 +8,15 @@ import Login from './components/Login';
 import Landing from './components/Landing';
 import Home from './components/Home';
 import Nav from './components/Nav';
+import Footer from './components/Footer';
 import Account from './components/Account';
 import Forum from './components/Forum';
 import AdminDash from './components/AdminDash';
-import EventsPage from './components/Events';
 import ScoresPage from './components/Scores';
 import Store from './components/Store'; 
 import CalendarPage from './components/Calendar';
 import Chat from './components/Chat';
+import Announcements from './components/Announcements';
 import { logout } from './reducers/userReducer';
 import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
 import { loadStripe } from "@stripe/stripe-js";
@@ -97,14 +98,6 @@ function App() {
             }
           />
           <Route
-            path="/events"
-            element={
-              <ProtectedRoute>
-                <EventsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/scores"
             element={
               <ProtectedRoute>
@@ -128,12 +121,21 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/announcements"
+            element={
+              <ProtectedRoute>
+                <Announcements />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
         {data && (
           <p className="absolute bottom-4 text-center w-full text-sm text-gray-600">
             Server Message: {data}
           </p>
         )}
+        {!isLandingPage && <Footer />}
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ const stripeRoutes = require('./server/routes/stripe');
 const usersRoutes = require('./server/routes/users');
 
 const app = express();
-admin.initializeApp();
+//admin.initializeApp();
 
 app.use(express.json());
 

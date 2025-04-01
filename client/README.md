@@ -68,3 +68,49 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+# UCF Golf Club Website
+
+This is the official website for the UCF Golf Club.
+
+## Contact Form Setup
+
+The contact form uses EmailJS to send emails. To set it up:
+
+1. Create a free account at [EmailJS](https://www.emailjs.com/)
+2. Create an Email Service (Gmail, Outlook, etc.)
+3. Create an Email Template with the following variables:
+   - `to_email` (recipient's email)
+   - `from_name` (sender's name)
+   - `subject` (email subject)
+   - `message` (email message)
+   - `reply_to` (sender's email for replies)
+4. Get your EmailJS User ID, Service ID, and Template ID
+5. Update the following constants in `src/components/Landing.js`:
+   ```javascript
+   emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS User ID
+   
+   // In the handleSubmit function:
+   await emailjs.send(
+     'YOUR_SERVICE_ID', // Replace with your EmailJS Service ID
+     'YOUR_TEMPLATE_ID', // Replace with your EmailJS Template ID
+     templateParams
+   );
+   ```
+
+## Development
+
+To run the development server:
+
+```bash
+npm install
+npm start
+```
+
+## Production Build
+
+To build the project for production:
+
+```bash
+npm run build
+```
