@@ -13,7 +13,7 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        const result = await dispatch(login(username, password));
+        const result = await dispatch(login({username, password}));
         if (result.error) {
             setErrorMessage(result.error.message);
         } else {
