@@ -6,6 +6,7 @@ import 'package:coffee_card/providers/announcement_provider.dart';
 import 'package:coffee_card/providers/user_provider.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
+import 'package:coffee_card/widgets/ListofUsers_widget.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/announcement_widget.dart';
@@ -110,47 +111,5 @@ class _UserList extends State<UserList> {
   }
 }
 
-class UserWidget extends StatelessWidget {
-  final UserModel user;
 
-  const UserWidget(
-      {super.key, required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.only(bottom: 8, left: 5, right: 5),
-        child: GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, '/pos');
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black, width: 1.5),
-                  borderRadius: const BorderRadius.all(Radius.circular(20))),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20, right: 8, bottom: 10),
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6, bottom: 5),
-                      child: Row(
-                        children: <Widget>[
-                          Text(
-                            user.username,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w700, fontSize: 20),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(user.email.toString())),
-                  ],
-                ),
-              ),
-            )));
-  }
-}
 

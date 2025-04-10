@@ -41,20 +41,6 @@ class PostWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-
-              // /// **Like Button & Actions Row**
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //   children: <Widget>[
-              //     LikeButton(
-              //       isPost: true,
-              //       likeNumber: likeNumber,
-              //       postId: postId,
-              //       replyId: replyId,
-              //       userId: userId,
-              //     ),
-              //   ],
-              // ),
             ],
           ),
         ),

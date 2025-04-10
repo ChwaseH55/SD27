@@ -180,7 +180,7 @@ class _PostsScreenInfoState extends State<PostsScreenInfo> {
                                     child: const Text(
                                       ' + Add Comment',
                                       style: TextStyle(
-                                          fontSize: 15, color: Colors.black),
+                                          fontSize: 13, color: Colors.black),
                                     ),
                                   )))))
                 ],

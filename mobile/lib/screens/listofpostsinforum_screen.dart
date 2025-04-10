@@ -7,6 +7,7 @@ import 'package:coffee_card/screens/postcreation_screen.dart';
 import 'package:coffee_card/widgets/likebutton_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
@@ -37,53 +38,52 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(35.0),
-        child: AppBar(
-          leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Row(
-              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
-              children: [
-                SizedBox(width: 14),
-                Icon(Icons.arrow_back_ios,
-                    color: Colors.black, size: 16), // Reduce size if needed
-          
-                Text(
-                  'Back',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-        ),
-          title: const Text('UCF Post',
-              style: TextStyle(fontWeight: FontWeight.w900)),
-          centerTitle: true,
-          backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-          actions: [
-            TextButton(
-              style: ButtonStyle(
-                foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
-              ),
-              onPressed: () async {
-                await Navigator.pushNamed(
-                  context,
-                  PostCreationForm.routeName,
-                  arguments: CreateArgument(false, -1, '', ''),
-                );
-                // Force refresh after returning from create post screen
-                forumProvider.fetchPosts();
+          preferredSize: const Size.fromHeight(35.0),
+          child: AppBar(
+            leading: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
               },
-              child: const Text('+ Create Post'),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
+                children: [
+                  SizedBox(width: 14),
+                  Icon(Icons.arrow_back_ios,
+                      color: Colors.black, size: 16), // Reduce size if needed
+
+                  Text(
+                    'Back',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        )
-      ),
+            title: const Text('UCF Post',
+                style: TextStyle(fontWeight: FontWeight.w900)),
+            centerTitle: true,
+            backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+            actions: [
+              TextButton(
+                style: ButtonStyle(
+                  foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+                ),
+                onPressed: () async {
+                  await Navigator.pushNamed(
+                    context,
+                    PostCreationForm.routeName,
+                    arguments: CreateArgument(false, -1, '', ''),
+                  );
+                  // Force refresh after returning from create post screen
+                  forumProvider.fetchPosts();
+                },
+                child: const Text('+ Create Post'),
+              ),
+            ],
+          )),
       body: Column(
         children: [
           Padding(
@@ -93,15 +93,16 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
               controller: searchController,
               cursorColor: Colors.black,
               decoration: InputDecoration(
-                
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.black, width: 2.0),
+                  borderRadius: BorderRadius.circular(40.0),
+                ),
                 fillColor: Colors.white,
                 filled: true,
-                
                 focusedBorder: OutlineInputBorder(
-                  
                   borderSide: const BorderSide(
                       color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
-                  borderRadius: BorderRadius.circular(25.0),
+                  borderRadius: BorderRadius.circular(40.0),
                 ),
                 labelText: 'Search Posts',
                 labelStyle: const TextStyle(color: Colors.black),
@@ -119,7 +120,9 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
             child: Consumer<ForumProvider>(
               builder: (context, forumProvider, child) {
                 if (forumProvider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                      child: LoadingAnimationWidget.threeArchedCircle(
+                          color: Colors.black, size: 70));
                 }
 
                 final filteredPosts = forumProvider.posts.where((post) {
@@ -134,26 +137,27 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
                   itemCount: filteredPosts.length,
                   itemBuilder: (context, index) {
                     final post = filteredPosts[index];
-                    return GestureDetector(
-                            onTap: () async {
-                              Navigator.pushNamed(
-                                context,
-                                PostsScreenInfo.routeName,
-                                arguments: PostArguments(post.postid),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 5),
-                              child: PostWidget(
-                                date: post.createddate,
-                                postName: post.title,
-                                likeNumber: forumProvider.likes[post.postid]!,
-                                postId: post.postid.toString(),
-                                replyId: '',
-                                userId: forumProvider.cacheUser!,
-                              ),
-                            ),
-                          );
+                    return InkWell(
+                      highlightColor: const Color.fromRGBO(186, 155, 55, 1),
+                      onTap: () async {
+                        Navigator.pushNamed(
+                          context,
+                          PostsScreenInfo.routeName,
+                          arguments: PostArguments(post.postid),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: PostWidget(
+                          date: post.createddate,
+                          postName: post.title,
+                          likeNumber: forumProvider.likes[post.postid]!,
+                          postId: post.postid.toString(),
+                          replyId: '',
+                          userId: forumProvider.cacheUser!,
+                        ),
+                      ),
+                    );
                   },
                 );
               },
@@ -377,15 +381,22 @@ class _LikeButtonForPost extends State<LikeButtonForPost> with RouteAware {
                           isLiked ? Icons.thumb_up : Icons.thumb_up_off_alt,
                           key: ValueKey<bool>(
                               isLiked), // Important for animation to trigger
-                          color: isLiked ? const Color.fromRGBO(186, 155, 55, 1) : Colors.black,
+                          color: isLiked
+                              ? const Color.fromRGBO(186, 155, 55, 1)
+                              : Colors.black,
                           size: 25,
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
-                        child: Text(likeCount.toString(), style: TextStyle(color: isLiked
-                        ? const Color.fromRGBO(186, 155, 55, 1)
-                        : Colors.black,),),
+                        child: Text(
+                          likeCount.toString(),
+                          style: TextStyle(
+                            color: isLiked
+                                ? const Color.fromRGBO(186, 155, 55, 1)
+                                : Colors.black,
+                          ),
+                        ),
                       )
                     ],
                   )),

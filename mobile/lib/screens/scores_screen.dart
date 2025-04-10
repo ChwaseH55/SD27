@@ -584,16 +584,13 @@ class _ScoresForm extends State<ScoresForm> {
                         String fileName =
                             "${DateTime.now().millisecondsSinceEpoch}_${result!.files.single.name}";
 
-                        // 🟢 Step 2: Create Firebase Storage reference
                         Reference storageRef = FirebaseStorage.instance
                             .ref()
                             .child("score_images/$eventid/$fileName");
 
-                        // 🟢 Step 3: Upload file
                         UploadTask uploadTask = storageRef.putFile(file);
                         TaskSnapshot snapshot = await uploadTask;
 
-                        // 🟢 Step 4: Get Download URL
                         String downloadUrl =
                             await snapshot.ref.getDownloadURL();
                         log("File uploaded! Download URL: $downloadUrl");

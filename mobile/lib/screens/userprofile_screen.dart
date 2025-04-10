@@ -1,5 +1,9 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:coffee_card/api_request/events_request.dart';
+import 'package:coffee_card/api_request/user_request.dart';
 import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/arguments/regOrAllargument.dart';
 import 'package:coffee_card/models/events_model.dart';
@@ -9,6 +13,8 @@ import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/screens/listofevents_screen.dart';
 import 'package:coffee_card/utils.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
 import 'package:intl/intl.dart';
@@ -78,17 +84,18 @@ class _UserProfileScreen extends State<UserProfileScreen> {
           backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 15),
-              child: TextButton(
-                onPressed: () async {
-                  logoutUser();
-                  Navigator.pushReplacementNamed(context, '/');
-                },
-                
-                child:
-                    const Text('Log out', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w900), ),
-              )
-            )
+                padding: const EdgeInsets.only(right: 15),
+                child: TextButton(
+                  onPressed: () async {
+                    logoutUser();
+                    Navigator.pushReplacementNamed(context, '/');
+                  },
+                  child: const Text(
+                    'Log out',
+                    style: TextStyle(
+                        color: Colors.red, fontWeight: FontWeight.w900),
+                  ),
+                ))
           ],
         ),
         body: SingleChildScrollView(
@@ -104,7 +111,7 @@ class _UserProfileScreen extends State<UserProfileScreen> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   ImageProvider<Object>? picture;
-                  if(userProvider.user!.profilepicture == null) {
+                  if (userProvider.user!.profilepicture == null) {
                     picture = const AssetImage('assets/images/golf_logo.jpg');
                   } else {
                     picture = NetworkImage(userProvider.user!.profilepicture!);
@@ -146,7 +153,15 @@ class _UserProfileScreen extends State<UserProfileScreen> {
                                     ),
                                   ),
                                   TextButton(
-                                    onPressed: () {},
+                                    onPressed: () async {
+                                      FilePickerResult? result =
+                                          await FilePicker.platform
+                                              .pickFiles(allowMultiple: true);
+
+                                      await updateUserInfo(
+                                          null, null, null, result,
+                                          id: userProvider.user!.id.toString());
+                                    },
                                     child: const Text(
                                       "Upload Picture",
                                       style: TextStyle(

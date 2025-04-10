@@ -49,7 +49,7 @@ Future<void> registerUser({
   }
 }
 
-Future<void> loginUser({
+Future<bool> loginUser({
   required String username,
   required String password,
   required BuildContext context,
@@ -73,20 +73,23 @@ Future<void> loginUser({
 
       // Save userID to shared preferences
       await storage.write(key: 'userId', value: data['user']['id'].toString());
-      await storage.write(key: 'userRole', value: data['user']['roleid'].toString());
+      await storage.write(
+          key: 'userRole', value: data['user']['roleid'].toString());
       await storage.write(key: 'token', value: data['token'].toString());
       String? userId = await storage.read(key: 'userId');
-       String? role = await storage.read(key: 'userRole');
+      String? role = await storage.read(key: 'userRole');
       log('User ID cached: $userId');
       log('Role ID cached: $role');
       log('Login successfully');
 
       if (context.mounted) Navigator.pushReplacementNamed(context, '/mainMenu');
+      return true;
     } else {
       log('Login failed');
+      return false;
     }
   } catch (e) {
-    log(e.toString());
+    throw Exception(e);
   }
 }
 

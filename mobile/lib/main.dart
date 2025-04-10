@@ -15,7 +15,6 @@ import 'package:coffee_card/screens/eventCreation.dart';
 import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/screens/login_screen.dart';
 import 'package:coffee_card/screens/main_menu.dart';
-
 import 'package:coffee_card/screens/listofpostsinforum_screen.dart';
 import 'package:coffee_card/screens/announcement_list.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
@@ -23,6 +22,7 @@ import 'package:coffee_card/screens/scores_screen.dart';
 import 'package:coffee_card/screens/tournament_list.dart';
 import 'package:coffee_card/screens/register_screen.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
+import 'package:coffee_card/widgets/background_widget.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:coffee_card/screens/forumcreation_screen.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
@@ -35,6 +35,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'screens/chat_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
@@ -45,8 +46,8 @@ void main() async {
     name: 'SD27',
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await Notifications.intsance.initialize();
-  
+  // await Notifications.intsance.initialize();
+
   runApp(
     MultiProvider(
       providers: [
@@ -74,7 +75,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      theme:  ThemeData(scaffoldBackgroundColor:  const Color.fromARGB(255, 235, 235, 235)),
+      theme: ThemeData(scaffoldBackgroundColor: const Color.fromARGB(255, 240, 239, 239)),
       navigatorObservers: [routeObserver],
       title: 'Named Routes Demo',
       initialRoute: '/',
@@ -92,6 +93,7 @@ class MyApp extends StatelessWidget {
         '/scores': (context) => const GolfScoreScreen(),
         '/users': (context) => const UserList(),
         '/adminscores': (context) => const ScoreListScreen(),
+        '/chat': (context) => const ChatDisplay(),
         PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
         EventInfo.routeName: (context) => const EventInfo(),
         EventsListScreen.routeName: (context) => const EventsListScreen(),
@@ -99,7 +101,7 @@ class MyApp extends StatelessWidget {
         CreateEvent.routeName: (context) => const CreateEvent(),
         AnnouncementInfo.routeName: (context) => const AnnouncementInfo(),
         AnnouncementCreationScreen.routeName: (context) =>
-        const AnnouncementCreationScreen(),
+            const AnnouncementCreationScreen(),
       },
     );
   }
