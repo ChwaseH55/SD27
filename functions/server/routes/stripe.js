@@ -6,7 +6,7 @@ const { defineSecret } = require("firebase-functions/params");
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
 
-const stripe = require('stripe')(STRIPE_SECRET_KEY.value());
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const express = require('express');
 const router = express.Router();
 const pool = require("../db");

@@ -2,67 +2,68 @@ const express = require('express');
 const multer = require('multer');
 const pool = require("../db");
 const router = express.Router();
-const path = require('path');
-const admin = require('../../firebaseAdmin'); 
 
-// Set up Multer to store file in memory
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
-// Helper to upload image to Firebase and return URL
-const uploadScoreImageToFirebase = async (file, eventid) => {
-    const bucket = admin.storage().bucket();
-    const fileExtension = path.extname(file.originalname);
-    const fileName = `score_images/${eventid}/${Date.now()}${fileExtension}`;
-    const firebaseFile = bucket.file(fileName);
-
-    await firebaseFile.save(file.buffer, {
-        metadata: {
-            contentType: file.mimetype,
-        },
-        public: true,
-    });
-
-    return `https://storage.googleapis.com/${bucket.name}/${firebaseFile.name}`;
-};
-
 //create score
 /*
     This api allows player to include multiple player in the score
 */
-router.post('/scores', upload.single('scoreimage'), async(req, res) =>{
-    const { eventid, userids, score } = req.body; //userids should be an array of user IDS or a string with userids seperated by commas
+router.post('/scores', upload.single('scoreimage'), async(req, res) => {
+    const { eventid, userids, scores, status, submissiondate } = req.body;
     const file = req.file;
     
     if (!eventid || !userids || !file) {
         return res.status(400).json({ message: "Missing required fields: eventid, userids, or scoreimage" });
     }
     
-
-    try{
+    try {
         const userIdArray = Array.isArray(userids) ? userids : userids.split(',');
-        const scoreImageUrl = await uploadScoreImageToFirebase(file, eventid);
+        const scoreArray = scores ? (Array.isArray(scores) ? scores : scores.split(',')) : null;
         
         //Inserting a score for each userid that is submitted
         const insertedScores = [];
-        for(const userid of userIdArray){
+        const errors = [];
+        
+        for(let i = 0; i < userIdArray.length; i++) {
             try {
                 const newScore = await pool.query(
-                    'INSERT INTO score_submissions (eventid, userid, score, scoreimage, approvalstatus) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-                    [eventid, userid, score, scoreImageUrl, 'Pending']
+                    'INSERT INTO score_submissions (eventid, userid, scoreimage, approvalstatus, score, submissiondate) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+                    [
+                        eventid, 
+                        userIdArray[i], 
+                        file.buffer, // Store the file buffer
+                        status || 'pending',
+                        scoreArray ? (Array.isArray(scoreArray) ? scoreArray[i] : scoreArray) : null,
+                        submissiondate || new Date().toISOString()
+                    ]
                 );
                 insertedScores.push(newScore.rows[0]);
             } catch (err) {
-                console.error(`Error inserting score for userid=${userid}:`, err.message);
+                console.error(`Error inserting score for userid=${userIdArray[i]}:`, err.message);
+                errors.push(`Failed to insert score for user ${userIdArray[i]}: ${err.message}`);
             }
         }
+
+        // If there were any errors during insertion
+        if (errors.length > 0) {
+            return res.status(500).json({
+                message: "Some scores failed to submit",
+                errors: errors,
+                successfulScores: insertedScores
+            });
+        }
+
         res.json({
             message: "Scores successfully submitted for all users.",
             scores: insertedScores,
         });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send("Server error");
+        console.error("Error in score submission:", err.message);
+        res.status(500).json({
+            message: "Server error during score submission",
+            error: err.message
+        });
     }
 });
 
@@ -116,10 +117,10 @@ router.put('/scores/:scoreid', async (req, res) => {
 
 
 //approve score :)
-router.put('/scores/approve', async (req, res) => {
+router.put('/approve', async (req, res) => {
     const {scoreid} = req.body;
     try{
-        const updatedScore = await pool.query(`UPDATE score_submissions SET approvalstatus = 'Approved' WHERE scoreid = $1 RETURNING *`, [scoreid]);
+        const updatedScore = await pool.query(`UPDATE score_submissions SET approvalstatus = 'approved' WHERE scoreid = $1 RETURNING *`, [scoreid]);
 
         if( updatedScore.rows.length === 0) {
             return res.status(404).json({ message : "Score not found"});
@@ -133,26 +134,37 @@ router.put('/scores/approve', async (req, res) => {
 });
 
 // not approve score :)
-router.put('/scores/not-approve', async (req, res) => {
+router.put('/not-approve', async (req, res) => {
     const {scoreid} = req.body;
     try{
-        const updatedScore = await pool.query(`UPDATE score_submissions SET approvalstatus = 'Not Approved' WHERE scoreid = $1 RETURNING *`, [scoreid]);
+        console.log("Attempting to reject score:", scoreid);
+        const updatedScore = await pool.query(`UPDATE score_submissions SET approvalstatus = 'not_approved' WHERE scoreid = $1 RETURNING *`, [scoreid]);
+        console.log("Update result:", updatedScore.rows);
 
         if( updatedScore.rows.length === 0) {
+            console.log("No score found with ID:", scoreid);
             return res.status(404).json({ message : "Score not found"});
         }
 
         res.json(updatedScore.rows[0]);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send("Server error");
+        console.error("Error in not-approve route:", err);
+        console.error("Error details:", {
+            message: err.message,
+            stack: err.stack,
+            code: err.code
+        });
+        res.status(500).json({
+            message: "Server error",
+            error: err.message
+        });
     }
 });
 
 //Get all scores (approved, pending and non-approved) 
 router.get('/scores', async(req, res) => {
     try{
-        const scores = await pool.query("SELECT * FROM score_submissions");
+        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser, score, scoreimage, submissiondate FROM score_submissions");
         res.json(scores.rows);
     }catch (err){
         console.error(err.message);
@@ -163,7 +175,7 @@ router.get('/scores', async(req, res) => {
 //Get all approved scores
 router.get('/scores/approved', async(req, res) => {
     try{
-        const scores = await pool.query("SELECT * WHERE approvalstatus = 'Approved'");
+        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser, score, scoreimage, submissiondate FROM score_submissions WHERE approvalstatus = 'approved'");
         res.json(scores.rows);
     }catch (err) {
         console.error(err.message);
@@ -174,7 +186,7 @@ router.get('/scores/approved', async(req, res) => {
 //Get all not approved scores
 router.get('/scores/not-approved', async(req, res) => {
     try{
-        const scores = await pool.query("SELECT * FROM score_submissions WHERE approvalstatus = 'Not Approved'");
+        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser, score, scoreimage, submissiondate FROM score_submissions WHERE approvalstatus = 'not_approved'");
         res.json(scores.rows);
     }catch (err) {
         console.error(err.message);
@@ -183,12 +195,14 @@ router.get('/scores/not-approved', async(req, res) => {
 });
 
 //get all pending scores
-router.get('/scores/pending', async(req, res) => {
+router.get('/pending', async(req, res) => {
     try{
-        const scores = await pool.query("SELECT * FROM score_submissions WHERE approvalstatus = 'Pending'");
+        console.log("Fetching pending scores...");
+        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser, score, scoreimage, submissiondate FROM score_submissions WHERE LOWER(approvalstatus) = 'pending'");
+        console.log("Found pending scores:", scores.rows);
         res.json(scores.rows);
     }catch (err) {
-        console.error(err.message);
+        console.error("Error fetching pending scores:", err.message);
         res.status(500).send("Server error");
     }
 });
@@ -197,9 +211,9 @@ router.get('/scores/pending', async(req, res) => {
 router.get('/scores/player/:id', async (req, res) => {
     const { userid } = req.params;
     try {
-        const scores = await pool.query("SELECT * FROM score_submissions WHERE userid = $1", [userid]);
+        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser, score, scoreimage, submissiondate FROM score_submissions WHERE userid = $1", [userid]);
         res.json(scores.rows);
-    } catch (err){
+    }catch (err) {
         console.error(err.message);
         res.status(500).send("Server error");
     }
@@ -209,7 +223,7 @@ router.get('/scores/player/:id', async (req, res) => {
 router.get('/scores/approved-by/:id', async (req, res) => {
     const { approvedbyuser } = req.params;
     try {
-        const scores = await pool.query("SELECT * FROM score_submissions WHERE approvedbyuser = $1", [approvedbyuser]);
+        const scores = await pool.query("SELECT scoreid, eventid, userid, approvalstatus, approvedbyuser FROM score_submissions WHERE approvedbyuser = $1", [approvedbyuser]);
         res.json(scores.rows);
     } catch (err) {
         console.error(err.message);

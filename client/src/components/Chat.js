@@ -5,6 +5,202 @@ import { useSelector } from 'react-redux';
 import { database } from '../firebase';
 import { api } from '../config';
 import UserAvatar from './UserAvatar';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiSend, FiImage, FiEdit2, FiTrash2, FiUsers, FiUserPlus, FiX } from 'react-icons/fi';
+
+// Modern gradient background
+const mainBgStyle = {
+  backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"52\" height=\"26\" viewBox=\"0 0 52 26\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23f0f0f0\" fill-opacity=\"0.8\"%3E%3Cpath d=\"M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z\"%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E'), linear-gradient(to bottom, rgba(250, 244, 230, 0.8), rgba(243, 244, 246, 0.9) 70%, rgba(209, 213, 219, 1))",
+  backgroundRepeat: 'repeat, no-repeat',
+  backgroundSize: 'auto, 100% 100%',
+};
+
+// Modern dot pattern
+const heroBgStyle = {
+  backgroundImage: "radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0)",
+  backgroundSize: "24px 24px",
+  opacity: 0.5
+};
+
+// Enhanced global styles
+const globalStyles = `
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  .chat-container {
+    height: calc(100vh - 64px);
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .chat-sidebar {
+    width: 300px;
+    border-right: 1px solid #e2e8f0;
+    background: white;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+  }
+  .message-bubble {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    margin: 4px 0;
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+    word-wrap: break-word;
+  }
+  .message-bubble.sent {
+    background: #eab308;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+  }
+  .message-bubble.received {
+    background: white;
+    color: #1e293b;
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  .message-input-container {
+    padding: 16px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .message-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .message-input:focus {
+    border-color: #eab308;
+    box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+  }
+  .send-button {
+    background: #eab308;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .send-button:hover {
+    background: #ca8a04;
+    transform: scale(1.05);
+  }
+  .chat-list-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .chat-list-item:hover {
+    background: #fef3c7;
+  }
+  .chat-list-item.active {
+    background: #fef3c7;
+    border-left: 4px solid #eab308;
+  }
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  .user-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .user-item {
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .user-item:hover {
+    background: #fef3c7;
+    border-color: #eab308;
+  }
+  .user-item.selected {
+    background: #fef3c7;
+    border-color: #eab308;
+  }
+  .message-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .message-image:hover {
+    transform: scale(1.02);
+  }
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+`;
 
 const Chat = () => {
     const [messages, setMessages] = useState([]);
@@ -40,7 +236,6 @@ const Chat = () => {
         if (!currentUser) return;
 
         const chatsRef = ref(database, 'chats');
-        // Convert ID to string to match Firebase format
         const userId = currentUser.id.toString();
         const userChatsQuery = query(chatsRef);
 
@@ -94,8 +289,21 @@ const Chat = () => {
                                     }
                                 };
                             }
+                        } else if (chat.type === 'group') {
+                            // Ensure group chat has a name
+                            return {
+                                ...chat,
+                                name: chat.name || 'Group Chat'
+                            };
                         }
                         return chat;
+                    });
+
+                    // Sort chats by last message timestamp
+                    chatsWithDetails.sort((a, b) => {
+                        const aTime = a.lastMessage?.timestamp || 0;
+                        const bTime = b.lastMessage?.timestamp || 0;
+                        return bTime - aTime;
                     });
 
                     setChats(chatsWithDetails);
@@ -114,6 +322,11 @@ const Chat = () => {
                                     firstname: 'Unknown',
                                     lastname: 'User'
                                 }
+                            };
+                        } else if (chat.type === 'group') {
+                            return {
+                                ...chat,
+                                name: chat.name || 'Group Chat'
                             };
                         }
                         return chat;
@@ -140,11 +353,28 @@ const Chat = () => {
         onValue(messagesQuery, (snapshot) => {
             const messagesData = snapshot.val();
             if (messagesData) {
-                const messagesArray = Object.entries(messagesData).map(([id, message]) => ({
-                    id,
-                    ...message
-                }));
+                const messagesArray = Object.entries(messagesData)
+                    .map(([id, message]) => ({
+                        id,
+                        ...message
+                    }))
+                    .sort((a, b) => a.timestamp - b.timestamp); // Sort messages by timestamp
+                
                 setMessages(messagesArray);
+
+                // Update last message in chat
+                if (messagesArray.length > 0) {
+                    const lastMessage = messagesArray[messagesArray.length - 1];
+                    const chatRef = ref(database, `chats/${activeChat.id}`);
+                    update(chatRef, {
+                        lastMessage: {
+                            text: lastMessage.text,
+                            timestamp: lastMessage.timestamp
+                        }
+                    });
+                }
+            } else {
+                setMessages([]);
             }
         });
 
@@ -384,340 +614,365 @@ const Chat = () => {
     };
 
     const ChatListItem = ({ chat, isActive, onClick, currentUser }) => {
-        const otherUser = chat.isGroupChat 
-            ? null 
-            : chat.participants.find(p => p.id.toString() !== currentUser.id.toString());
-
+        const lastMessage = chat.lastMessage || { text: 'No messages yet', timestamp: 0 };
+        const timestamp = new Date(lastMessage.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
         return (
-            <div
-                className={`flex items-center p-3 cursor-pointer hover:bg-gray-100 ${
-                    isActive ? 'bg-gray-100' : ''
-                }`}
+            <motion.div
+                className={`chat-list-item ${isActive ? 'active' : ''}`}
                 onClick={onClick}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
             >
-                {chat.isGroupChat ? (
-                    <div className="flex items-center">
-                        <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            {chat.name?.charAt(0) || 'G'}
-                        </div>
-                        <span className="ml-3 font-medium">{chat.name || 'Group Chat'}</span>
+                <UserAvatar
+                    user={chat.type === 'direct' ? chat.otherUser : chat}
+                    size={40}
+                />
+                <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-medium text-gray-900 truncate">
+                            {chat.type === 'direct' 
+                                ? `${chat.otherUser.firstname} ${chat.otherUser.lastname}`
+                                : chat.name || 'Group Chat'}
+                        </h3>
+                        <span className="text-xs text-gray-500">{timestamp}</span>
                     </div>
-                ) : (
-                    <div className="flex items-center">
-                        <UserAvatar user={otherUser} size="sm" />
-                        <span className="ml-3 font-medium">
-                            {otherUser?.firstname} {otherUser?.lastname}
-                        </span>
-                    </div>
-                )}
-            </div>
+                    <p className="text-sm text-gray-500 truncate">{lastMessage.text}</p>
+                </div>
+            </motion.div>
         );
     };
 
     const Message = ({ message, currentUser, onReply, onEdit, onDelete }) => {
-        const isOwnMessage = message.senderId === currentUser.id.toString();
-
+        const isSent = message.senderId === currentUser.id.toString();
+        const timestamp = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
         return (
-            <div className={`flex items-start mb-4 ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
-                <UserAvatar 
-                    user={{
-                        id: message.senderId,
-                        firstname: message.senderName?.split(' ')[0] || '',
-                        lastname: message.senderName?.split(' ')[1] || '',
-                        profilePicture: message.senderProfilePicture
-                    }} 
-                    size="sm" 
-                />
-                <div className={`mx-2 ${isOwnMessage ? 'text-right' : ''}`}>
-                    <div className="flex items-center mb-1">
-                        <span className="text-sm text-gray-600">{message.senderName}</span>
-                        <span className="text-xs text-gray-400 ml-2">
-                            {new Date(message.timestamp).toLocaleTimeString()}
-                        </span>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`message-bubble ${isSent ? 'sent' : 'received'}`}
+            >
+                <div className="flex items-start gap-2">
+                    {!isSent && (
+                        <UserAvatar
+                            user={{ id: message.senderId, username: message.senderName }}
+                            size={32}
+                        />
+                    )}
+                    <div className="flex-1 min-w-0">
+                        {!isSent && (
+                            <div className="text-xs text-gray-500 mb-1">{message.senderName}</div>
+                        )}
+                        {message.image ? (
+                            <img
+                                src={message.image}
+                                alt="Shared"
+                                className="message-image"
+                                onClick={() => window.open(message.image, '_blank')}
+                            />
+                        ) : (
+                            <p className="text-sm break-words">{message.text}</p>
+                        )}
+                        <div className="text-xs mt-1 opacity-70">{timestamp}</div>
                     </div>
-                    {message.replyTo && (
-                        <div className="text-sm text-gray-500 bg-gray-100 p-2 rounded mb-1">
-                            ↪ {message.replyTo.text}
+                    {isSent && (
+                        <div className="flex gap-1">
+                            <button
+                                onClick={() => onEdit(message, 'edit')}
+                                className="p-1 hover:bg-white/10 rounded-full"
+                            >
+                                <FiEdit2 size={14} />
+                            </button>
+                            <button
+                                onClick={() => onDelete(message, 'delete')}
+                                className="p-1 hover:bg-white/10 rounded-full"
+                            >
+                                <FiTrash2 size={14} />
+                            </button>
                         </div>
                     )}
-                    <div className={`p-3 rounded-lg ${
-                        isOwnMessage ? 'bg-blue-500 text-white' : 'bg-gray-200'
-                    }`}>
-                        {message.text}
-                        {message.image && (
-                            <img 
-                                src={message.image} 
-                                alt="Shared" 
-                                className="mt-2 max-w-xs rounded"
-                            />
-                        )}
-                        <div className="flex items-center justify-end gap-2 mt-1">
-                            <button 
-                                onClick={() => onReply(message)}
-                                className="text-sm text-gray-500"
-                            >
-                                ↩ Reply
-                            </button>
-                            {isOwnMessage && (
-                                <>
-                                    <button 
-                                        onClick={() => onEdit(message)}
-                                        className="text-sm text-gray-500"
-                                    >
-                                        ✎ Edit
-                                    </button>
-                                    <button 
-                                        onClick={() => onDelete(message)}
-                                        className="text-sm text-gray-500"
-                                    >
-                                        🗑 Delete
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </div>
                 </div>
-            </div>
+            </motion.div>
         );
     };
 
     return (
-        <div className="flex h-screen bg-gray-100 pt-16"> {/* Added pt-16 to account for fixed navbar */}
-            {/* Sidebar with chat list */}
-            <div className="w-1/4 bg-white border-r">
+        <div className="chat-container" style={mainBgStyle}>
+            <style>{globalStyles}</style>
+            
+            <div className="chat-sidebar">
                 <div className="p-4 border-b">
-                    <button 
-                        onClick={() => openNewChatModal(false)}
-                        className="w-full bg-blue-500 text-white p-2 rounded mb-2"
-                    >
-                        New Direct Message
-                    </button>
-                    <button 
-                        onClick={() => openNewChatModal(true)}
-                        className="w-full bg-green-500 text-white p-2 rounded"
-                    >
-                        New Group Chat
-                    </button>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-semibold text-gray-900">Chats</h2>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => openNewChatModal(false)}
+                                className="p-2 hover:bg-gray-100 rounded-full"
+                                title="New Message"
+                            >
+                                <FiUserPlus size={20} />
+                            </button>
+                            <button
+                                onClick={() => openNewChatModal(true)}
+                                className="p-2 hover:bg-gray-100 rounded-full"
+                                title="Create Group"
+                            >
+                                <FiUsers size={20} />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => openNewChatModal(false)}
+                            className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-md text-sm hover:bg-yellow-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <FiUserPlus size={16} />
+                            New Message
+                        </button>
+                        <button 
+                            onClick={() => openNewChatModal(true)}
+                            className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-md text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <FiUsers size={16} />
+                            Create Group
+                        </button>
+                    </div>
                 </div>
-                <div className="overflow-y-auto">
-                    {chats.map(chat => (
-                        <ChatListItem
-                            key={chat.id}
-                            chat={chat}
-                            isActive={activeChat?.id === chat.id}
-                            onClick={() => setActiveChat(chat)}
-                            currentUser={currentUser}
-                        />
-                    ))}
+                
+                <div className="flex-1 overflow-y-auto">
+                    <AnimatePresence>
+                        {chats.map((chat) => (
+                            <motion.div
+                                key={chat.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                            >
+                                <ChatListItem
+                                    chat={chat}
+                                    isActive={activeChat?.id === chat.id}
+                                    onClick={() => setActiveChat(chat)}
+                                    currentUser={currentUser}
+                                />
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
                 </div>
             </div>
 
-            {/* Main chat area */}
-            <div className="flex-1 flex flex-col">
+            <div className="chat-main">
                 {activeChat ? (
                     <>
-                        {/* Chat header */}
-                        <div className="p-4 border-b bg-white flex justify-between items-center">
-                            <div>
-                                <h2 className="text-xl font-semibold">
-                                    {activeChat.type === 'group' 
-                                        ? (activeChat.name || 'Group Chat')
-                                        : (activeChat.otherUser ? `${activeChat.otherUser.firstname} ${activeChat.otherUser.lastname}` : 'Loading...')}
-                                </h2>
-                                <p className="text-sm text-gray-500">
-                                    {activeChat.type === 'group' ? 'Group Chat' : 'Direct Message'}
-                                </p>
-                            </div>
-                            <div className="flex gap-2">
+                        <div className="p-4 border-b bg-white">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <UserAvatar
+                                        user={activeChat.type === 'direct' ? activeChat.otherUser : activeChat}
+                                        size={40}
+                                    />
+                                    <div>
+                                        <h3 className="font-medium text-gray-900">
+                                            {activeChat.type === 'direct'
+                                                ? `${activeChat.otherUser.firstname} ${activeChat.otherUser.lastname}`
+                                                : activeChat.name}
+                                        </h3>
+                                        <p className="text-sm text-gray-500">
+                                            {activeChat.type === 'group' ? `${Object.keys(activeChat.participants).length} members` : 'Online'}
+                                        </p>
+                                    </div>
+                                </div>
                                 {activeChat.type === 'group' && (
-                                    <button
-                                        onClick={() => {
-                                            setIsGroupChat(true);
-                                            setSelectedUsers([]);
-                                            fetchAvailableUsers();
-                                            setShowAddUsersModal(true);
-                                        }}
-                                        className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                                    >
-                                        Add Users
-                                    </button>
-                                )}
-                                {activeChat.createdBy === currentUser.id.toString() && (
-                                    <button
-                                        onClick={() => setShowDeleteConfirm(true)}
-                                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                                    >
-                                        Delete Chat
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setIsGroupChat(true);
+                                                setSelectedUsers([]);
+                                                fetchAvailableUsers();
+                                                setShowAddUsersModal(true);
+                                            }}
+                                            className="px-3 py-1 bg-yellow-500 text-white rounded-md text-sm hover:bg-yellow-600 transition-colors"
+                                        >
+                                            Add Users
+                                        </button>
+                                        {activeChat.createdBy === currentUser.id.toString() && (
+                                            <button
+                                                onClick={() => setShowDeleteConfirm(true)}
+                                                className="px-3 py-1 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 transition-colors"
+                                            >
+                                                Delete Chat
+                                            </button>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-4">
-                            {messages.map(message => (
-                                <Message
-                                    key={message.id}
-                                    message={message}
-                                    currentUser={currentUser}
-                                    onReply={() => handleMessageAction(message, 'reply')}
-                                    onEdit={() => handleMessageAction(message, 'edit')}
-                                    onDelete={() => handleMessageAction(message, 'delete')}
-                                />
-                            ))}
+                        <div className="chat-messages">
+                            <AnimatePresence>
+                                {messages.map((message) => (
+                                    <Message
+                                        key={message.id}
+                                        message={message}
+                                        currentUser={currentUser}
+                                        onReply={setReplyingTo}
+                                        onEdit={handleMessageAction}
+                                        onDelete={handleMessageAction}
+                                    />
+                                ))}
+                            </AnimatePresence>
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Message input */}
-                        <div className="p-4 border-t bg-white">
+                        <div className="message-input-container">
                             {replyingTo && (
-                                <div className="mb-2 p-2 bg-gray-100 rounded flex justify-between items-center">
-                                    <span className="text-sm text-gray-600">
-                                        Replying to {replyingTo.senderName}
-                                    </span>
+                                <div className="mb-2 p-2 bg-gray-100 rounded-md flex justify-between items-center">
+                                    <div className="text-sm text-gray-600">
+                                        <span className="font-medium">Replying to:</span> {replyingTo.text}
+                                    </div>
                                     <button 
                                         onClick={() => setReplyingTo(null)}
-                                        className="text-gray-500"
+                                        className="text-gray-400 hover:text-gray-600"
                                     >
-                                        ✕
+                                        <FiX size={16} />
                                     </button>
                                 </div>
                             )}
-                            <form onSubmit={sendMessage} className="flex space-x-2">
-                                <input
-                                    type="text"
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder={editingMessage ? "Edit message..." : "Type a message..."}
-                                    className="flex-1 p-2 border rounded"
-                                />
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    onChange={handleImageUpload}
-                                    accept="image/*"
-                                    className="hidden"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="bg-green-500 text-white px-4 py-2 rounded"
-                                    disabled={uploadingImage}
-                                >
-                                    {uploadingImage ? 'Uploading...' : '📷'}
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                                >
-                                    {editingMessage ? 'Save' : 'Send'}
-                                </button>
-                                {editingMessage && (
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setEditingMessage(null);
-                                            setNewMessage('');
-                                        }}
-                                        className="bg-gray-500 text-white px-4 py-2 rounded"
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
-                            </form>
+                            <input
+                                type="text"
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && sendMessage(e)}
+                                placeholder={editingMessage ? "Edit your message..." : "Type a message..."}
+                                className="message-input"
+                            />
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                                accept="image/*"
+                                className="hidden"
+                            />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="p-2 hover:bg-gray-100 rounded-full"
+                            >
+                                <FiImage size={20} />
+                            </button>
+                            <button
+                                onClick={sendMessage}
+                                className="send-button"
+                            >
+                                <FiSend size={20} />
+                            </button>
                         </div>
                     </>
                 ) : (
                     <div className="flex-1 flex items-center justify-center">
-                        <p className="text-gray-500">Select a chat to start messaging</p>
+                        <div className="text-center">
+                            <FiUsers size={48} className="mx-auto text-gray-400 mb-4" />
+                            <h3 className="text-xl font-medium text-gray-900 mb-2">Welcome to Chat</h3>
+                            <p className="text-gray-500">Select a chat or start a new conversation</p>
+                        </div>
                     </div>
                 )}
             </div>
 
-            {/* User Selection Modal */}
-            {(showUserModal || showAddUsersModal) && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white rounded-lg p-6 w-96">
-                        <h2 className="text-xl font-semibold mb-4">
-                            {showAddUsersModal 
-                                ? 'Add Users to Group' 
-                                : (isGroupChat ? 'Create Group Chat' : 'New Direct Message')}
-                        </h2>
-                        
-                        {isGroupChat && !showAddUsersModal && (
-                            <input
-                                type="text"
-                                value={groupName}
-                                onChange={(e) => setGroupName(e.target.value)}
-                                placeholder="Group Name"
-                                className="w-full p-2 border rounded mb-4"
-                            />
-                        )}
-
-                        <div className="max-h-60 overflow-y-auto">
-                            {availableUsers.map(user => (
-                                <div
-                                    key={user.id}
-                                    onClick={() => toggleUserSelection(user)}
-                                    className={`p-2 cursor-pointer rounded ${
-                                        selectedUsers.find(u => u.id === user.id)
-                                            ? 'bg-blue-100'
-                                            : 'hover:bg-gray-100'
-                                    }`}
+            {/* Modals */}
+            <AnimatePresence>
+                {showUserModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="modal-overlay"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="modal-content"
+                        >
+                            <h2 className="text-xl font-semibold mb-4">
+                                {isGroupChat ? 'Create New Group' : 'New Chat'}
+                            </h2>
+                            {isGroupChat && (
+                                <input
+                                    type="text"
+                                    value={groupName}
+                                    onChange={(e) => setGroupName(e.target.value)}
+                                    placeholder="Group Name"
+                                    className="w-full p-2 border rounded-lg mb-4"
+                                />
+                            )}
+                            <div className="user-list">
+                                {availableUsers.map((user) => (
+                                    <motion.div
+                                        key={user.id}
+                                        className={`user-item ${selectedUsers.find(u => u.id === user.id) ? 'selected' : ''}`}
+                                        onClick={() => toggleUserSelection(user)}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                    >
+                                        <UserAvatar user={user} size={32} />
+                                        <span>{user.firstname} {user.lastname}</span>
+                                    </motion.div>
+                                ))}
+                            </div>
+                            <div className="flex justify-end gap-2 mt-4">
+                                <button
+                                    onClick={() => setShowUserModal(false)}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                                 >
-                                    <span className="font-semibold">{user.username}</span>
-                                    <span className="text-sm text-gray-600 ml-2">
-                                        {user.firstname} {user.lastname}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={createNewChat}
+                                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-300"
+                                >
+                                    Create
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
 
-                        <div className="mt-4 flex justify-end space-x-2">
-                            <button
-                                onClick={() => {
-                                    setShowUserModal(false);
-                                    setShowAddUsersModal(false);
-                                }}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={showAddUsersModal ? addUsersToGroup : createNewChat}
-                                disabled={selectedUsers.length === 0 || (!showAddUsersModal && isGroupChat && !groupName.trim())}
-                                className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
-                            >
-                                {showAddUsersModal ? 'Add Users' : 'Create Chat'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Delete Confirmation Modal */}
-            {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white rounded-lg p-6 w-96">
-                        <h2 className="text-xl font-semibold mb-4">Delete Chat</h2>
-                        <p className="mb-4">Are you sure you want to delete this {activeChat.type === 'group' ? 'group chat' : 'conversation'}? This action cannot be undone.</p>
-                        <div className="flex justify-end space-x-2">
-                            <button
-                                onClick={() => setShowDeleteConfirm(false)}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={deleteChat}
-                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                {/* Delete Confirmation Modal */}
+                {showDeleteConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="modal-overlay"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="modal-content"
+                        >
+                            <h2 className="text-xl font-semibold mb-4">Delete Chat</h2>
+                            <p className="text-gray-600 mb-6">
+                                Are you sure you want to delete this chat? This action cannot be undone and all messages will be permanently deleted.
+                            </p>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={deleteChat}
+                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

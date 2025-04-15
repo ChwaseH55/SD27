@@ -4,6 +4,21 @@ import { api } from '../config';
 
 const POSTS_PER_PAGE = 10;
 
+// Background pattern for forum
+const forumBgStyle = {
+  backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"52\" height=\"26\" viewBox=\"0 0 52 26\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23f0f0f0\" fill-opacity=\"0.8\"%3E%3Cpath d=\"M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z\"%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E'), linear-gradient(to bottom, rgba(250, 244, 230, 0.8), rgba(243, 244, 246, 0.9) 70%, rgba(209, 213, 219, 1))",
+  backgroundRepeat: 'repeat, no-repeat',
+  backgroundSize: 'auto, 100% 100%',
+};
+
+// Simple dot pattern for hero section
+const heroBgStyle = {
+  backgroundImage: "radial-gradient(white 2px, transparent 0)",
+  backgroundSize: "30px 30px",
+  backgroundPosition: "0 0",
+  opacity: 0.2
+};
+
 const Forum = () => {
   const [posts, setPosts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -368,166 +383,312 @@ const Forum = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen">
-      <header className="bg-black text-gold p-6 shadow-md">
-        <h1 className="text-3xl font-bold text-center">UCF Golf Club Forum</h1>
+    <div className="flex flex-col min-h-screen" style={forumBgStyle}>
+      {/* Hero Section with Welcome Message */}
+      <header className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white overflow-hidden">
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 opacity-20" style={heroBgStyle}></div>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold">Community Forum</h1>
+            <p className="mt-3 text-lg md:text-xl text-yellow-100 max-w-3xl mx-auto">
+              Connect with other members, share tips, discuss tournaments, and grow the golf community together.
+            </p>
+          </div>
+        </div>
+        
+        {/* Wave SVG divider */}
+        <div className="absolute bottom-0 left-0 right-0 overflow-hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="fill-current text-gray-50" style={{ width: '100%', height: '50px' }}>
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+          </svg>
+        </div>
       </header>
 
-      <main className="max-w-4xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-black">Latest Posts</h2>
+      <main className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 mb-16">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">Forum Discussions</h2>
+            <p className="text-gray-600">Join the conversation and share your thoughts with fellow golfers</p>
+          </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-gold text-black px-4 py-2 rounded shadow hover:bg-yellow-400 transition"
+            className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-md font-medium shadow transition-colors flex items-center"
           >
-            + New Post
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            New Discussion
           </button>
         </div>
 
-        <div className="flex space-x-4 mb-6">
-          <input
-            type="text"
-            placeholder="Search posts..."
-            value={searchQuery}
-            onChange={handleSearch}
-            className="flex-1 p-2 border border-gray-300 rounded"
-          />
-          <select
-            value={sortOrder}
-            onChange={handleSort}
-            className="p-2 border border-gray-300 rounded"
-          >
-            <option value="newest">Newest to Oldest</option>
-            <option value="oldest">Oldest to Newest</option>
-          </select>
-          <select
-            value={filterRole}
-            onChange={handleFilter}
-            className="p-2 border border-gray-300 rounded"
-          >
-            <option value="all">All</option>
-            <option value="members">Members</option>
-            <option value="admins">Admins</option>
-          </select>
+        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div className="p-4 bg-gray-50 border-b">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search discussions..."
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <select
+                  value={sortOrder}
+                  onChange={handleSort}
+                  className="px-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                </select>
+                <select
+                  value={filterRole}
+                  onChange={handleFilter}
+                  className="px-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                >
+                  <option value="all">All Posts</option>
+                  <option value="members">Member Posts</option>
+                  <option value="admins">Admin Posts</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
 
         {selectedPost ? (
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-2">{selectedPost.post.title}</h2>
-            <p className="text-gray-700 mb-4">{selectedPost.post.content}</p>
-            <div className="text-gray-500 text-sm mb-6">
-              Posted by {selectedPost.post.username || 'Unknown User'} on{" "}
-              {new Date(selectedPost.post.createddate).toLocaleDateString()}
+          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            {/* Post Header */}
+            <div className="px-6 py-4 bg-yellow-50 border-b border-yellow-100">
+              <div className="flex justify-between items-start">
+                <h2 className="text-2xl font-bold text-gray-800">{selectedPost.post.title}</h2>
+                <button
+                  onClick={() => setSelectedPost(null)}
+                  className="ml-4 text-gray-400 hover:text-gray-500 focus:outline-none"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+              <div className="flex items-center mt-2 text-sm text-gray-500">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span className="mr-4">{selectedPost.post.username || 'Unknown User'}</span>
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>{new Date(selectedPost.post.createddate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+              </div>
+            </div>
+
+            {/* Post Content */}
+            <div className="p-6">
+              <div className="prose max-w-none mb-6">
+                <p className="text-gray-700 whitespace-pre-line">{selectedPost.post.content}</p>
+              </div>
+              
+              {/* Like button for post */}
+              <div className="flex justify-end">
+                <button
+                  onClick={() => handleLikePost(selectedPost.post.postid)}
+                  className={`flex items-center px-3 py-1 rounded-full ${
+                    likedPosts.has(selectedPost.post.postid)
+                      ? "bg-red-50 text-red-600 border border-red-100"
+                      : "bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100"
+                  } transition-colors`}
+                >
+                  <svg className="w-5 h-5 mr-1" fill={likedPosts.has(selectedPost.post.postid) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
+                  <span>{selectedPost.post.likeCount || 0}</span>
+                </button>
+              </div>
             </div>
             
-            <div className="border-t pt-4">
-              <h3 className="text-xl font-bold mb-4">Comments</h3>
+            {/* Comments Section */}
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">
+                Comments ({selectedPost.replies.length})
+              </h3>
+              
               {selectedPost.replies.length === 0 ? (
-                <p className="text-gray-500">No comments yet. Be the first to comment!</p>
+                <div className="py-8 text-center">
+                  <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                  </svg>
+                  <p className="text-gray-500">No comments yet. Be the first to comment!</p>
+                </div>
               ) : (
-                <ul className="space-y-4">
+                <div className="space-y-4">
                   {selectedPost.replies.map((reply) => (
-                    <li key={reply.replyid} className="border-b pb-4">
-                      <p className="text-gray-700">{reply.content}</p>
-                      <div className="flex justify-between items-center mt-2">
-                        <div className="text-gray-500 text-sm">
-                          By {reply.username || 'Unknown User'} on{" "}
-                          {new Date(reply.createddate).toLocaleDateString()}
+                    <div key={reply.replyid} className="bg-white p-4 rounded-lg shadow-sm">
+                      <div className="prose max-w-none mb-3">
+                        <p className="text-gray-700 whitespace-pre-line">{reply.content}</p>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <div className="text-gray-500 flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                          </svg>
+                          <span className="mr-2">{reply.username || 'Unknown User'}</span>
+                          <svg className="w-4 h-4 ml-2 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                          </svg>
+                          <span>{new Date(reply.createddate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                         </div>
                         <button
                           onClick={() => handleLikeReply(reply.replyid)}
                           className={`flex items-center ${
                             likedReplies.has(reply.replyid)
                               ? "text-red-500"
-                              : "text-gray-500"
+                              : "text-gray-400 hover:text-gray-500"
                           }`}
                         >
-                          <span className="mr-1">
-                            {likedReplies.has(reply.replyid) ? "♥" : "♡"}
-                          </span>
-                          {reply.likeCount || 0}
+                          <svg className="w-5 h-5 mr-1" fill={likedReplies.has(reply.replyid) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                          </svg>
+                          <span>{reply.likeCount || 0}</span>
                         </button>
                       </div>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
             
+            {/* Add Comment Form */}
             {user && (
-              <div className="mt-6">
-                <h3 className="text-lg font-bold mb-2">Add a Comment</h3>
+              <div className="px-6 py-4 border-t border-gray-200">
+                <h3 className="text-lg font-medium text-gray-800 mb-3">Add a Comment</h3>
                 <form onSubmit={handleAddReply}>
                   <textarea
                     value={newReplyContent}
                     onChange={(e) => setNewReplyContent(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded mb-2"
-                    placeholder="Write your comment here..."
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500 mb-3"
+                    placeholder="Share your thoughts..."
+                    rows="3"
                     required
                   />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-gold text-black rounded"
-                  >
-                    Post Comment
-                  </button>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPost(null)}
+                      className="mr-2 px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                    >
+                      Back to Posts
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                    >
+                      Post Comment
+                    </button>
+                  </div>
                 </form>
               </div>
             )}
-            
-            <button
-              onClick={() => setSelectedPost(null)}
-              className="mt-6 px-4 py-2 border border-gray-300 rounded"
-            >
-              Back to Posts
-            </button>
           </div>
         ) : (
           <>
             {loading && posts.length === 0 ? (
-              <div className="text-center py-4">Loading posts...</div>
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-500"></div>
+              </div>
             ) : (
-              <ul className="space-y-4">
-                {getFilteredPosts()
-                  .map((post, index) => (
-                    <li
+              <div className="space-y-4">
+                {getFilteredPosts().length === 0 ? (
+                  <div className="bg-white rounded-xl shadow-md p-8 text-center">
+                    <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                    </svg>
+                    {searchQuery ? (
+                      <p className="text-gray-500">No discussions found matching "{searchQuery}".</p>
+                    ) : (
+                      <p className="text-gray-500">No discussions yet. Be the first to start a conversation!</p>
+                    )}
+                    <button
+                      onClick={() => setShowCreateModal(true)}
+                      className="mt-4 inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/>
+                      </svg>
+                      Start a Discussion
+                    </button>
+                  </div>
+                ) : (
+                  getFilteredPosts().map((post, index) => (
+                    <div
                       key={post.postid}
                       ref={index === posts.length - 1 ? lastPostRef : null}
-                      className="bg-white p-4 shadow rounded-lg border border-gray-200 hover:shadow-lg transition"
+                      className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
                     >
-                      <h3 className="text-xl font-bold text-black">{post.title}</h3>
-                      <p className="text-gray-700 mt-2">{post.content}</p>
-                      <div className="text-gray-500 text-sm mt-2">
-                        By {post.username || 'Unknown User'} on{" "}
-                        {new Date(post.createddate).toLocaleDateString()}
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-2 hover:text-yellow-600 cursor-pointer" onClick={() => handleViewPost(post)}>
+                          {post.title}
+                        </h3>
+                        <p className="text-gray-600 mb-4 line-clamp-2">
+                          {post.content}
+                        </p>
+                        <div className="flex flex-wrap items-center justify-between">
+                          <div className="flex items-center text-sm text-gray-500">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <span className="mr-4">{post.username || 'Unknown User'}</span>
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <span>{new Date(post.createddate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                          </div>
+                          <div className="flex items-center mt-2 sm:mt-0 space-x-4">
+                            <button
+                              onClick={() => handleViewPost(post)}
+                              className="flex items-center text-blue-600 hover:text-blue-800"
+                            >
+                              <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                              </svg>
+                              <span>{post.replyCount || 0}</span>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLikePost(post.postid);
+                              }}
+                              className={`flex items-center ${
+                                likedPosts.has(post.postid)
+                                  ? "text-red-500"
+                                  : "text-gray-400 hover:text-gray-500"
+                              }`}
+                            >
+                              <svg className="w-5 h-5 mr-1" fill={likedPosts.has(post.postid) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                              </svg>
+                              <span>{post.likeCount || 0}</span>
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center mt-4 space-x-4">
-                        <button
-                          onClick={() => handleViewPost(post)}
-                          className="text-blue-500 hover:underline"
-                        >
-                          View Discussion ({post.replyCount || 0})
-                        </button>
-                        <button
-                          onClick={() => handleLikePost(post.postid)}
-                          className={`flex items-center ${
-                            likedPosts.has(post.postid)
-                              ? "text-red-500"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          <span className="mr-1">
-                            {likedPosts.has(post.postid) ? "♥" : "♡"}
-                          </span>
-                          {post.likeCount || 0}
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-              </ul>
+                    </div>
+                  ))
+                )}
+              </div>
             )}
             {loading && posts.length > 0 && (
-              <div className="text-center py-4">Loading more posts...</div>
+              <div className="flex justify-center py-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-500"></div>
+              </div>
             )}
           </>
         )}
@@ -535,26 +696,56 @@ const Forum = () => {
 
       {/* Create Post Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-            <h2 className="text-2xl font-bold mb-4">Create New Post</h2>
-            <form onSubmit={handleCreatePost}>
-              <input
-                type="text"
-                placeholder="Post Title"
-                value={newPostTitle}
-                onChange={(e) => setNewPostTitle(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded mb-4"
-                required
-              />
-              <textarea
-                placeholder="Post Content"
-                value={newPostContent}
-                onChange={(e) => setNewPostContent(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded mb-4 h-32"
-                required
-              />
-              <div className="flex justify-end space-x-2">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg animate-fadeIn">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-800">Start a Discussion</h2>
+              <button 
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewPostTitle("");
+                  setNewPostContent("");
+                }}
+                className="text-gray-400 hover:text-gray-500 focus:outline-none"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreatePost} className="space-y-4">
+              <div>
+                <label htmlFor="post-title" className="block text-sm font-medium text-gray-700 mb-1">
+                  Title
+                </label>
+                <input
+                  id="post-title"
+                  type="text"
+                  placeholder="Give your discussion a title"
+                  value={newPostTitle}
+                  onChange={(e) => setNewPostTitle(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="post-content" className="block text-sm font-medium text-gray-700 mb-1">
+                  Content
+                </label>
+                <textarea
+                  id="post-content"
+                  placeholder="Share your thoughts, questions, or ideas with the community..."
+                  value={newPostContent}
+                  onChange={(e) => setNewPostContent(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500"
+                  rows="6"
+                  required
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -562,15 +753,18 @@ const Forum = () => {
                     setNewPostTitle("");
                     setNewPostContent("");
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-gold text-black rounded"
+                  className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 flex items-center"
                 >
-                  Create Post
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                  Create Discussion
                 </button>
               </div>
             </form>

@@ -1,16 +1,7 @@
 // In /routes/users.js
 const express = require('express');
 const pool = require('../db'); // Assuming you have a db connection setup
-const multer = require('multer');
-const { getStorage } = require('firebase-admin/storage');
 const router = express.Router();
-const path = require('path');
-const admin = require('../../firebaseAdmin'); 
-
-// Set up Multer to store file in memory
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
 
 // Get all users (no ID required)
 router.get('/', async (req, res) => {
@@ -28,10 +19,7 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const user = await pool.query(
-            "SELECT id, username, firstname, lastname, email, roleid, profilepicture FROM users WHERE id = $1",
-            [id]
-        );
+        const user = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
 
         // Check if the user exists
         if (user.rows.length === 0) {
@@ -45,99 +33,46 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Update profile picture
-router.put('/:id/profile-picture', upload.single('profilePicture'), async (req, res) => {
-    const { id } = req.params;
-    
-    if (!req.file) {
-        return res.status(400).json({ error: "No file uploaded" });
-    }
-
-    try {
-        // Upload to Firebase Storage
-        const bucket = getStorage().bucket();
-        const fileName = `profile_pictures/${id}/${req.file.originalname}`;
-        const file = bucket.file(fileName);
-        
-        await file.save(req.file.buffer, {
-            metadata: {
-                contentType: req.file.mimetype
-            }
-        });
-
-        // Get the public URL
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-
-        // Update the user's profile picture URL in the database
-        const updateResult = await pool.query(
-            "UPDATE users SET profilepicture = $1 WHERE id = $2 RETURNING id, username, firstname, lastname, email, roleid, profilepicture",
-            [publicUrl, id]
-        );
-
-        if (updateResult.rows.length === 0) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        res.json({
-            message: "Profile picture updated successfully",
-            user: updateResult.rows[0]
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send(err.message);
-    }
-});
-
 //update user info
-router.put('/:id', upload.single('profilepicture'), async (req, res) => {
+router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { username, firstname, lastname, roleid } = req.body;
+    const { username, firstname, lastname, profilePicture } = req.body;
 
     try {
-        let profilePictureUrl = null;
-
-        if (file) {
-            const bucket = admin.storage().bucket();
-            const fileExtension = path.extname(file.originalname);
-            const fileName = `profile_pictures/${id}/${Date.now()}${fileExtension}`;
-            const firebaseFile = bucket.file(fileName);
-
-            await firebaseFile.save(file.buffer, {
-                metadata: {
-                    contentType: file.mimetype,
-                },
-                public: true, 
-            });
-
-            profilePictureUrl = `https://storage.googleapis.com/${bucket.name}/${firebaseFile.name}`;
+        // Validate the profile picture path if provided
+        if (profilePicture) {
+            // Check if it's a storage path or full URL
+            if (!profilePicture.startsWith('profile_pictures/') && 
+                !profilePicture.startsWith('https://firebasestorage.googleapis.com/') &&
+                !profilePicture.startsWith('https://storage.googleapis.com/')) {
+                return res.status(400).json({ error: "Invalid profile picture path or URL" });
+            }
         }
 
         const updateQuery = `
-            UPDATE users
-            SET
-                username = COALESCE($1, username),
-                firstname = COALESCE($2, firstname),
-                lastname = COALESCE($3, lastname),
-                roleid = COALESCE($4, roleid)
-            WHERE id = $5
-            RETURNING *;`;
+          UPDATE users
+          SET
+            username = COALESCE($1, username),
+            firstname = COALESCE($2, firstname),
+            lastname = COALESCE($3, lastname),
+            profilepicture = COALESCE($4, profilepicture)
+          WHERE id = $5
+          RETURNING *;
+        `;
 
         const updateResult = await pool.query(updateQuery, [
             username || null,
             firstname || null,
             lastname || null,
-            roleid || null,
+            profilePicture || null,
             id
         ]);
-
-        if (updateResult.rows.length === 0) {
-            return res.status(404).json({ error: "User not found" });
-        }
 
         res.json({
             message: "User information updated successfully.",
             user: updateResult.rows[0],
         });
+
     } catch (err) {
         console.error(err);
         res.status(500).send(err.message);
