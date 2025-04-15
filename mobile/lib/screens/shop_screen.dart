@@ -41,7 +41,22 @@ class _ShopScreenState extends State<ShopScreen> {
       isScrollControlled: true,
       isDismissible: true,
       enableDrag: true,
-      builder: (context) => const CartBottomSheet(),
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, controller) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: CartBottomSheet(controller: controller),
+        ),
+      ),
     );
   }
 
@@ -193,7 +208,12 @@ class _ShopScreenState extends State<ShopScreen> {
 }
 
 class CartBottomSheet extends StatelessWidget {
-  const CartBottomSheet({super.key});
+  final ScrollController controller;
+  
+  const CartBottomSheet({
+    super.key,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +228,6 @@ class CartBottomSheet extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -233,6 +252,7 @@ class CartBottomSheet extends StatelessWidget {
               else
                 Expanded(
                   child: ListView.builder(
+                    controller: controller,
                     itemCount: cartItems.length,
                     itemBuilder: (context, index) {
                       final item = cartItems[index];
@@ -299,34 +319,32 @@ class CartBottomSheet extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: cartItems.isEmpty
-                      ? null
-                      : () async {
-                          final checkoutUrl =
-                              await shopProvider.createCheckoutSession();
-                          if (checkoutUrl != null) {
-                            if (await canLaunchUrl(Uri.parse(checkoutUrl))) {
-                              await launchUrl(Uri.parse(checkoutUrl));
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Could not launch checkout URL'),
-                                ),
-                              );
-                            }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Failed to create checkout session'),
-                              ),
-                            );
-                          }
-                        },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 50),
                   ),
-                  child: const Text('Checkout'),
+                  onPressed: () async {
+                    final shopProvider = Provider.of<ShopProvider>(context, listen: false);
+                    final success = await shopProvider.launchCheckout(context);
+                    
+                    if (success) {
+                      if (context.mounted) {
+                        Navigator.pop(context); // Close the bottom sheet
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Payment successful!')),
+                        );
+                      }
+                    } else {
+                      if (context.mounted) {
+                        Navigator.pop(context); // Close the bottom sheet
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Checkout was not completed')),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('CHECKOUT', style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],
@@ -335,4 +353,4 @@ class CartBottomSheet extends StatelessWidget {
       },
     );
   }
-} 
+}

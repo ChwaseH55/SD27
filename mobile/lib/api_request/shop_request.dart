@@ -51,12 +51,19 @@ Future<String?> createStripeCheckoutSession({
     final token = await storage.read(key: 'token');
     if (token == null) throw Exception('Not authenticated');
 
+    // Format the data exactly as Stripe expects it
     final requestBody = {
-      'items': cartItems,
+      'cartItems': cartItems.map((item) => {
+        'price': item['price'],
+        'quantity': item['quantity'],
+        'name': item['name'],
+      }).toList(),
       'userId': userId,
     };
-    
-    dev.log('Creating checkout session with body: ${jsonEncode(requestBody)}');
+
+    // Add this log to see the full request payload
+    dev.log('Full request: ${jsonEncode(requestBody)}');
+    dev.log('Request body structure: ${jsonEncode(requestBody)}');
 
     final response = await http.post(
       Uri.parse('${Utils.apiUrl}/stripe/create-checkout-session'),
@@ -75,10 +82,10 @@ Future<String?> createStripeCheckoutSession({
       return data['url'];
     } else {
       dev.log('Checkout session error: ${response.body}');
-      throw Exception('Failed to create checkout session');
+      throw Exception('Failed to create checkout session: ${response.body}');
     }
   } catch (e) {
     dev.log('Error creating checkout session: $e');
-    return null;
+    throw e;
   }
-} 
+}

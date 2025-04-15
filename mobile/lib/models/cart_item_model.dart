@@ -13,9 +13,10 @@ class CartItem {
     this.quantity = 1,
   });
 
+  // Make sure this includes all fields required by your backend
   Map<String, dynamic> toJson() => {
     'price': priceId,
     'quantity': quantity,
     'name': name,
   };
-} 
+}
