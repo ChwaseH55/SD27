@@ -59,6 +59,13 @@ class EventsProvider extends ChangeNotifier {
     }
 
     _isLoading = false;
-    notifyListeners();
+   
   }
+
+   List<EventsModel> getFilteredEvents({required bool isAllEvents, required String search}) {
+  final baseList = isAllEvents ? events : registeredevents;
+  return baseList
+      .where((event) => event.eventname?.toLowerCase().contains(search.toLowerCase()) ?? false)
+      .toList();
+}
 }

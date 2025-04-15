@@ -1,3 +1,5 @@
+import 'package:coffee_card/api_request/user_request.dart';
+
 class PostModel {
   final int postid;
   final int userid;

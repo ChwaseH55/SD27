@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/utils.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +25,9 @@ class EventsWidgets extends StatefulWidget {
 }
 
 class _EventsWidgetsState extends State<EventsWidgets> {
-  late bool _isRegistered;
-  bool _isAddedToCalendar = false;
-  late EventsProvider eventsProvider = eventsProvider = Provider.of<EventsProvider>(context, listen: false);
-    
+  bool? _isRegistered;
+  late EventsProvider eventsProvider =
+      eventsProvider = Provider.of<EventsProvider>(context, listen: false);
 
   @override
   void initState() {
@@ -35,127 +36,159 @@ class _EventsWidgetsState extends State<EventsWidgets> {
   }
 
   Future<void> _toggleRegistration() async {
-    if (_isRegistered) {
+    if (_isRegistered!) {
       // Call API to unregister
       await unregisterFromEvent(
           widget.event.eventid.toString(), widget.userId.toString());
-          eventsProvider.fetchEvents();
-          
+      eventsProvider.fetchEvents();
     } else {
       // Call API to register
       await registerForEvent(
           widget.event.eventid.toString(), widget.userId.toString());
-         eventsProvider.fetchEvents();
+      eventsProvider.fetchEvents();
     }
 
     setState(() {
-      _isRegistered = !_isRegistered;
+      _isRegistered = !_isRegistered!;
     });
-  }
-
-  void _addToCalendar() {
-    EventProvider provider = Provider.of<EventProvider>(context, listen: false);
-    DateTime eventDate = DateTime.parse(widget.event.eventdate!);
-    provider.addEvent(eventDate, widget.event.eventname!, widget.event.eventid!);
-    setState(() {
-      _isAddedToCalendar = true;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Event added to calendar!")),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('MMM d, yyyy')
-        .format(DateTime.parse(widget.event.eventdate!));
+    String formattedDate =
+        DateFormat('d').format(DateTime.parse(widget.event.eventdate!));
+    double width = MediaQuery.sizeOf(context).width;
+    double height = MediaQuery.sizeOf(context).height;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+    return TweenAnimationBuilder<Offset>(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+        tween: Tween(begin: const Offset(1, 0), end: Offset.zero),
+        builder: (context, offset, child) {
+          return Transform.translate(
+            offset: Offset(offset.dx * width, 0),
+            child: child,
+          );
+        },
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      widget.event.eventname!,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    formattedDate,
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                  ),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+          child: IntrinsicHeight(
+            child: Container(
+              height: height * 0.16,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, 3),
+                  )
                 ],
               ),
-              const SizedBox(height: 10),
-              Text(
-                widget.event.eventdescription!,
-                style: const TextStyle(fontSize: 16, height: 1.4),
-                textAlign: TextAlign.justify,
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: <Widget>[
-                  if (widget.event.createdbyuserid == int.parse(widget.userId!))
-                    Padding(
-                      padding: const EdgeInsets.only(right: 7),
-                      child: SizedBox(
-                        height: 30,
-                        child: ElevatedButton(
-                          onPressed: _isAddedToCalendar ? null : _addToCalendar,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _isAddedToCalendar
-                                ? Colors.grey
-                                : const Color.fromRGBO(186, 155, 55, 1),
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+              child: Row(
+                crossAxisAlignment:
+                    CrossAxisAlignment.stretch, // important for full height
+                children: [
+                  // LEFT TIME PANEL
+                  Container(
+                    width: width * 0.15, // optional fixed width
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: const BoxDecoration(
+                      color: Color.fromRGBO(186, 155, 55, 1),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        bottomLeft: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          DateFormat('MMM')
+                              .format(DateTime.parse(widget.event.eventdate!))
+                              .toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        Text(
+                          formattedDate,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // RIGHT CONTENT
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title & Add to calendar
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  widget.event.eventname ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            overflow: TextOverflow.ellipsis,
+                            widget.event.eventdescription ?? '',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
                             ),
                           ),
-                          child: Text(
-                            _isAddedToCalendar ? 'Added to Calendar' : 'Add to Calendar',
-                            style: const TextStyle(fontSize: 12, color: Colors.black),
+
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: SizedBox(
+                              height: 34,
+                              child: Row(children: [
+                                const Spacer(),
+                                TextButton(
+                                  onPressed: _toggleRegistration,
+                                  child: Text(
+                                    _isRegistered!
+                                        ? '✓ Unregister'
+                                        : ' + Register',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 12,
+                                      color: _isRegistered!
+                                          ? Colors.red
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                )
+                              ]),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  // Register / Unregister button
-                  SizedBox(
-                    height: 30,
-                    child: ElevatedButton(
-                      onPressed: _toggleRegistration,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isRegistered ? Colors.red : Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        _isRegistered ? 'Unregister' : 'Register',
-                        style: const TextStyle(fontSize: 12, color: Colors.white),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }

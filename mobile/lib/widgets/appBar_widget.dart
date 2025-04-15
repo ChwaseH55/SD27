@@ -1,45 +1,59 @@
-import 'package:coffee_card/models/announcement_model.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-class AppBarWidget extends StatelessWidget {
-  final String screenTitle;
-  final FontWeight fontWeight;
-  final double fontSize;
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  final bool showBackButton;
 
-  const AppBarWidget({super.key, required this.screenTitle,required this.fontSize,required this.fontWeight});
+  const CustomAppBar({
+    super.key,
+    required this.title,
+    this.showBackButton = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(35.0),
-      child: AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
+    return AppBar(
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w900),
+      ),
+      centerTitle: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      leading: showBackButton
+          ? BackButton(
+              color: Colors.black,
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            )
+          : null,
+      actions: <Widget>[
+        IconButton(
+          icon: const Icon(
+            Icons.account_circle_rounded,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pushNamed(context, '/pro');
           },
-          child: const Row(
-            mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
-            children: [
-              SizedBox(width: 14),
-              Icon(Icons.arrow_back_ios,
-                  color: Colors.black, size: 16), // Reduce size if needed
-                Text(
-                'Back',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+        )
+      ],
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromRGBO(186, 155, 55, 1),
+              Color.fromARGB(255, 240, 219, 130),
             ],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
           ),
         ),
-        title:  Text(screenTitle,
-            style:  TextStyle(fontWeight: fontWeight, fontSize: fontSize)),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-      )
+      ),
     );
   }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

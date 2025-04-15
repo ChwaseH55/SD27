@@ -8,6 +8,7 @@ import 'package:coffee_card/main.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
 import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/screens/listofevents_screen.dart';
+import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -147,10 +148,8 @@ class Notifications {
         arguments: EventsArgument(int.parse(value)),
       );
     } else if (topic == 'announcements') {
-      navigatorKey.currentState?.pushNamed(
-        AnnouncementInfo.routeName,
-        arguments: AnnouncementArgument(int.parse(value)),
-      );
+      navigatorKey.currentState
+          ?.push(slideRightRoute(AnnouncementInfo(id: value)));
     }
   }
 

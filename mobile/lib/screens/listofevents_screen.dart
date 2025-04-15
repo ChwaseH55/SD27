@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:coffee_card/arguments/regOrAllargument.dart';
+import 'package:coffee_card/models/events_model.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
+import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
@@ -11,7 +15,8 @@ import 'package:coffee_card/arguments/eventcreateargument.dart';
 
 class EventsListScreen extends StatefulWidget {
   static const routeName = '/extractIsRegOrAll';
-  const EventsListScreen({super.key});
+  final bool isAllEvents;
+  const EventsListScreen({super.key, required this.isAllEvents});
 
   @override
   State<EventsListScreen> createState() => _EventsListScreenState();
@@ -19,21 +24,35 @@ class EventsListScreen extends StatefulWidget {
 
 class _EventsListScreenState extends State<EventsListScreen> {
   late EventsProvider eventsProvider;
-  bool isAllEvents = true;
   TextEditingController searchController = TextEditingController();
   String searchQuery = "";
+  bool? isAll;
+  bool _isInit = true;
+  bool _isLoading = false;
+  bool? isRecent = true;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments as IsAllOrReg?;
-    isAllEvents = args?.boolean ?? true;
-    eventsProvider = Provider.of<EventsProvider>(context, listen: false);
-    eventsProvider.fetchEvents();
+    if (_isInit) {
+      _isLoading = true;
+      isAll = widget.isAllEvents;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        eventsProvider = Provider.of<EventsProvider>(context, listen: false);
+        eventsProvider.fetchEvents();
+      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+
+      _isInit = false;
+    }
   }
 
   void _toggleEventView(bool showAll) {
-    setState(() => isAllEvents = showAll);
+    setState(() => isAll = showAll);
     eventsProvider.fetchEvents();
   }
 
@@ -41,58 +60,72 @@ class _EventsListScreenState extends State<EventsListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('UCF Events', style: TextStyle(fontWeight: FontWeight.w900)),
+        title: const Text('UCF Events',
+            style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
         actions: [
-          
-            ElevatedButton(
-              onPressed: () async {
-                await Navigator.pushNamed(context, CreateEvent.routeName,
-                    arguments: EventCreateArgument(false, 1, '', '', '', '', false, ''));
-                eventsProvider.fetchEvents();
-              },
-              style: ElevatedButton.styleFrom(
+          ElevatedButton(
+            onPressed: () async {
+              await Navigator.pushNamed(context, CreateEvent.routeName,
+                  arguments:
+                      EventCreateArgument(false, 1, '', '', '', '', false, ''));
+              eventsProvider.fetchEvents();
+            },
+            style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
               shape: RoundedRectangleBorder(
                 borderRadius:
                     BorderRadius.circular(12), // Change this value as needed
               ),
             ),
-              child: const Text('+ New Event', style: TextStyle(color: Colors.white)),
-            ),
+            child: const Text('+ New Event',
+                style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
       floatingActionButton: const FloatingBtn(),
       body: Column(
         children: [
           Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: searchController,
-            decoration: InputDecoration(
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(
-                    color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
-                borderRadius: BorderRadius.circular(25.0),
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: searchController,
+              cursorColor: Colors.black,
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.black, width: 2.0),
+                  borderRadius: BorderRadius.circular(40.0),
+                ),
+                fillColor: Colors.white,
+                filled: true,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+                  borderRadius: BorderRadius.circular(40.0),
+                ),
+                labelText: 'Search Events',
+                labelStyle: const TextStyle(color: Colors.black),
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
               ),
-              labelText: 'Search Events',
-              labelStyle: const TextStyle(color: Colors.black),
-              prefixIcon: const Icon(Icons.search),
-              border: const OutlineInputBorder(),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
             ),
-            onChanged: (value) {
-              setState(() {
-                searchQuery = value.toLowerCase();
-              });
-            },
           ),
-        ),
           ToggleButtons(
-            isAllEvents: isAllEvents,
+            isAllEvents: isAll!,
             onToggle: _toggleEventView,
           ),
-          Expanded(child: EventsWidgetBase(isAllEvents: isAllEvents, search: searchQuery,)),
+          Expanded(
+              child: EventsWidgetBase(
+            isAllEvents: isAll!,
+            search: searchQuery,
+            isRecent: isRecent!,
+          )),
         ],
       ),
     );
@@ -102,7 +135,8 @@ class _EventsListScreenState extends State<EventsListScreen> {
 class ToggleButtons extends StatelessWidget {
   final bool isAllEvents;
   final Function(bool) onToggle;
-  const ToggleButtons({required this.isAllEvents, required this.onToggle, super.key});
+  const ToggleButtons(
+      {required this.isAllEvents, required this.onToggle, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +158,6 @@ class ToggleButtons extends StatelessWidget {
             ? const Color.fromRGBO(186, 155, 55, 1)
             : const Color.fromARGB(255, 147, 122, 39),
       ),
-      
       child: Text(text, style: const TextStyle(color: Colors.black)),
     );
   }
@@ -133,25 +166,26 @@ class ToggleButtons extends StatelessWidget {
 class EventsWidgetBase extends StatelessWidget {
   final bool isAllEvents;
   final String search;
-  const EventsWidgetBase({required this.isAllEvents, required this.search, super.key});
+  final bool isRecent;
+  const EventsWidgetBase(
+      {required this.isAllEvents,
+      required this.search,
+      required this.isRecent,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<EventsProvider>(
-      builder: (context, eventsProvider, child) {
-        if (eventsProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+    return Selector<EventsProvider, List<EventsModel>>(
+      selector: (_, provider) => provider.getFilteredEvents(
+        isAllEvents: isAllEvents,
+        search: search,
+      ),
+      builder: (context, filteredEvents, child) {
+        final eventsProvider =
+            Provider.of<EventsProvider>(context, listen: false);
+        if (filteredEvents.isEmpty) {
+          return const Center(child: Text('No matching events found.'));
         }
-
-        final events = isAllEvents ? eventsProvider.events : eventsProvider.registeredevents;
-
-        final filteredEvents = events.where((event) {
-                return event.eventname!.toLowerCase().contains(search);
-              }).toList();
-
-              if (filteredEvents.isEmpty) {
-                return const Center(child: Text('No matching events found.'));
-              }
 
         return ListView.builder(
           itemCount: filteredEvents.length,
@@ -159,16 +193,20 @@ class EventsWidgetBase extends StatelessWidget {
             final event = filteredEvents[index];
             return InkWell(
               onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  EventInfo.routeName,
-                  arguments: EventsArgument(event.eventid!),
-                );
+                Navigator.push(
+                    context, slideRightRoute(EventInfo(id: event.eventid)));
               },
-              child: EventsWidgets(
-                isReg: eventsProvider.isRegList[event.eventid],
-                event: event,
-                userId: eventsProvider.userId,
+              child: Selector<EventsProvider, bool>(
+                selector: (_, provider) =>
+                    provider.isRegList[event.eventid] ?? false,
+                builder: (_, isRegistered, __) {
+             
+                  return EventsWidgets(
+                    isReg: isRegistered,
+                    event: event,
+                    userId: eventsProvider.userId,
+                  );
+                },
               ),
             );
           },
@@ -182,6 +220,7 @@ class FloatingBtn extends StatelessWidget {
   const FloatingBtn({super.key});
   @override
   Widget build(BuildContext context) {
-    return const Align(alignment: Alignment.bottomRight, child: FormAddWidget());
+    return const Align(
+        alignment: Alignment.bottomRight, child: FormAddWidget());
   }
 }

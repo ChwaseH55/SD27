@@ -111,6 +111,9 @@ class _UserProfileScreen extends State<UserProfileScreen> {
                     return const Center(child: CircularProgressIndicator());
                   }
                   ImageProvider<Object>? picture;
+                  if(userProvider.user == null) {
+                    picture = const AssetImage('assets/images/golf_logo.jpg');
+                  } else 
                   if (userProvider.user!.profilepicture == null) {
                     picture = const AssetImage('assets/images/golf_logo.jpg');
                   } else {

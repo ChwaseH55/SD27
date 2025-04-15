@@ -4,56 +4,114 @@ import 'package:intl/intl.dart';
 
 class AnnouncementWidget extends StatelessWidget {
   final AnnouncementModel announcement;
+  final String? username;
 
-  const AnnouncementWidget({super.key, required this.announcement});
+  const AnnouncementWidget({super.key, required this.announcement, required this.username});
+
+  String _getTimeAgo(String dateString) {
+    final date = DateTime.parse(dateString);
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inHours < 24) {
+      return '${difference.inHours} hours ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return DateFormat('MMM d, yyyy').format(date);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('MMM d, yyyy')
-        .format(DateTime.parse(announcement.createddate!));
-
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Colors.black),
-          
+    return Card(
+      elevation: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Colors.grey.shade200,
+          width: 1,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.only(left: 20, right: 8, bottom: 10, top: 5),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          children: <Widget>[
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Row with Icon and Account Name
             Row(
-              children: <Widget>[
-                Text(
-                  announcement.title!,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.amber.shade700,
+                    size: 20,
                   ),
                 ),
-                const Spacer(),
-                Text(formattedDate),
-              ],
-            ),
-            const Row(
-              children: <Widget>[],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
+                const SizedBox(width: 12),
                 Expanded(
-                  // Wrap text in Expanded
-                  child: Text(
-                    announcement.content!,
-                    maxLines: 1,
-                  
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        username!,
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              announcement.title!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
-            )
+            ),
+            
+            // Content
+            Padding(
+              padding: const EdgeInsets.only(left: 40, top: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    announcement.content!,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _getTimeAgo(announcement.createddate!),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

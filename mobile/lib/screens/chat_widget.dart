@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:bubble/bubble.dart';
 import 'package:coffee_card/api_request/user_request.dart';
 import 'package:coffee_card/models/chat_model.dart';
 import 'package:coffee_card/models/user_model.dart';
@@ -33,6 +34,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _chatNameController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ImagePicker _picker = ImagePicker();
+  bool _isLoadingMessages = false;
 
   List<Chat> _chats = [];
   Chat? _activeChat;
@@ -92,10 +94,10 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void _loadMessages() {
+  Future<void> _loadMessages() async {
     if (_activeChat == null) return;
 
-    _messageSubscription?.cancel(); // Cancel previous listener if any
+    _messageSubscription?.cancel();
 
     _messageSubscription = _database
         .child('messages/${_activeChat!.id}')
@@ -112,9 +114,13 @@ class _ChatScreenState extends State<ChatScreen> {
           messages.add(Message.fromJson(key, value));
         });
 
+        // 🔥 Sort messages by timestamp
+        messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
         if (mounted) {
           setState(() {
             _messages = messages;
+            _isLoadingMessages = false;
           });
         }
       }
@@ -260,6 +266,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildChatList() {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
           title: Text(_activeChat?.name ?? 'Chats'),
           actions: [
             Padding(
@@ -289,15 +296,21 @@ class _ChatScreenState extends State<ChatScreen> {
               final chat = _chats[index];
               return ListTile(
                 leading: CircleAvatar(
-                  child: Text(chat.name[0]),
+                  backgroundColor: const Color.fromRGBO(229, 191, 69, 1),
+                  child: Text(
+                    chat.name[0],
+                    style: const TextStyle(color: Colors.black),
+                  ),
                 ),
                 title: Text(chat.name),
                 subtitle: Text(chat.lastMessage ?? 'No messages yet'),
-                onTap: () {
+                onTap: () async {
                   setState(() {
                     _activeChat = chat;
+                    _messages = [];
+                    _isLoadingMessages = true;
                   });
-                  _loadMessages();
+                  await _loadMessages();
                 },
               );
             },
@@ -557,23 +570,17 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _onCreatePressed() {
-    if (_selectedUser != null) {
-      // Pass selected user data
-      log('Selected User: ${_selectedUser!.username}');
-      // Navigate or handle the selected user
-    } else {
-      log('No user selected');
-    }
-  }
-
   Widget _buildChatView() {
     return Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
+          backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
           leading: GestureDetector(
             onTap: () {
               setState(() {
                 _activeChat = null;
+
+                _messages = []; // 🧹 Clear messages instantly
               });
               _loadChats();
             },
@@ -587,91 +594,116 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           title: Text(_activeChat?.name ?? 'Chats'),
-          actions: [
-            GestureDetector(
-              child: const Icon(Icons.add),
-              onTap: () {
-                // setState(() {
-                //   _showUserModal = true;
-                //   _isGroupChat = false;
-                //   _selectedUsers = [];
-                //   _groupName = '';
-                // });
-              },
-              onTapDown: (TapDownDetails details) {
-                log('did hit chat btn');
-                _showPopupMenu(details.globalPosition);
-              },
-            ),
-          ],
         ),
         body: Column(
           children: [
             Expanded(
               // ✅ Constrains ListView
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final message = _messages[index];
-                  final isMe = message.senderId == widget.currentUserId;
-                  return GestureDetector(
-                      onLongPressDown: (LongPressDownDetails details) {
-                        _selectedMsg = message;
-                        _showMsgMenu(details.globalPosition);
-                      },
-                      child: Align(
-                        alignment:
-                            isMe ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: isMe ? Colors.blue : Colors.grey[300],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (!isMe)
-                                Text(
-                                  message.senderName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+              child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: _isLoadingMessages
+                      ? const Center(child: CircularProgressIndicator())
+                      : ListView.builder(
+                          controller: _scrollController,
+                          itemCount: _messages.length,
+                          itemBuilder: (context, index) {
+                            final message = _messages[index];
+                            final isMe =
+                                message.senderId == widget.currentUserId;
+                            return GestureDetector(
+                                onLongPressDown:
+                                    (LongPressDownDetails details) {
+                                  _selectedMsg = message;
+                                  _showMsgMenu(details.globalPosition);
+                                },
+                                child: Align(
+                                  alignment: isMe
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    child: Bubble(
+                                      padding: const BubbleEdges.all(
+                                          0), // remove internal padding from Bubble
+                                      elevation: 5,
+                                      margin: const BubbleEdges.symmetric(
+                                          horizontal: 0, vertical: 2),
+                                      color: Colors
+                                          .transparent, // make bubble itself transparent
+                                      nip: isMe
+                                          ? BubbleNip.rightBottom
+                                          : BubbleNip.leftBottom,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(11),
+                                        decoration: BoxDecoration(
+                                          gradient: isMe
+                                              ? const LinearGradient(
+                                                  colors: [
+                                                    Color.fromRGBO(
+                                                        229, 191, 69, 1),
+                                                    Color.fromRGBO(
+                                                        137, 108, 14, 1)
+                                                  ],
+                                                  begin: Alignment.topRight,
+                                                  end: Alignment.bottomLeft,
+                                                )
+                                              : null,
+                                          color: isMe
+                                              ? null
+                                              : Colors.grey[
+                                                  300], // fallback for non-gradient
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (!isMe)
+                                              Text(
+                                                message.senderName,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            if (message.imageUrl != null)
+                                              Image.network(
+                                                message.imageUrl!,
+                                                width: 200,
+                                                height: 200,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            if (message.text != null)
+                                              Text(
+                                                message.text!,
+                                                style: TextStyle(
+                                                  color: isMe
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                                ),
+                                              ),
+                                            Text(
+                                              DateFormat('hh:mm a').format(
+                                                DateTime
+                                                    .fromMillisecondsSinceEpoch(
+                                                        message.timestamp),
+                                              ),
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                color: isMe
+                                                    ? Colors.white70
+                                                    : Colors.black54,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              if (message.imageUrl != null)
-                                Image.network(
-                                  message.imageUrl!,
-                                  width: 200,
-                                  height: 200,
-                                  fit: BoxFit.cover,
-                                ),
-                              if (message.text != null)
-                                Text(
-                                  message.text!,
-                                  style: TextStyle(
-                                    color: isMe ? Colors.white : Colors.black,
-                                  ),
-                                ),
-                              Text(
-                                DateFormat('HH:mm').format(
-                                  DateTime.fromMillisecondsSinceEpoch(
-                                      message.timestamp),
-                                ),
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: isMe ? Colors.white70 : Colors.black54,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ));
-                },
-              ),
+                                ));
+                          },
+                        )),
             ),
             _buildMessageInput(), // ✅ Ensures input field is placed correctly
           ],
@@ -700,8 +732,13 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           Expanded(
             child: TextField(
+              cursorColor: const Color.fromRGBO(186, 155, 55, 1),
               controller: _messageController,
               decoration: const InputDecoration(
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    borderSide: BorderSide(
+                        color: Color.fromRGBO(186, 155, 55, 1), width: 2)),
                 hintText: 'Type a message...',
                 border: OutlineInputBorder(),
               ),

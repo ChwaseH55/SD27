@@ -43,7 +43,7 @@ class LikeButtonForPost extends StatefulWidget {
 }
 
 class _LikeButtonForPost extends State<LikeButtonForPost> {
-   late ForumProvider forumProvider;
+  late ForumProvider forumProvider;
   bool isLiked = false;
   int counter = 0;
   late int likeCount; // Mutable variable to store the like count
@@ -56,44 +56,41 @@ class _LikeButtonForPost extends State<LikeButtonForPost> {
       isLiked = true;
     }
   }
-@override
-void didChangeDependencies() {
-  super.didChangeDependencies();
- forumProvider = Provider.of<ForumProvider>(context, listen: false);
-}
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    forumProvider = Provider.of<ForumProvider>(context);
+  }
 
   @override
   void dispose() {
-    likeApi();
     super.dispose();
   }
 
   Future<void> likeApi() async {
+    
     if (counter > 0) {
       if (isLiked) {
         if (widget.isPost) {
-          await addLike(
-              postId: widget.id!,
-              replyId: null,
-              userId: widget.userId!.toString());
+          await forumProvider.addLikeAndRefresh(
+              widget.id!, widget.userId!.toString());
         } else {
-          await addLike(
-              postId: null,
-              replyId: widget.id!,
-              userId: widget.userId!.toString());
+          await forumProvider.addLikeAndRefresh(
+              widget.id!, widget.userId!.toString());
         }
       } else {
         var likeId = widget.likes.keys.firstWhere(
             (k) => widget.likes[k] == widget.userId,
             orElse: () => -100);
 
-        await deleteLike(likeId: likeId.toString());
+        await forumProvider.removeLikeAndRefresh(likeId.toString());
       }
       await forumProvider.fetchPosts();
     }
   }
 
-  void toggleLike() {
+  void toggleLike() async {
     counter++;
     setState(() {
       isLiked = !isLiked;
@@ -103,6 +100,8 @@ void didChangeDependencies() {
         likeCount -= 1;
       }
     });
+
+    await likeApi();
   }
 
   @override
@@ -113,16 +112,6 @@ void didChangeDependencies() {
             width: 50,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                border: Border.all(
-                    color: isLiked
-                        ? const Color.fromRGBO(186, 155, 55, 1)
-                        : Colors.black,
-                    width: 2),
-                borderRadius:
-                    const BorderRadius.all(Radius.elliptical(90, 100)),
-              ),
               child: Padding(
                   padding: const EdgeInsets.only(left: 5),
                   child: Row(
@@ -138,15 +127,22 @@ void didChangeDependencies() {
                           isLiked ? Icons.thumb_up : Icons.thumb_up_off_alt,
                           key: ValueKey<bool>(
                               isLiked), // Important for animation to trigger
-                          color: isLiked ? const Color.fromRGBO(186, 155, 55, 1) : Colors.black,
+                          color: isLiked
+                              ? const Color.fromRGBO(186, 155, 55, 1)
+                              : Colors.black,
                           size: 20,
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 2),
-                        child: Text(likeCount.toString(),style: TextStyle( color: isLiked
-                        ? const Color.fromRGBO(186, 155, 55, 1)
-                        : Colors.black,),),
+                        child: Text(
+                          likeCount.toString(),
+                          style: TextStyle(
+                            color: isLiked
+                                ? const Color.fromRGBO(186, 155, 55, 1)
+                                : Colors.black,
+                          ),
+                        ),
                       )
                     ],
                   )),

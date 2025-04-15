@@ -1,10 +1,12 @@
+import 'dart:developer';
+
 import 'package:coffee_card/api_request/scores_request.dart';
 import 'package:coffee_card/models/custom_scores_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/models/user_model.dart';
 import 'package:coffee_card/providers/scores_approval_provider.dart';
-import 'package:coffee_card/widgets/score_card_widget.dart';
+
 
 class ScoreListScreen extends StatefulWidget {
   const ScoreListScreen({super.key});
@@ -16,16 +18,28 @@ class ScoreListScreen extends StatefulWidget {
 class _ScoreListScreen extends State<ScoreListScreen> {
   String scoreType = 'all';
   String value = '';
+  late ScoresAdminProvider _scoresProvider;
 
   @override
   void initState() {
     super.initState();
+    _scoresProvider = ScoresAdminProvider(scoreType, value);
+  }
+
+  @override
+  void dispose() {
+    _scoresProvider.dispose();
+    super.dispose();
   }
 
   void _updateSelectedWidget(String state, {String newValue = ''}) {
     setState(() {
       scoreType = state;
       value = newValue;
+
+      // Recreate the provider when values change
+      _scoresProvider.dispose(); // Dispose old one
+      _scoresProvider = ScoresAdminProvider(scoreType, value);
     });
   }
 
@@ -39,14 +53,14 @@ class _ScoreListScreen extends State<ScoreListScreen> {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: ChangeNotifierProvider(
-        key: ValueKey('$scoreType-$value'), // Forces rebuild
-        create: (_) => ScoresAdminProvider(scoreType, value),
+      body: ChangeNotifierProvider<ScoresAdminProvider>.value(
+        value: _scoresProvider,
         child: ScoresWidget(scoreState: scoreType, value: value),
       ),
     );
   }
 }
+
 
 class ScoresWidget extends StatefulWidget {
   final String scoreState;
@@ -306,9 +320,11 @@ class _ScoreCardWidget extends State<ScoreCardWidget> {
                 children: <Widget>[
                   ElevatedButton(
                       onPressed: () async {
-                        await approveScore(
-                            widget.score.score.scoreid.toString());
-                        parentState?._updateSelectedWidget('approved');
+                        log('${widget.score.score.approvalstatus!}');
+                        // await approveScore(
+                          
+                        //     widget.score.score.scoreid.toString());
+                        // parentState?._updateSelectedWidget('approved');
                       },
                       style: ElevatedButton.styleFrom(
                         side: const BorderSide(
@@ -323,9 +339,7 @@ class _ScoreCardWidget extends State<ScoreCardWidget> {
                       ),
                       child: const Text('Approve',
                           style: TextStyle(color: Colors.white))),
-
                   const SizedBox(width: 10),
-
                   ElevatedButton(
                       onPressed: () async {
                         await rejectScore(

@@ -1,18 +1,17 @@
 import 'dart:developer';
 
 import 'package:coffee_card/api_request/forum_request.dart';
-import 'package:coffee_card/arguments/postcreateargument.dart';
 import 'package:coffee_card/main.dart';
+import 'package:coffee_card/models/post_model.dart';
+import 'package:coffee_card/models/user_model.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
-import 'package:coffee_card/widgets/likebutton_widget.dart';
+import 'package:coffee_card/widgets/slideRightTransition.dart';
+import 'package:coffee_card/widgets/slidedown.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/screens/disscusisonpost_info.dart';
-import 'package:coffee_card/arguments/postargument.dart';
-import 'package:coffee_card/widgets/post_discussion_widget.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ForumpostScreen extends StatefulWidget {
@@ -23,15 +22,28 @@ class ForumpostScreen extends StatefulWidget {
 }
 
 class _ForumpostScreenState extends State<ForumpostScreen> {
-  late ForumProvider forumProvider;
+  ForumProvider? forumProvider;
   TextEditingController searchController = TextEditingController();
   String searchQuery = "";
+  bool _isInit = true;
+  bool _isLoading = false;
+  bool? isRecent;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    forumProvider = Provider.of<ForumProvider>(context, listen: false);
-    forumProvider.fetchPosts();
+    if (_isInit) {
+      _isLoading = true;
+      forumProvider = Provider.of<ForumProvider>(context, listen: false);
+      forumProvider!.fetchPosts().then((_) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      });
+      _isInit = false;
+    }
   }
 
   @override
@@ -67,54 +79,104 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
             centerTitle: true,
             backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
             actions: [
-              TextButton(
+              IconButton(
                 style: ButtonStyle(
                   foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
                 ),
                 onPressed: () async {
-                  await Navigator.pushNamed(
+                  final res = await Navigator.push(
                     context,
-                    PostCreationForm.routeName,
-                    arguments: CreateArgument(false, -1, '', ''),
+                    SlideDownRoute(
+                        page: const PostCreationForm(
+                      isUpdate: false,
+                      postId: -1,
+                      content: '',
+                      title: '',
+                    )), // your destination
                   );
-                  // Force refresh after returning from create post screen
-                  forumProvider.fetchPosts();
+                  log('$res');
+                  if (res == true) {
+                    forumProvider!.fetchPosts();
+                  }
                 },
-                child: const Text('+ Create Post'),
+                icon: const Icon(
+                  Icons.add,
+                  size: 15,
+                ),
               ),
             ],
           )),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(
-                top: 13.0, left: 8.0, right: 8.0, bottom: 8.0),
-            child: TextField(
-              controller: searchController,
-              cursorColor: Colors.black,
-              decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.black, width: 2.0),
-                  borderRadius: BorderRadius.circular(40.0),
+          Row(
+            children: [
+              /// Search Bar
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: searchController,
+                    cursorColor: Colors.black,
+                    decoration: InputDecoration(
+                      suffixIcon: Align(
+                        widthFactor: 1.0,
+                        heightFactor: 1.0,
+                        child: PopupMenuButton<String>(
+                          icon: const Icon(Icons.filter_list),
+                          onSelected: (String result) {
+                            setState(() {
+                              switch (result) {
+                                case 'recent':
+                                  isRecent = null;
+                                  break;
+                                case 'old':
+                                  isRecent = false;
+                                  break;
+
+                                default:
+                              }
+                            });
+                          },
+                          itemBuilder: (BuildContext context) =>
+                              <PopupMenuEntry<String>>[
+                            const PopupMenuItem<String>(
+                              value: 'recent',
+                              child: Text('Newest Posts'),
+                            ),
+                            const PopupMenuItem<String>(
+                              value: 'old',
+                              child: Text('Oldest Posts'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.black, width: 2.0),
+                        borderRadius: BorderRadius.circular(40.0),
+                      ),
+                      fillColor: Colors.white,
+                      filled: true,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                            color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+                        borderRadius: BorderRadius.circular(40.0),
+                      ),
+                      labelText: 'Search Posts',
+                      labelStyle: const TextStyle(color: Colors.black),
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value.toLowerCase();
+                      });
+                    },
+                  ),
                 ),
-                fillColor: Colors.white,
-                filled: true,
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(
-                      color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
-                  borderRadius: BorderRadius.circular(40.0),
-                ),
-                labelText: 'Search Posts',
-                labelStyle: const TextStyle(color: Colors.black),
-                prefixIcon: const Icon(Icons.search),
-                border: const OutlineInputBorder(),
               ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value.toLowerCase();
-                });
-              },
-            ),
+            ],
           ),
           Expanded(
             child: Consumer<ForumProvider>(
@@ -125,41 +187,21 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
                           color: Colors.black, size: 70));
                 }
 
-                final filteredPosts = forumProvider.posts.where((post) {
-                  return post.title.toLowerCase().contains(searchQuery);
-                }).toList();
-
-                if (filteredPosts.isEmpty) {
-                  return const Center(child: Text('No matching posts found.'));
+                final filteredPosts =
+                    forumProvider.getFilteredPosts(searchQuery);
+                if (isRecent != null && isRecent == false) {
+                  filteredPosts
+                      .sort((a, b) => a.createddate.compareTo(b.createddate));
                 }
 
-                return ListView.builder(
-                  itemCount: filteredPosts.length,
-                  itemBuilder: (context, index) {
-                    final post = filteredPosts[index];
-                    return InkWell(
-                      highlightColor: const Color.fromRGBO(186, 155, 55, 1),
-                      onTap: () async {
-                        Navigator.pushNamed(
-                          context,
-                          PostsScreenInfo.routeName,
-                          arguments: PostArguments(post.postid),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: PostWidget(
-                          date: post.createddate,
-                          postName: post.title,
-                          likeNumber: forumProvider.likes[post.postid]!,
-                          postId: post.postid.toString(),
-                          replyId: '',
-                          userId: forumProvider.cacheUser!,
-                        ),
-                      ),
-                    );
-                  },
-                );
+                return forumProvider.isLoading
+                    ? Center(
+                        child: LoadingAnimationWidget.threeArchedCircle(
+                            color: Colors.black, size: 70))
+                    : filteredPosts.isEmpty
+                        ? const Center(child: Text('No matching posts found.'))
+                        : PostListView(
+                            posts: filteredPosts, forumProvider: forumProvider);
               },
             ),
           ),
@@ -169,7 +211,55 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
   }
 }
 
+class PostListView extends StatelessWidget {
+  final List<PostModel> posts;
+  final ForumProvider forumProvider;
+
+  const PostListView({
+    required this.posts,
+    required this.forumProvider,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: posts.length,
+      itemBuilder: (context, index) {
+        final post = posts[index];
+        return InkWell(
+          onTap: () async {
+            final res = await Navigator.push(
+                context,
+                slideRightRoute(
+                    PostsScreenInfo(postId: post.postid.toString())));
+            log('$res');
+            if (res == true) {
+              forumProvider.fetchPosts();
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: PostWidget(
+              user: forumProvider.postUsers[post.postid]!,
+              replyNum: forumProvider.numReplies[post.postid]!,
+              date: post.createddate,
+              postName: post.title,
+              likeNumber: forumProvider.likes[post.postid]!,
+              postId: post.postid.toString(),
+              replyId: '',
+              userId: forumProvider.cacheUser!,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class PostWidget extends StatelessWidget {
+  final UserModel user;
+  final int replyNum;
   final String date;
   final String postName;
   final Map<int, int> likeNumber;
@@ -179,6 +269,8 @@ class PostWidget extends StatelessWidget {
 
   const PostWidget({
     super.key,
+    required this.user,
+    required this.replyNum,
     required this.date,
     required this.postName,
     required this.likeNumber,
@@ -191,51 +283,142 @@ class PostWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     DateTime time1 = DateTime.parse(date);
     String newDate = timeago.format(time1, locale: 'en_short');
+    double width = MediaQuery.sizeOf(context).width;
+    double height = MediaQuery.sizeOf(context).height;
+    bool noPic = user.profilepicture == null;
+    
+    log('$noPic');
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Card(
-        color: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 3.0, color: Colors.black),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              /// **Post Title**
-              Row(children: <Widget>[
-                Text(
-                  postName,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+
+
+    return TweenAnimationBuilder<Offset>(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+      tween: Tween(begin: const Offset(1, 0), end: Offset.zero),
+      builder: (context, offset, child) {
+        return Transform.translate(
+          offset: Offset(offset.dx * width, 0),
+          child: child,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: SizedBox(
+          height: height * 0.15,
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              side: const BorderSide(
+                  width: 2.0, color: Colors.black), // black border
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  /// Avatar-like circle
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Color.fromRGBO(229, 191, 69, 1),
+                          Color.fromRGBO(137, 108, 14, 1)
+                        ],
+                      ),
+                    ),
+                    child: noPic
+                        ? CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.transparent,
+                            child: Text(
+                              user.username[0].toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ))
+                        : CircleAvatar(
+                            radius: 20,
+                            backgroundImage: NetworkImage(user.profilepicture!),
+                          ),
                   ),
-                ),
-                const SizedBox(width: 7),
-                Text(
-                  newDate,
-                  style: const TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-              ]),
-              const SizedBox(height: 12),
+                  const SizedBox(width: 14),
 
-              // /// **Like Button & Actions Row**
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  LikeButton(
-                    isPost: true,
-                    likes: likeNumber,
-                    id: postId,
-                    userId: int.parse(userId),
+                  /// Main content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        /// Post title
+                        Text(
+                          postName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+
+                        /// Subtitle (username and reply count)
+                        Row(
+                          children: [
+                            Text(
+                              user.username,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.comment,
+                                size: 14, color: Colors.blueAccent),
+                            const SizedBox(width: 4),
+                            Text(
+                              "$replyNum Replies",
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+
+                  /// Right-side actions
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      LikeButton(
+                        isPost: true,
+                        likes: likeNumber,
+                        id: postId,
+                        userId: int.parse(userId),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        newDate.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -356,16 +539,6 @@ class _LikeButtonForPost extends State<LikeButtonForPost> with RouteAware {
             width: 60,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                border: Border.all(
-                    color: isLiked
-                        ? const Color.fromRGBO(186, 155, 55, 1)
-                        : Colors.black,
-                    width: 2),
-                borderRadius:
-                    const BorderRadius.all(Radius.elliptical(90, 100)),
-              ),
               child: Padding(
                   padding: const EdgeInsets.only(left: 5),
                   child: Row(

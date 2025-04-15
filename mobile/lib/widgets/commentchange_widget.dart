@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
+import 'package:coffee_card/providers/forum_reply_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -66,7 +67,8 @@ class _AddCommentSheet extends State<AddCommentSheet> {
               border: OutlineInputBorder(),
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(
-                    color:  Color.fromRGBO(186, 155, 55, 1), width: 2.0), // Highlight color
+                    color: Color.fromRGBO(186, 155, 55, 1),
+                    width: 2.0), // Highlight color
               ),
             ),
             maxLines: 3,
@@ -74,26 +76,20 @@ class _AddCommentSheet extends State<AddCommentSheet> {
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: () async {
-              final forumProvider =
+              final replyProvider =
                   Provider.of<PostProvider>(context, listen: false);
 
               if (widget.isUpdate) {
-                updateReply(
-                    replyId: widget.replyId, content: commentController.text);
+               await replyProvider.editReplyAndRefresh(
+                    widget.replyId, commentController.text, widget.postId);
               } else {
                 if (commentController.text.trim().isEmpty) {
                   return;
                 }
-                addReply(
-                    postId: widget.postId,
-                    content: commentController.text,
-                    userId: widget.userId);
+                await replyProvider.addReplyAndRefresh(
+                    widget.postId, commentController.text, widget.userId);
               }
 
-              // Fetch updated replies
-              await forumProvider.fetchPostDetails(widget.postId);
-
-              // Close the bottom sheet
               if (context.mounted) {
                 Navigator.of(context).pop();
               }

@@ -12,6 +12,7 @@ class Chat {
   final int? lastMessageDate;
   final String createdBy;
   final int createdAt;
+  String? username;
 
   Chat(
       {required this.id,
@@ -30,7 +31,7 @@ class Chat {
     return Chat(
       id: id,
       createdAt: json['createdAt'],
-      name: json['name'] ?? 'Chat',
+      name: json['name'] ?? 'Chats',
       createdBy: json['createdBy'],
       type: json['type'] ?? 'direct',
       participants: Map<String, bool>.from(json['participants'] ?? {}),
@@ -43,6 +44,7 @@ class Chat {
     throw Exception('Error: $e');
   }
 }
+
 
 
 }

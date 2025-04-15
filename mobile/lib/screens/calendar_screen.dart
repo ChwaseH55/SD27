@@ -2,6 +2,7 @@ import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/utils.dart';
+import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -104,13 +105,11 @@ class _TableEventsExampleState extends State<TableEventsExample> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        EventInfo.routeName,
-                        arguments: EventsArgument(eventProvider
+                      Navigator.push(
+                    context, slideRightRoute(EventInfo(id: eventProvider
                             .getEventsForDay(_selectedDay!)[index]
-                            .id),
-                      );
+                            .id)));
+                      
                     },
                     child: Container(
                         margin: const EdgeInsets.symmetric(

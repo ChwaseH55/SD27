@@ -1,4 +1,5 @@
 import 'package:coffee_card/api_request/auth_request.dart';
+import 'package:coffee_card/models/postwithreplies_model.dart';
 import 'package:flutter/material.dart';
 import 'package:coffee_card/api_request/user_request.dart';
 import 'package:coffee_card/api_request/forum_request.dart';
@@ -6,39 +7,39 @@ import 'package:coffee_card/models/user_model.dart';
 import 'package:coffee_card/models/likes_model.dart';
 
 class ReplyProvider extends ChangeNotifier {
-  UserModel? _user;
-  Map<int,int> _likes = {};
+  final Map<int, UserModel> _users = {};
+  final Map<int, Map<int, int>> _likes = {}; // replyId -> likes map
   bool _isLoading = true;
   String? _userid;
   String? _roleid;
 
-  UserModel? get user => _user;
-  Map<int,int> get likes => _likes;
+  Map<int, UserModel> get users => _users;
+  Map<int, Map<int, int>> get likes => _likes;
   bool get isLoading => _isLoading;
   String? get userId => _userid;
-  String? get roleid => _roleid;
+  String? get roleId => _roleid;
 
-  ReplyProvider(String replyId, String userId) {
-    fetchReplyDetails(replyId, userId);
-  }
-
-  Future<void> fetchReplyDetails(String replyId, String userId) async {
+  Future<void> fetchReplyDetailsList(List<ReplyModel> replies) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _likes = await getLikes(postId: null, replyId: replyId);
-
-      _user = await getSingleUser(userId: userId);
       _userid = await getUserID();
-            _roleid = await getRoleId();
-      
+      _roleid = await getRoleId();
+
+      for (var reply in replies) {
+        final user = await getSingleUser(userId: reply.userid.toString());
+        final likeMap = await getLikes(postId: null, replyId: reply.replyid.toString());
+
+        _users[reply.replyid!] = user;
+        _likes[reply.replyid!] = likeMap;
+      }
     } catch (e) {
-      _user = null;
-      _likes = {};
+      // Handle errors individually if needed
     }
 
     _isLoading = false;
     notifyListeners();
   }
+  
 }

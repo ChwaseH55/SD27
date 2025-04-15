@@ -5,6 +5,7 @@ import 'package:coffee_card/providers/events_info_provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
+import 'package:coffee_card/providers/forum_reply_provider.dart';
 import 'package:coffee_card/providers/scores_approval_provider.dart';
 import 'package:coffee_card/providers/scores_provider.dart';
 import 'package:coffee_card/providers/user_provider.dart';
@@ -51,11 +52,12 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ForumProvider()..fetchPosts()),
+        ChangeNotifierProvider(create: (_) => ForumProvider()),
         ChangeNotifierProvider(create: (_) => PostProvider()),
         ChangeNotifierProvider(create: (_) => EventsProvider()..fetchEvents()),
         ChangeNotifierProvider(create: (_) => EventsInfoProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => ReplyProvider()),
         ChangeNotifierProvider(create: (_) => ScoresProvider()),
         ChangeNotifierProvider(
             create: (_) => AnnouncementProvider()..fetchAnnouncements()),
@@ -74,10 +76,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
-      theme: ThemeData(scaffoldBackgroundColor: const Color.fromARGB(255, 240, 239, 239)),
+      theme: ThemeData(
+          scaffoldBackgroundColor: const Color.fromARGB(255, 240, 239, 239)),
       navigatorObservers: [routeObserver],
-      title: 'Named Routes Demo',
+      title: 'UCF Golf Club',
       initialRoute: '/',
       routes: {
         '/': (context) => const LoginScreen(),
@@ -86,7 +90,6 @@ class MyApp extends StatelessWidget {
         '/createFor': (context) => const CreateForum(),
         '/pos': (context) => const ForumpostScreen(),
         '/annc': (context) => const AnnouncementListScreen(),
-        '/tes': (context) => const DisscusisonpostInfoScreen(),
         '/pro': (context) => const UserProfileScreen(),
         '/calendar': (context) => const TableEventsExample(),
         '/createEvent': (context) => const CreateEvent(),
@@ -94,12 +97,8 @@ class MyApp extends StatelessWidget {
         '/users': (context) => const UserList(),
         '/adminscores': (context) => const ScoreListScreen(),
         '/chat': (context) => const ChatDisplay(),
-        PostsScreenInfo.routeName: (context) => const PostsScreenInfo(),
-        EventInfo.routeName: (context) => const EventInfo(),
-        EventsListScreen.routeName: (context) => const EventsListScreen(),
-        PostCreationForm.routeName: (context) => const PostCreationForm(),
+        //PostCreationForm.routeName: (context) => const PostCreationForm(),
         CreateEvent.routeName: (context) => const CreateEvent(),
-        AnnouncementInfo.routeName: (context) => const AnnouncementInfo(),
         AnnouncementCreationScreen.routeName: (context) =>
             const AnnouncementCreationScreen(),
       },

@@ -13,26 +13,26 @@ class CreateEvent extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Row(
-              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
-              children: [
-                SizedBox(width: 14),
-                Icon(Icons.arrow_back_ios,
-                    color: Colors.black, size: 16), // Reduce size if needed
-          
-                Text(
-                  'Back',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Row(
+            mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
+            children: [
+              SizedBox(width: 14),
+              Icon(Icons.arrow_back_ios,
+                  color: Colors.black, size: 16), // Reduce size if needed
+
+              Text(
+                'Back',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ),
         title: const Text(
           'Create Event',
@@ -106,17 +106,39 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _selectDateTime(BuildContext context) async {
+    // Step 1: Pick the date
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
     );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
+
+    if (pickedDate != null) {
+      final TimeOfDay? pickedTime;
+      // Step 2: Pick the time
+      if (context.mounted) {
+        pickedTime = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(selectedDate ?? DateTime.now()),
+        );
+
+        if (pickedTime != null) {
+          // Step 3: Combine both into one DateTime
+          final DateTime fullDateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+
+          setState(() {
+            selectedDate = fullDateTime;
+          });
+        }
+      }
     }
   }
 
@@ -178,7 +200,7 @@ class _EventCreationWidgetState extends State<EventCreationWidget> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             GestureDetector(
-              onTap: () => _selectDate(context),
+              onTap: () => _selectDateTime(context),
               child: AbsorbPointer(
                 child: TextField(
                   decoration: _inputDecoration(selectedDate == null

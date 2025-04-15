@@ -4,7 +4,18 @@ import 'package:coffee_card/arguments/postcreateargument.dart';
 import 'package:flutter/material.dart';
 
 class PostCreationForm extends StatefulWidget {
-  const PostCreationForm({super.key});
+  final bool isUpdate;
+  final int postId;
+  final String title;
+  final String content;
+
+  const PostCreationForm({
+    super.key,
+    required this.isUpdate,
+    required this.postId,
+    required this.title,
+    required this.content,
+  });
 
   static const routeName = '/extractUpdateInfo';
 
@@ -15,38 +26,52 @@ class PostCreationForm extends StatefulWidget {
 class _PostCreationForm extends State<PostCreationForm> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: CreatePost());
+    return Scaffold(
+      body: CreatePost(
+        isUpdate: widget.isUpdate,
+        postId: widget.postId,
+        title: widget.title,
+        content: widget.content,
+      ),
+    );
   }
 }
 
 class CreatePost extends StatelessWidget {
-  const CreatePost({super.key});
+  final bool isUpdate;
+  final int postId;
+  final String title;
+  final String content;
+
+  const CreatePost({
+    super.key,
+    required this.isUpdate,
+    required this.postId,
+    required this.title,
+    required this.content,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Row(
-              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
-              children: [
-                SizedBox(width: 14),
-                Icon(Icons.arrow_back_ios,
-                    color: Colors.black, size: 16), // Reduce size if needed
-          
-                Text(
-                  'Back',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
+          onTap: () => Navigator.of(context).pop(false),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: 14),
+              Icon(Icons.arrow_back_ios, color: Colors.black, size: 16),
+              Text(
+                'Back',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ),
         title: const Text(
           'Create Post',
@@ -55,25 +80,43 @@ class CreatePost extends StatelessWidget {
         centerTitle: true,
         backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: SingleChildScrollView(child: PostCreationWidget()),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: PostCreationWidget(
+            isUpdate: isUpdate,
+            postId: postId,
+            title: title,
+            content: content,
+          ),
+        ),
       ),
     );
   }
 }
 
 class PostCreationWidget extends StatelessWidget {
-  const PostCreationWidget({super.key});
+  final bool isUpdate;
+  final int postId;
+  final String title;
+  final String content;
+
+  const PostCreationWidget({
+    super.key,
+    required this.isUpdate,
+    required this.postId,
+    required this.title,
+    required this.content,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as CreateArgument;
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Colors.black, width: 3),
-          borderRadius: BorderRadius.circular(20)),
+        side: const BorderSide(color: Colors.black, width: 3),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -81,11 +124,16 @@ class PostCreationWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              args.isUpdate ? 'Update Post' : 'Create New Post',
+              isUpdate ? 'Update Post' : 'Create New Post',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 12),
-            const PostForm(),
+            PostForm(
+              isUpdate: isUpdate,
+              postId: postId,
+              title: title,
+              content: content,
+            ),
           ],
         ),
       ),
@@ -94,29 +142,34 @@ class PostCreationWidget extends StatelessWidget {
 }
 
 class PostForm extends StatefulWidget {
-  const PostForm({super.key});
+  final bool isUpdate;
+  final int postId;
+  final String title;
+  final String content;
+
+  const PostForm({
+    super.key,
+    required this.isUpdate,
+    required this.postId,
+    required this.title,
+    required this.content,
+  });
 
   @override
   State<PostForm> createState() => _PostForm();
 }
 
 class _PostForm extends State<PostForm> {
-  final titleController = TextEditingController();
-  final descriptionController = TextEditingController();
-  CreateArgument? args; // Store argument for use in initState
+  late final TextEditingController titleController;
+  late final TextEditingController descriptionController;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    // Retrieve arguments only once
-    final CreateArgument? receivedArgs =
-        ModalRoute.of(context)?.settings.arguments as CreateArgument?;
-    if (receivedArgs != null) {
-      args = receivedArgs;
-      titleController.text = args!.isUpdate ? args!.title : "";
-      descriptionController.text = args!.isUpdate ? args!.content : "";
-    }
+  void initState() {
+    super.initState();
+    titleController =
+        TextEditingController(text: widget.isUpdate ? widget.title : '');
+    descriptionController =
+        TextEditingController(text: widget.isUpdate ? widget.content : '');
   }
 
   @override
@@ -139,10 +192,8 @@ class _PostForm extends State<PostForm> {
         TextField(
           controller: titleController,
           decoration: InputDecoration(
-            hintText: args!.isUpdate ? 'Enter title' : 'New Post Title',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            hintText: 'Enter title',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             filled: true,
             fillColor: const Color.fromARGB(255, 240, 235, 235),
           ),
@@ -158,9 +209,7 @@ class _PostForm extends State<PostForm> {
           maxLines: 4,
           decoration: InputDecoration(
             hintText: 'Enter description',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             filled: true,
             fillColor: const Color.fromARGB(255, 240, 235, 235),
           ),
@@ -169,32 +218,30 @@ class _PostForm extends State<PostForm> {
         Center(
           child: ElevatedButton(
             onPressed: () async {
-              if (args!.isUpdate) {
+              if (widget.isUpdate) {
                 await updatePost(
-                    postId: args!.postId.toString(),
-                    title: titleController.text,
-                    content: descriptionController.text);
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
+                  postId: widget.postId.toString(),
+                  title: titleController.text,
+                  content: descriptionController.text,
+                );
               } else {
                 String? id = await getUserID();
                 await createPost(
-                    title: titleController.text,
-                    content: descriptionController.text,
-                    userId: id);
-                if (context.mounted) Navigator.of(context).pop();
+                  title: titleController.text,
+                  content: descriptionController.text,
+                  userId: id,
+                );
               }
+              if (context.mounted) Navigator.of(context).pop(true);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+                  borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
               textStyle: const TextStyle(fontSize: 16),
             ),
-            child: Text(args!.isUpdate ? 'Update' : 'Create Post',
+            child: Text(widget.isUpdate ? 'Update' : 'Create Post',
                 style: const TextStyle(color: Colors.black)),
           ),
         ),
