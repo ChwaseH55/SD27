@@ -4,9 +4,6 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = require('stripe')(stripeSecretKey);
-
 const authRoutes = require('./server/routes/auth');
 const announcementsRoutes = require('./server/routes/announcements');
 const eventsRoutes = require('./server/routes/events');

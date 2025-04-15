@@ -6,7 +6,6 @@ const { defineSecret } = require("firebase-functions/params");
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const express = require('express');
 const router = express.Router();
 const pool = require("../db");
@@ -16,21 +15,44 @@ const pool = require("../db");
 
 const YOUR_DOMAIN = 'https://sd27-87d55.web.app';
 
+// Helper function to get Stripe instance
+const getStripe = () => {
+    try {
+        // Try to use Firebase Functions secret first
+        if (STRIPE_SECRET_KEY.value) {
+            return require('stripe')(STRIPE_SECRET_KEY.value());
+        }
+    } catch (error) {
+        console.error('Error using Firebase secret:', error);
+    }
+    
+    // Fallback to environment variable
+    if (process.env.STRIPE_SECRET_KEY) {
+        return require('stripe')(process.env.STRIPE_SECRET_KEY);
+    }
+    
+    throw new Error('No Stripe secret key available');
+};
+
 // Test Route
 router.get('/test', (req, res) => {
-    res.json({ message: "Stripe API is working!", secretKey: STRIPE_SECRET_KEY.value() });
+    try {
+        const stripe = getStripe();
+        res.json({ message: "Stripe API is working!" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 router.get('/productlist', async (req, res) => {
     try {
-        const { userId } = req.query; // Get userId from query params
+        const { userId } = req.query;
         console.log(`Fetching products for user: ${userId}`);
 
         if (!userId) {
             return res.status(400).json({ error: "User ID is required." });
         }
 
-        // Fetch user payment status from the database
         const userResult = await pool.query("SELECT paymentstatus FROM users WHERE id = $1", [userId]);
 
         if (userResult.rows.length === 0) {
@@ -40,7 +62,7 @@ router.get('/productlist', async (req, res) => {
         const userPaymentStatus = userResult.rows[0].paymentstatus;
         console.log("User payment status:", userPaymentStatus);
 
-        // Fetch products and prices from Stripe
+        const stripe = getStripe();
         const products = await stripe.products.list({ active: true });
         const prices = await stripe.prices.list({ active: true });
 
@@ -70,12 +92,9 @@ router.get('/productlist', async (req, res) => {
     }
 });
 
-
-
 router.post('/create-checkout-session', async (req, res) => {
     try {
         const { cartItems, userId } = req.body;
-
         console.log("Received request with cartItems:", cartItems, "for userId:", userId);
 
         const userResult = await pool.query("SELECT paymentstatus FROM users WHERE id = $1", [userId]);
@@ -87,9 +106,6 @@ router.post('/create-checkout-session', async (req, res) => {
         const userPaymentStatus = userResult.rows[0].paymentstatus;
         const hasMembership = cartItems.some(item => item.name.toLowerCase().includes("membership"));
 
-        console.log("User payment status:", userPaymentStatus, "Membership in cart:", hasMembership);
-
-        // Prevent users from paying membership again if they already paid
         if (userPaymentStatus && hasMembership) {
             return res.status(400).json({ error: "You have already paid your dues for this year." });
         }
@@ -99,18 +115,15 @@ router.post('/create-checkout-session', async (req, res) => {
             quantity: item.quantity,
         }));
 
-        // Create metadata ONLY if membership is in the cart
         let metadata = {};
         if (hasMembership) {
             metadata = {
-                userId: String(userId), 
+                userId: String(userId),
                 type: "membership_dues"
             };
         }
 
-        console.log(metadata);
-
-        // Create Checkout Session
+        const stripe = getStripe();
         const session = await stripe.checkout.sessions.create({
             line_items: lineItems,
             mode: 'payment',
@@ -134,6 +147,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     console.log("✅ webhook received");
 
     try {
+        const stripe = getStripe();
         event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET.value());
     } catch (err) {
         console.error("❌ Webhook signature verification failed:", err.message);
@@ -169,6 +183,5 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
     res.json({ received: true });
 });
-
 
 module.exports = router;
