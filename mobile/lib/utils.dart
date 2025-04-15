@@ -1,6 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:collection';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+class Utils {
+  static const String apiUrl = 'https://sd27-87d55.web.app/api';
+  static const storage = FlutterSecureStorage();
+
+  static Future<String?> getToken() async {
+    return await storage.read(key: 'token');
+  }
+}
 
 /// Example event class.
 class Event {

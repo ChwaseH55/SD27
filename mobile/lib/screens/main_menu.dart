@@ -188,6 +188,12 @@ class HomePage extends StatelessWidget {
                             Navigator.push(
                                 context, slideRightRoute(const ChatDisplay()));
                           }),
+                          GridTile(
+                        icon: Icons.shopping_cart,
+                        title: "Shop",
+                        onTap: () {
+                          Navigator.pushNamed(context, '/shop');
+                        }),
                     ],
                   ),
                 ),

@@ -6,12 +6,14 @@ import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/providers/forum_reply_provider.dart';
 import 'package:coffee_card/providers/scores_provider.dart';
+import 'package:coffee_card/providers/shop_provider.dart';
 import 'package:coffee_card/providers/user_provider.dart';
 import 'package:coffee_card/screens/adminscorereview_screen.dart';
 import 'package:coffee_card/screens/calendar_screen.dart';
 import 'package:coffee_card/screens/eventCreation.dart';
 import 'package:coffee_card/screens/login_screen.dart';
 import 'package:coffee_card/screens/main_menu.dart';
+import 'package:coffee_card/screens/shop_screen.dart';
 import 'package:coffee_card/screens/listofpostsinforum_screen.dart';
 import 'package:coffee_card/screens/announcement_list.dart';
 import 'package:coffee_card/screens/scores_screen.dart';
@@ -53,7 +55,9 @@ void main() async {
             create: (_) => AnnouncementProvider()..fetchAnnouncements()),
         ChangeNotifierProvider(create: (_) => AnnouncementInfoProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
-        // Add more providers here if needed
+        ChangeNotifierProvider(
+          create: (context) => ShopProvider(context.read<UserProvider>()),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -80,6 +84,7 @@ class MyApp extends StatelessWidget {
         '/createFor': (context) => const CreateForum(),
         '/pos': (context) => const ForumpostScreen(),
         '/annc': (context) => const AnnouncementListScreen(),
+        '/shop': (context) => const ShopScreen(),
         '/pro': (context) => const UserProfileScreen(),
         '/calendar': (context) => const TableEventsExample(),
         '/createEvent': (context) => const CreateEvent(),
