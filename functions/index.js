@@ -17,7 +17,7 @@ const stripeRoutes = require('./server/routes/stripe');
 const usersRoutes = require('./server/routes/users');
 
 const app = express();
-admin.initializeApp();
+//admin.initializeApp();
 
 app.use(express.json());
 
@@ -76,6 +76,8 @@ app.get('/api/test', (req, res) => {
 
 // Auth routes (no authentication required for login/register)
 app.use('/api/auth', authRoutes);
+// Stripe webhook route (public, no auth)
+app.post('/api/stripe/webhook', stripeRoutes);
 
 // Protected routes (require authentication)
 app.use('/api/announcements', authenticateUser, announcementsRoutes);
