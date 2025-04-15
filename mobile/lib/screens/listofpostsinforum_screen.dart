@@ -50,62 +50,71 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(35.0),
-          child: AppBar(
-            leading: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
+        preferredSize: const Size.fromHeight(35.0),
+        child: AppBar(
+          title: const Text(
+            'UCF Post',
+            style:  TextStyle(fontWeight: FontWeight.w900),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: BackButton(
+            color: Colors.black,
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+          ),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(
+                Icons.account_circle_rounded,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, '/pro');
               },
-              child: const Row(
-                mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
-                children: [
-                  SizedBox(width: 14),
-                  Icon(Icons.arrow_back_ios,
-                      color: Colors.black, size: 16), // Reduce size if needed
-
-                  Text(
-                    'Back',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+            ),
+            IconButton(
+              style: ButtonStyle(
+                foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+              ),
+              onPressed: () async {
+                final res = await Navigator.push(
+                  context,
+                  SlideDownRoute(
+                      page: const PostCreationForm(
+                    isUpdate: false,
+                    postId: -1,
+                    content: '',
+                    title: '',
+                  )), // your destination
+                );
+                log('$res');
+                if (res == true) {
+                  forumProvider!.fetchPosts();
+                }
+              },
+              icon: const Icon(
+                Icons.add,
+                size: 15,
               ),
             ),
-            title: const Text('UCF Post',
-                style: TextStyle(fontWeight: FontWeight.w900)),
-            centerTitle: true,
-            backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-            actions: [
-              IconButton(
-                style: ButtonStyle(
-                  foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
-                ),
-                onPressed: () async {
-                  final res = await Navigator.push(
-                    context,
-                    SlideDownRoute(
-                        page: const PostCreationForm(
-                      isUpdate: false,
-                      postId: -1,
-                      content: '',
-                      title: '',
-                    )), // your destination
-                  );
-                  log('$res');
-                  if (res == true) {
-                    forumProvider!.fetchPosts();
-                  }
-                },
-                icon: const Icon(
-                  Icons.add,
-                  size: 15,
-                ),
+          ],
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromRGBO(186, 155, 55, 1),
+                  Color.fromARGB(255, 240, 219, 130),
+                ],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
               ),
-            ],
-          )),
+            ),
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Row(
@@ -286,10 +295,8 @@ class PostWidget extends StatelessWidget {
     double width = MediaQuery.sizeOf(context).width;
     double height = MediaQuery.sizeOf(context).height;
     bool noPic = user.profilepicture == null;
-    
+
     log('$noPic');
-
-
 
     return TweenAnimationBuilder<Offset>(
       duration: const Duration(milliseconds: 500),
