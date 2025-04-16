@@ -87,15 +87,6 @@ class EventInfoWidget extends StatelessWidget {
       required this.roleid,
       required this.eventid});
 
-  void _addToCalendar(BuildContext context) {
-    final provider = Provider.of<EventProvider>(context, listen: false);
-    DateTime eventDate = DateTime.parse(event!.eventdate!);
-    provider.addEvent(eventDate, event!.eventname!, int.parse(eventid!));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Event added to calendar!")),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +179,7 @@ class EventInfoWidget extends StatelessWidget {
                             if (context.mounted) {
                               Navigator.of(context).pop();
                             }
-                            await eventProvider.fetchEvents();
+                            await eventProvider.fetchEvents(context);
                             provider.removEvent(
                                 DateTime.parse(event!.eventdate!),
                                 int.parse(eventid!));
@@ -233,7 +224,7 @@ class EventInfoWidget extends StatelessWidget {
                                     event!.eventdate!));
                             if (context.mounted) Navigator.of(context).pop();
                             eventInfoProvider.fetchEventDetails(eventid!);
-                            eventListProvider.fetchEvents();
+                            eventListProvider.fetchEvents(context);
                           },
                           child: const Row(
                             children: [
@@ -253,30 +244,30 @@ class EventInfoWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-                      PopupMenuItem(
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            _addToCalendar(context);
-                          },
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.event_available,
-                                color: Colors.black,
-                                size: 20,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                'Add to Calendar',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // PopupMenuItem(
+                      //   child: InkWell(
+                      //     onTap: () {
+                      //       Navigator.of(context).pop();
+                      //       _addToCalendar(context);
+                      //     },
+                      //     child: const Row(
+                      //       children: [
+                      //         Icon(
+                      //           Icons.event_available,
+                      //           color: Colors.black,
+                      //           size: 20,
+                      //         ),
+                      //         SizedBox(width: 4),
+                      //         Text(
+                      //           'Add to Calendar',
+                      //           style: TextStyle(
+                      //             fontSize: 14,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   )))
             ],

@@ -1,6 +1,7 @@
 import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:coffee_card/arguments/postcreateargument.dart';
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:flutter/material.dart';
 
 class PostCreationForm extends StatefulWidget {
@@ -54,32 +55,7 @@ class CreatePost extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(false),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(width: 14),
-              Icon(Icons.arrow_back_ios, color: Colors.black, size: 16),
-              Text(
-                'Back',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        title: const Text(
-          'Create Post',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-      ),
+      appBar: CustomAppBar(title: isUpdate ? 'Edit Post' : 'Create Post', showBackButton: true,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -190,8 +166,13 @@ class _PostForm extends State<PostForm> {
         ),
         const SizedBox(height: 6),
         TextField(
+          cursorColor: Colors.black,
           controller: titleController,
           decoration: InputDecoration(
+              focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            borderSide:
+                BorderSide(color: Color.fromRGBO(186, 155, 55, 1), width: 2)),
             hintText: 'Enter title',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             filled: true,
@@ -205,9 +186,15 @@ class _PostForm extends State<PostForm> {
         ),
         const SizedBox(height: 6),
         TextField(
+          cursorColor: Colors.black,
           controller: descriptionController,
           maxLines: 4,
           decoration: InputDecoration(
+            
+              focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            borderSide:
+                BorderSide(color: Color.fromRGBO(186, 155, 55, 1), width: 2)),
             hintText: 'Enter description',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             filled: true,
@@ -242,7 +229,7 @@ class _PostForm extends State<PostForm> {
               textStyle: const TextStyle(fontSize: 16),
             ),
             child: Text(widget.isUpdate ? 'Update' : 'Create Post',
-                style: const TextStyle(color: Colors.black)),
+                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
           ),
         ),
       ],

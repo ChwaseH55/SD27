@@ -40,12 +40,12 @@ class _EventsWidgetsState extends State<EventsWidgets> {
       // Call API to unregister
       await unregisterFromEvent(
           widget.event.eventid.toString(), widget.userId.toString());
-      eventsProvider.fetchEvents();
+      eventsProvider.fetchEvents(context);
     } else {
       // Call API to register
       await registerForEvent(
           widget.event.eventid.toString(), widget.userId.toString());
-      eventsProvider.fetchEvents();
+      eventsProvider.fetchEvents(context);
     }
 
     setState(() {
@@ -171,7 +171,7 @@ class _EventsWidgetsState extends State<EventsWidgets> {
                                         : ' + Register',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w900,
-                                      fontSize: 12,
+                                      fontSize: 13,
                                       color: _isRegistered!
                                           ? Colors.red
                                           : Colors.black,

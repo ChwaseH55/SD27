@@ -5,7 +5,7 @@ import '../models/cart_item_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ShopPage extends StatelessWidget {
-  const ShopPage({Key? key}) : super(key: key);
+  const ShopPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class ShopPage extends StatelessWidget {
 class ShopItemCard extends StatelessWidget {
   final Map<String, dynamic> item;
 
-  const ShopItemCard({Key? key, required this.item}) : super(key: key);
+  const ShopItemCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +122,7 @@ class ShopItemCard extends StatelessWidget {
 }
 
 class CartBottomSheet extends StatelessWidget {
-  const CartBottomSheet({Key? key}) : super(key: key);
+  const CartBottomSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -212,30 +212,47 @@ class CartBottomSheet extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          12), // Change this value as needed
+                    ),
+                  ),
                   onPressed: cartItems.isEmpty
                       ? null
                       : () async {
                           final checkoutUrl =
                               await shopProvider.createCheckoutSession();
+
                           if (checkoutUrl != null) {
                             if (await canLaunchUrl(Uri.parse(checkoutUrl))) {
                               await launchUrl(Uri.parse(checkoutUrl));
                             } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text('Could not launch checkout URL'),
+                                  ),
+                                );
+                              }
+                            }
+                          } else {
+                            if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Could not launch checkout URL'),
+                                  content:
+                                      Text('Failed to create checkout session'),
                                 ),
                               );
                             }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Failed to create checkout session'),
-                              ),
-                            );
                           }
                         },
-                  child: const Text('Checkout'),
+                  child: const Text(
+                    'l',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
               ),
             ],
@@ -244,4 +261,4 @@ class CartBottomSheet extends StatelessWidget {
       },
     );
   }
-} 
+}

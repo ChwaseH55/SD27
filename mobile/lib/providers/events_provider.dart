@@ -1,7 +1,9 @@
 import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:coffee_card/api_request/events_request.dart';
 import 'package:coffee_card/models/events_model.dart';
+import 'package:coffee_card/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class EventsProvider extends ChangeNotifier {
   List<EventsModel> _events = [];
@@ -18,7 +20,7 @@ class EventsProvider extends ChangeNotifier {
   String? get roleid => _roleid;
   bool get isLoading => _isLoading;
 
-  Future<void> fetchEvents() async {
+  Future<void> fetchEvents(BuildContext context) async {
     _isLoading = true;
     //notifyListeners();
 
@@ -40,28 +42,6 @@ class EventsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> testEvents() async {
-    _isLoading = true;
-    //notifyListeners();
-
-    try {
-      _events = await getAllEvents();
-      _userid = await getUserID();
-      for(var event in _events ) {
-        _isRegList[event.eventid!] = await isUserRegisteredForEvent(event.eventid.toString(), userId!);
-      }
-      _roleid = await getRoleId();
-      _registeredevents = await getUserRegisteredEvents(userId!);
-    } catch (e) {
-      _events = [];
-      _userid = '';
-      _registeredevents = [];
-    }
-
-    _isLoading = false;
-   
-  }
-
    List<EventsModel> getFilteredEvents({required bool isAllEvents, required String search}) {
   final baseList = isAllEvents ? events : registeredevents;
   return baseList
@@ -69,3 +49,11 @@ class EventsProvider extends ChangeNotifier {
       .toList();
 }
 }
+
+void _addToCalendar(BuildContext context, EventsModel event) {
+    // final provider = Provider.of<EventProvider>(context, listen: false);
+    // DateTime eventDate = DateTime.parse(event.eventdate!);
+    // provider.addEvent(eventDate, event.eventname!, event.eventid!);
+
+    
+  }

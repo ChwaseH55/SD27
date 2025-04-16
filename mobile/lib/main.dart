@@ -1,3 +1,4 @@
+import 'package:accessibility_tools/accessibility_tools.dart';
 import 'package:coffee_card/providers/announcement_info_provider.dart';
 import 'package:coffee_card/providers/announcement_provider.dart';
 import 'package:coffee_card/providers/events_info_provider.dart';
@@ -46,7 +47,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ForumProvider()),
         ChangeNotifierProvider(create: (_) => PostProvider()),
-        ChangeNotifierProvider(create: (_) => EventsProvider()..fetchEvents()),
+        ChangeNotifierProvider(create: (_) => EventsProvider()),
         ChangeNotifierProvider(create: (_) => EventsInfoProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
         ChangeNotifierProvider(create: (_) => ReplyProvider()),
@@ -70,6 +71,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      //builder: (context, child) => AccessibilityTools(child: child),
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
       theme: ThemeData(

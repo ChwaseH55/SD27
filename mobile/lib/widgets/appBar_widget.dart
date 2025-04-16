@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBackButton;
+  final List<Widget>? actions;
 
   const CustomAppBar({
     super.key,
     required this.title,
+    this.actions,
     this.showBackButton = false,
   });
 
@@ -28,17 +30,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               },
             )
           : null,
-      actions: <Widget>[
-        IconButton(
-          icon: const Icon(
-            Icons.account_circle_rounded,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.pushNamed(context, '/pro');
-          },
-        )
-      ],
+      actions: actions,
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -57,3 +49,4 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+

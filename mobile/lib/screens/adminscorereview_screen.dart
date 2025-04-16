@@ -2,11 +2,13 @@ import 'dart:developer';
 
 import 'package:coffee_card/api_request/scores_request.dart';
 import 'package:coffee_card/models/custom_scores_model.dart';
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/models/user_model.dart';
 import 'package:coffee_card/providers/scores_approval_provider.dart';
-
 
 class ScoreListScreen extends StatefulWidget {
   const ScoreListScreen({super.key});
@@ -46,12 +48,9 @@ class _ScoreListScreen extends State<ScoreListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const BackButton(color: Colors.black),
-        title: const Text('UCF Events',
-            style: TextStyle(fontWeight: FontWeight.w900)),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+      appBar: const CustomAppBar(
+        title: 'Score Approval',
+        showBackButton: true,
       ),
       body: ChangeNotifierProvider<ScoresAdminProvider>.value(
         value: _scoresProvider,
@@ -60,7 +59,6 @@ class _ScoreListScreen extends State<ScoreListScreen> {
     );
   }
 }
-
 
 class ScoresWidget extends StatefulWidget {
   final String scoreState;
@@ -76,6 +74,7 @@ class ScoresWidget extends StatefulWidget {
 class _ScoresWidget extends State<ScoresWidget> {
   final TextEditingController searchController = TextEditingController();
   String searchQuery = "";
+  bool? isRecent = true;
 
   @override
   Widget build(BuildContext context) {
@@ -86,12 +85,7 @@ class _ScoresWidget extends State<ScoresWidget> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: searchController,
-            decoration: _inputDecoration(),
-            onChanged: (value) =>
-                setState(() => searchQuery = value.toLowerCase()),
-          ),
+          child: _inputDecoration(),
         ),
         if (scoreProvider.isLoading)
           const Center(child: CircularProgressIndicator())
@@ -109,10 +103,14 @@ class _ScoresWidget extends State<ScoresWidget> {
                         .length,
                     itemBuilder: (context, index) {
                       final filteredScores = scoreProvider.custScore
-                          .where((score) => score.event.eventname!
+                          .where((score) => score.user.username
                               .toLowerCase()
                               .contains(searchQuery))
                           .toList();
+                      if (isRecent != null && isRecent == false) {
+                        filteredScores.sort((a, b) => a.score.submissionDate!
+                            .compareTo(b.score.submissionDate!));
+                      }
                       if (filteredScores.isEmpty) {
                         return const Center(
                             child: Text('No matching events found.'));
@@ -128,17 +126,69 @@ class _ScoresWidget extends State<ScoresWidget> {
     );
   }
 
-  InputDecoration _inputDecoration() {
-    return InputDecoration(
-      focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(
-            color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
-        borderRadius: BorderRadius.circular(25.0),
+  Widget _inputDecoration() {
+    return Expanded(
+      flex: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextField(
+          controller: searchController,
+          cursorColor: Colors.black,
+          decoration: InputDecoration(
+            suffixIcon: Align(
+              widthFactor: 1.0,
+              heightFactor: 1.0,
+              child: PopupMenuButton<String>(
+                icon: const Icon(Icons.filter_list),
+                onSelected: (String result) {
+                  setState(() {
+                    switch (result) {
+                      case 'recent':
+                        isRecent = null;
+                        break;
+                      case 'old':
+                        isRecent = false;
+                        break;
+
+                      default:
+                    }
+                  });
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'recent',
+                    child: Text('Latest'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'old',
+                    child: Text('Oldest'),
+                  ),
+                ],
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.black, width: 2.0),
+              borderRadius: BorderRadius.circular(40.0),
+            ),
+            fillColor: Colors.white,
+            filled: true,
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(
+                  color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+              borderRadius: BorderRadius.circular(40.0),
+            ),
+            labelText: 'Search Posts',
+            labelStyle: const TextStyle(color: Colors.black),
+            prefixIcon: const Icon(Icons.search),
+            border: const OutlineInputBorder(),
+          ),
+          onChanged: (value) {
+            setState(() {
+              searchQuery = value.toLowerCase();
+            });
+          },
+        ),
       ),
-      labelText: 'Search Scores',
-      labelStyle: const TextStyle(color: Colors.black),
-      prefixIcon: const Icon(Icons.search),
-      border: const OutlineInputBorder(),
     );
   }
 
@@ -157,22 +207,22 @@ class _ScoresWidget extends State<ScoresWidget> {
               context, parentState, 'Approved Scores', 'approved'),
           _buildFilterButton(context, parentState, 'Denied Scores', 'denied'),
           _buildFilterButton(context, parentState, 'Pending Scores', 'pending'),
-          const SizedBox(width: 10),
-          _buildDropdownMenu(
-            context,
-            'Admin',
-            scoreProvider.adminusers,
-            (value) =>
-                parentState?._updateSelectedWidget('admin', newValue: value),
-          ),
-          const SizedBox(width: 10),
-          _buildDropdownMenu(
-            context,
-            'Player',
-            scoreProvider.users,
-            (value) =>
-                parentState?._updateSelectedWidget('player', newValue: value),
-          ),
+          // const SizedBox(width: 10),
+          // _buildDropdownMenu(
+          //   context,
+          //   'Admin',
+          //   scoreProvider.adminusers,
+          //   (value) =>
+          //       parentState?._updateSelectedWidget('admin', newValue: value),
+          // ),
+          // const SizedBox(width: 10),
+          // _buildDropdownMenu(
+          //   context,
+          //   'Player',
+          //   scoreProvider.users,
+          //   (value) =>
+          //       parentState?._updateSelectedWidget('player', newValue: value),
+          // ),
         ],
       ),
     );
@@ -274,7 +324,12 @@ class _ScoreCardWidget extends State<ScoreCardWidget> {
     } else {
       picture = 'https://picsum.photos/250?image=9';
     }
+    //var name = '${widget.score.user.firstname!} ${widget.score.user.lastname}' ;
     var name = widget.score.user.username;
+    var score = widget.score.score.score;
+    String formattedDate = DateFormat.yMd()
+        .format(DateTime.parse(widget.score.score.submissionDate!));
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Card(
@@ -316,51 +371,89 @@ class _ScoreCardWidget extends State<ScoreCardWidget> {
                 style: const TextStyle(fontSize: 16, height: 1.4),
                 textAlign: TextAlign.justify,
               ),
+              Text(
+                'Score: $score',
+                style: const TextStyle(fontSize: 16, height: 1.4),
+                textAlign: TextAlign.justify,
+              ),
               Row(
                 children: <Widget>[
-                  ElevatedButton(
-                      onPressed: () async {
-                        log('${widget.score.score.approvalstatus!}');
-                        // await approveScore(
-                          
-                        //     widget.score.score.scoreid.toString());
-                        // parentState?._updateSelectedWidget('approved');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        side: const BorderSide(
-                            width: 2, // the thickness
-                            color: Colors.black // the color of the border
+                  if (widget.score.score.approvalstatus == 'approved')
+                    Expanded(
+                        flex: 2,
+                        child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 2,
+                              ),
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              12), // Change this value as needed
+                            child: const Center(
+                                child: Text(
+                              'APPROVED',
+                              style: TextStyle(color: Colors.white),
+                            )))),
+                  if (widget.score.score.approvalstatus == 'not_approved')
+                    Expanded(
+                        flex: 2,
+                        child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 2,
+                              ),
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Center(
+                                child: Text(
+                              'DENIED',
+                              style: TextStyle(color: Colors.white),
+                            )))),
+                  if (widget.score.score.approvalstatus == 'pending')
+                    ElevatedButton(
+                        onPressed: () async {
+                          log('${widget.score.score.approvalstatus!}');
+                          await approveScore(
+                              widget.score.score.scoreid.toString());
+                          parentState?._updateSelectedWidget('approved');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          side: const BorderSide(
+                              width: 2, // the thickness
+                              color: Colors.black // the color of the border
+                              ),
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                12), // Change this value as needed
+                          ),
                         ),
-                      ),
-                      child: const Text('Approve',
-                          style: TextStyle(color: Colors.white))),
+                        child: const Text('Approve',
+                            style: TextStyle(color: Colors.white))),
                   const SizedBox(width: 10),
-                  ElevatedButton(
-                      onPressed: () async {
-                        await rejectScore(
-                            widget.score.score.scoreid.toString());
-                        parentState?._updateSelectedWidget('denied');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        side: const BorderSide(
-                            width: 2, // the thickness
-                            color: Colors.black // the color of the border
-                            ),
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              12), // Change this value as needed
+                  if (widget.score.score.approvalstatus == 'pending')
+                    ElevatedButton(
+                        onPressed: () async {
+                          await rejectScore(
+                              widget.score.score.scoreid.toString());
+                          parentState?._updateSelectedWidget('denied');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          side: const BorderSide(
+                              width: 2, // the thickness
+                              color: Colors.black // the color of the border
+                              ),
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                12), // Change this value as needed
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'Deny',
-                        style: TextStyle(color: Colors.white),
-                      )),
+                        child: const Text(
+                          'Deny',
+                          style: TextStyle(color: Colors.white),
+                        )),
                   const SizedBox(width: 15),
                   ElevatedButton.icon(
                     onPressed: () async {
@@ -377,6 +470,11 @@ class _ScoreCardWidget extends State<ScoreCardWidget> {
                     ),
                   )
                 ],
+              ),
+              Text(
+                'Submission Date: $formattedDate',
+                style: const TextStyle(fontSize: 10.5, height: 1.4),
+                textAlign: TextAlign.justify,
               ),
             ],
           ),

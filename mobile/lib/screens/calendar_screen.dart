@@ -145,7 +145,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                   eventProvider
                                       .getEventsForDay(_selectedDay!)[index]
                                       .id);
-                                      listProvider.fetchEvents();
+                                      listProvider.fetchEvents(context);
                             },
                           ),
                         )));

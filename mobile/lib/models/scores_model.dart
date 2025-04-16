@@ -6,6 +6,7 @@ class ScoresModel {
   int? approvedbyuser;
   String? scoreimage;
   int? score;
+  String? submissionDate;
 
   ScoresModel(
       {this.scoreid,
@@ -14,7 +15,8 @@ class ScoresModel {
       this.approvalstatus,
       this.approvedbyuser,
       this.scoreimage,
-      this.score});
+      this.score,
+      this.submissionDate});
 
   ScoresModel.fromJson(Map<String, dynamic> json) {
     scoreid = json['scoreid'];
@@ -24,5 +26,6 @@ class ScoresModel {
     approvedbyuser = json['approvedbyuser'];
     scoreimage = json['scoreimage'];
     score = json['score'];
+    submissionDate = json['submissiondate'];
   }
 }

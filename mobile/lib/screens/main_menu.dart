@@ -10,6 +10,7 @@ import 'package:coffee_card/screens/chat_screen.dart';
 import 'package:coffee_card/screens/listofevents_screen.dart';
 import 'package:coffee_card/screens/listofpostsinforum_screen.dart';
 import 'package:coffee_card/screens/scores_screen.dart';
+import 'package:coffee_card/screens/shop_screen.dart';
 import 'package:coffee_card/screens/users_list.dart';
 import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:coffee_card/widgets/slideRightTransition.dart';
@@ -20,10 +21,20 @@ class MainMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
         backgroundColor: Colors.white,
-        appBar: CustomAppBar(title: 'UCF Main', showBackButton: false,),
-        body:  HomePage());
+        appBar: CustomAppBar(title: 'UCF Main', showBackButton: false, actions: <Widget>[
+        IconButton(
+          icon: const Icon(
+            Icons.account_circle_rounded,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pushNamed(context, '/pro');
+          },
+        )
+      ]),
+        body:  const HomePage());
   }
 }
 
@@ -192,8 +203,11 @@ class HomePage extends StatelessWidget {
                         icon: Icons.shopping_cart,
                         title: "Shop",
                         onTap: () {
-                          Navigator.pushNamed(context, '/shop');
-                        }),
+                          Navigator.push(
+                                context, slideRightRoute(const ShopScreen()));
+                          }),
+                         
+                        
                     ],
                   ),
                 ),

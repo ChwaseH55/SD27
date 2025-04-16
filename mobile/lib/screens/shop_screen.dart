@@ -1,3 +1,4 @@
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/shop_provider.dart';
@@ -63,9 +64,8 @@ class _ShopScreenState extends State<ShopScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Shop'),
-        backgroundColor: Colors.green,
+      appBar: CustomAppBar(
+        title: 'Shop',
         actions: [
           Consumer<ShopProvider>(
             builder: (context, shopProvider, child) {
@@ -73,7 +73,7 @@ class _ShopScreenState extends State<ShopScreen> {
               return Stack(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.shopping_cart),
+                    icon: const Icon(Icons.shopping_cart, color: Colors.black,),
                     onPressed: () => _showCartBottomSheet(context),
                   ),
                   if (itemCount > 0)
@@ -148,7 +148,8 @@ class _ShopScreenState extends State<ShopScreen> {
                         width: double.infinity,
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: NetworkImage(item['imageUrl'] ?? ''),
+                            image: NetworkImage(item['imageUrl'] ??
+                                'https://dogsinc.org/wp-content/uploads/2021/08/extraordinary-dog.png'),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -171,7 +172,7 @@ class _ShopScreenState extends State<ShopScreen> {
                             '\$${item['price']?.toString() ?? '0'}',
                             style: const TextStyle(
                               fontSize: 14,
-                              color: Colors.green,
+                              color:  Color.fromRGBO(186, 155, 55, 1),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -187,8 +188,8 @@ class _ShopScreenState extends State<ShopScreen> {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
+                                backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+                                foregroundColor: Colors.black,
                               ),
                               child: const Text('Add to Cart'),
                             ),
@@ -209,7 +210,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
 class CartBottomSheet extends StatelessWidget {
   final ScrollController controller;
-  
+
   const CartBottomSheet({
     super.key,
     required this.controller,
@@ -325,9 +326,10 @@ class CartBottomSheet extends StatelessWidget {
                     minimumSize: const Size(double.infinity, 50),
                   ),
                   onPressed: () async {
-                    final shopProvider = Provider.of<ShopProvider>(context, listen: false);
+                    final shopProvider =
+                        Provider.of<ShopProvider>(context, listen: false);
                     final success = await shopProvider.launchCheckout(context);
-                    
+
                     if (success) {
                       if (context.mounted) {
                         Navigator.pop(context); // Close the bottom sheet
@@ -339,7 +341,8 @@ class CartBottomSheet extends StatelessWidget {
                       if (context.mounted) {
                         Navigator.pop(context); // Close the bottom sheet
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Checkout was not completed')),
+                          const SnackBar(
+                              content: Text('Checkout was not completed')),
                         );
                       }
                     }

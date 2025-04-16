@@ -5,6 +5,7 @@ import 'package:coffee_card/main.dart';
 import 'package:coffee_card/models/post_model.dart';
 import 'package:coffee_card/models/user_model.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:coffee_card/widgets/slidedown.dart';
 import 'package:flutter/material.dart';
@@ -49,32 +50,8 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(35.0),
-        child: AppBar(
-          title: const Text(
-            'UCF Post',
-            style:  TextStyle(fontWeight: FontWeight.w900),
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: BackButton(
-            color: Colors.black,
-            onPressed: () {
-              Navigator.of(context).pop(true);
-            },
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(
-                Icons.account_circle_rounded,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.pushNamed(context, '/pro');
-              },
-            ),
+      appBar: CustomAppBar(title: 'Forum Posts', showBackButton: true, actions: <Widget>[
+            
             IconButton(
               style: ButtonStyle(
                 foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
@@ -97,24 +74,10 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
               },
               icon: const Icon(
                 Icons.add,
-                size: 15,
+                size: 35,
               ),
             ),
-          ],
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color.fromRGBO(186, 155, 55, 1),
-                  Color.fromARGB(255, 240, 219, 130),
-                ],
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-              ),
-            ),
-          ),
-        ),
-      ),
+          ]),
       body: Column(
         children: [
           Row(

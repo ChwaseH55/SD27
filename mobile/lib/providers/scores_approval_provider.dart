@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:coffee_card/api_request/announcement_request.dart';
 import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:coffee_card/api_request/events_request.dart';
@@ -8,12 +9,11 @@ import 'package:coffee_card/models/custom_scores_model.dart';
 import 'package:coffee_card/models/events_model.dart';
 import 'package:coffee_card/models/scores_model.dart';
 import 'package:coffee_card/models/user_model.dart';
-import 'package:flutter/material.dart';
 
 class ScoresAdminProvider extends ChangeNotifier {
-  List<UserModel> _users = [];
-  List<UserModel> _adminusers = [];
-  List<CustomScoresModel> _custScore = [];
+  final List<UserModel> _users = [];
+  final List<UserModel> _adminusers = [];
+  final List<CustomScoresModel> _custScore = [];
 
   bool _isLoading = true;
 
@@ -23,40 +23,54 @@ class ScoresAdminProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   ScoresAdminProvider(String replyId, String userId) {
-    getScores(replyId, userId);
+    loadScores(replyId, userId);
   }
 
-  Future<void> getScores(String topic, String id) async {
+  Future<void> loadScores(String topic, String id) async {
     _isLoading = true;
-    //notifyListeners();
+    notifyListeners();
 
     try {
-      _users = await getAllUsers();
-      _adminusers = _users
-          .where((user) =>
-              user.roleid == 4 || user.roleid == 5 || user.roleid == 6)
-          .toList();
-      if (topic == 'player') {
-        var temp = (await getPlayerScores(id))!;
-        _custScore = await makeScores(temp);
-      } else if (topic == 'admin') {
-        var temp = (await getScoresAdmin(id))!;
-        _custScore = await makeScores(temp);
-      } else if (topic == 'all') {
-        var temp = (await getAllScores())!;
-        _custScore = await makeScores(temp);
-      } else if (topic == 'pending') {
-        var temp = (await getPendingScores())!;
-        _custScore = await makeScores(temp);
-      } else if (topic == 'denied') {
-        var temp = (await getDeniedScores())!;
-        _custScore = await makeScores(temp);
-      } else if (topic == 'approved') {
-        var temp = (await getApprovedScores())!;
-        _custScore = await makeScores(temp);
+      final allUsers = await getAllUsers();
+      _users.clear();
+      _users.addAll(allUsers);
+
+      _adminusers.clear();
+      _adminusers.addAll(
+        allUsers.where((u) => [4, 5, 6].contains(u.roleid)),
+      );
+
+      List<ScoresModel> scores;
+
+      switch (topic) {
+        case 'player':
+          scores = await getPlayerScores(id) ?? [];
+          break;
+        case 'admin':
+          scores = await getScoresAdmin(id) ?? [];
+          break;
+        case 'all':
+          scores = await getAllScores() ?? [];
+          break;
+        case 'pending':
+          scores = await getPendingScores() ?? [];
+          break;
+        case 'denied':
+          scores = await getDeniedScores() ?? [];
+          break;
+        case 'approved':
+          scores = await getApprovedScores() ?? [];
+          break;
+        default:
+          scores = [];
       }
+
+      final custom = await makeScores(scores);
+      _custScore
+        ..clear()
+        ..addAll(custom);
     } catch (e) {
-      _users;
+      debugPrint('Error loading scores: $e');
     }
 
     _isLoading = false;
@@ -65,14 +79,15 @@ class ScoresAdminProvider extends ChangeNotifier {
 }
 
 Future<List<CustomScoresModel>> makeScores(List<ScoresModel> scores) async {
-  List<CustomScoresModel> res = [];
-  for (ScoresModel score in scores) {
-    var event = await getEventById(score.eventid.toString());
-    var user = await getSingleUser(userId: score.userid.toString());
-    var newScore = await getScoreById(score.scoreid.toString());
-    CustomScoresModel model =
-        CustomScoresModel(event: event, user: user, score: newScore);
-    res.add(model);
-  }
-  return res;
+  return Future.wait(scores.map((score) async {
+    final event = await getEventById(score.eventid.toString());
+    final user = await getSingleUser(userId: score.userid.toString());
+    final fullScore = await getScoreById(score.scoreid.toString());
+
+    return CustomScoresModel(
+      event: event,
+      user: user,
+      score: fullScore,
+    );
+  }));
 }

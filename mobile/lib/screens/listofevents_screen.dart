@@ -2,9 +2,12 @@ import 'dart:developer';
 
 import 'package:coffee_card/arguments/regOrAllargument.dart';
 import 'package:coffee_card/models/events_model.dart';
+import 'package:coffee_card/utils.dart';
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:coffee_card/widgets/creationformplus.dart';
 import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/screens/event_info.dart';
@@ -23,13 +26,14 @@ class EventsListScreen extends StatefulWidget {
 }
 
 class _EventsListScreenState extends State<EventsListScreen> {
-  late EventsProvider eventsProvider;
+  EventsProvider? eventsProvider;
   TextEditingController searchController = TextEditingController();
   String searchQuery = "";
   bool? isAll;
   bool _isInit = true;
   bool _isLoading = false;
   bool? isRecent = true;
+  bool addToCal = true;
 
   @override
   void didChangeDependencies() {
@@ -39,49 +43,61 @@ class _EventsListScreenState extends State<EventsListScreen> {
       isAll = widget.isAllEvents;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         eventsProvider = Provider.of<EventsProvider>(context, listen: false);
-        eventsProvider.fetchEvents();
+        eventsProvider!.fetchEvents(context);
+        if (eventsProvider != null && addToCal) {
+          _addToCalendar(context, eventsProvider!.events);
+          
+        }
       });
       if (mounted) {
         setState(() {
+          addToCal = false;
           _isLoading = false;
         });
       }
-
       _isInit = false;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _addToCalendar(BuildContext context, List<EventsModel> events) {
+    for (var event in events) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final provider = Provider.of<EventProvider>(context, listen: false);
+        DateTime eventDate = DateTime.parse(event.eventdate!);
+        provider.addEvent(eventDate, event.eventname!, event.eventid!);
+      });
     }
   }
 
   void _toggleEventView(bool showAll) {
     setState(() => isAll = showAll);
-    eventsProvider.fetchEvents();
+    eventsProvider!.fetchEvents(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('UCF Events',
-            style: TextStyle(fontWeight: FontWeight.w900)),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+      appBar: CustomAppBar(
+        title: 'Golf Events',
+        showBackButton: true,
         actions: [
-          ElevatedButton(
-            onPressed: () async {
-              await Navigator.pushNamed(context, CreateEvent.routeName,
-                  arguments:
-                      EventCreateArgument(false, 1, '', '', '', '', false, ''));
-              eventsProvider.fetchEvents();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(12), // Change this value as needed
-              ),
-            ),
-            child: const Text('+ New Event',
-                style: TextStyle(color: Colors.white)),
-          ),
+          IconButton(
+              onPressed: () async {
+                await Navigator.pushNamed(context, CreateEvent.routeName,
+                    arguments: EventCreateArgument(
+                        false, 1, '', '', '', '', false, ''));
+                eventsProvider!.fetchEvents(context);
+              },
+              icon: const Icon(
+                Icons.add,
+                size: 35,
+                color: Colors.black,
+              )),
         ],
       ),
       floatingActionButton: const FloatingBtn(),
@@ -154,11 +170,19 @@ class ToggleButtons extends StatelessWidget {
     return ElevatedButton(
       onPressed: () => onToggle(value),
       style: ElevatedButton.styleFrom(
+        side: BorderSide(
+          width: 3.0,
+          color: isAllEvents == value ? Colors.black : Colors.transparent,
+        ),
         backgroundColor: isAllEvents == value
             ? const Color.fromRGBO(186, 155, 55, 1)
-            : const Color.fromARGB(255, 147, 122, 39),
+            : Colors.white,
       ),
-      child: Text(text, style: const TextStyle(color: Colors.black)),
+      child: Text(text,
+          style: TextStyle(
+              color: isAllEvents == value
+                  ? Colors.black
+                  : const Color.fromRGBO(186, 155, 55, 1))),
     );
   }
 }
@@ -200,7 +224,6 @@ class EventsWidgetBase extends StatelessWidget {
                 selector: (_, provider) =>
                     provider.isRegList[event.eventid] ?? false,
                 builder: (_, isRegistered, __) {
-             
                   return EventsWidgets(
                     isReg: isRegistered,
                     event: event,
