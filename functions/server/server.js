@@ -7,7 +7,7 @@ const eventsRouter = require('./routes/events');
 const forumRouter = require('./routes/forum');
 const announcementsRouter = require('./routes/announcements');
 const productsRouter = require('./routes/products');
-const stripeRouter = require('./routes/stripe');
+const { router: stripeRouter, handleWebhook } = require('./server/routes/stripe');
 const scoresRouter = require('./routes/scores');
 
 const app = express();
