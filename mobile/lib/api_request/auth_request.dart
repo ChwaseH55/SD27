@@ -12,7 +12,7 @@ String urlAddress = "https://sd27-87d55.web.app/api/auth";
 const FlutterSecureStorage storage = FlutterSecureStorage();
 Dio dio = ApiService.dio;
 
-Future<void> registerUser({
+Future<bool> registerUser({
   required BuildContext context,
   required String username,
   required String email,
@@ -38,14 +38,29 @@ Future<void> registerUser({
     );
 
     if (response.statusCode == 200) {
-      // Navigate to home screen on success
-      navigatorKey.currentState?.pushNamed('/mainMenu');
-      log('Register successfully');
+      var data = jsonDecode(response.body.toString());
+      // Assuming 'userID' exists in response
+
+      // Save userID to shared preferences
+      await storage.write(key: 'userId', value: data['user']['id'].toString());
+      await storage.write(
+          key: 'userRole', value: data['user']['roleid'].toString());
+      await storage.write(key: 'token', value: data['token'].toString());
+      String? userId = await storage.read(key: 'userId');
+      String? role = await storage.read(key: 'userRole');
+      log('User ID cached: $userId');
+      log('Role ID cached: $role');
+      log('Login successfully');
+
+      if (context.mounted) Navigator.pushReplacementNamed(context, '/mainMenu');
+      return true;
     } else {
       log('Error with register');
+      return false;
     }
   } catch (e) {
     log(e.toString());
+    throw Exception(e);
   }
 }
 

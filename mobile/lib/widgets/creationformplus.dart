@@ -1,3 +1,5 @@
+import 'package:coffee_card/screens/calendar_screen.dart';
+import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:flutter/material.dart';
 
 class FormAddWidget extends StatelessWidget {
@@ -29,7 +31,7 @@ class _DisplayCreationState extends State<DisplayCreation> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, '/calendar');
+        Navigator.push(context, slideRightRoute(const TableEventsExample()));
       },
       child: Container(
         width: 56,

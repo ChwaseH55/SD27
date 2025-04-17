@@ -1,4 +1,6 @@
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class CheckoutWebViewScreen extends StatefulWidget {
@@ -61,17 +63,17 @@ class _CheckoutWebViewScreenState extends State<CheckoutWebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Checkout'),
-        backgroundColor: Colors.green,
+      appBar: const CustomAppBar(
+        title: 'Checkout',
+        showBackButton: true,
       ),
       body: Stack(
         children: [
           WebViewWidget(controller: controller),
           if (isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
+            Center(
+                child: LoadingAnimationWidget.threeArchedCircle(
+                    color: Colors.black, size: 70)),
           if (error != null)
             Center(
               child: Padding(

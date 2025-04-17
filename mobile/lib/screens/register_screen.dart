@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:coffee_card/api_request/auth_request.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -7,37 +8,17 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Row(
-              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
-              children: [
-                SizedBox(width: 14),
-                Icon(Icons.arrow_back_ios,
-                    color: Colors.black, size: 16), // Reduce size if needed
-          
-                Text(
-                  'Back',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+      resizeToAvoidBottomInset: true,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.black87, Color.fromRGBO(255, 204, 0, 1)],
+          ),
         ),
-        title: const Text(
-          'UCF',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+        child: const Center(child: RegisterForm()),
       ),
-      body: const RegisterForm(),
     );
   }
 }
@@ -49,148 +30,157 @@ class RegisterForm extends StatefulWidget {
   State<RegisterForm> createState() => _RegisterForm();
 }
 
-// This class holds the data related to the Form.
 class _RegisterForm extends State<RegisterForm> {
-  // Create a text controller and use it to retrieve the current value
-  // of the TextField.
-  final fNameController = TextEditingController();
-  final lNameController = TextEditingController();
-  final emailController = TextEditingController();
+  bool _isLoading = false;
   final userController = TextEditingController();
   final passController = TextEditingController();
+  final fnameController = TextEditingController();
+  final lnameController = TextEditingController();
+  final emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    // Clean up the controller when the widget is disposed.
+    fnameController.dispose();
+    lnameController.dispose();
+    emailController.dispose();
     userController.dispose();
     passController.dispose();
-    fNameController.dispose();
-    lNameController.dispose();
-    emailController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.width;
-    return Padding(
-        padding: EdgeInsets.only(top: screenHeight * 0.18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+    return _isLoading
+        ? LoadingAnimationWidget.threeArchedCircle(
+            color: Colors.yellow, size: 100)
+        : SingleChildScrollView(
+          child: Card(
+              elevation: 5,
+              color: Colors.black,
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              margin: const EdgeInsets.symmetric(horizontal: 25),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextField(
-                  controller: fNameController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'First Name',
-                  ),
+                padding: const EdgeInsets.all(25),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Logo
+                    
+                      // Welcome Text
+                    const Text(
+                      "Register",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                     
+                      Form(
+                        key: _formKey,
+                        child: Column(children: <Widget>[
+                          // Username Field
+                          _buildTextField(userController, "First Name", false),
+                          const SizedBox(height: 15),
+                          // Password Field
+                          _buildTextField(passController, "Last Name", false),
+                          const SizedBox(height: 20),
+                          _buildTextField(passController, "Email", false),
+                          const SizedBox(height: 20),
+                          _buildTextField(passController, "Username", false),
+                          const SizedBox(height: 20),
+                          _buildTextField(passController, "Password", true),
+                          const SizedBox(height: 20),
+                        ])),
+                      // Login Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 45,
+                      child: ElevatedButton(
+                        onPressed: _isLoading
+                            ? null // disable button during loading
+                            : () async {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(
+                                      () => _isLoading = true); // show loading
+                                    bool res = await registerUser(
+                                    context: context,
+                                    username: userController.text,
+                                    password: passController.text,
+                                    email: emailController.text,
+                                    firstName: fnameController.text,
+                                    lastName: lnameController.text
+                                  );
+                                    setState(
+                                      () => _isLoading = false); // hide loading
+                                    if (!res && context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Invalid Registration Information')),
+                                    );
+                                  }
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromRGBO(255, 204, 0, 1),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text(
+                          "Register",
+                          style: TextStyle(fontSize: 16, color: Colors.black),
+                        ),
+                      ),
+                    ),
+                      const SizedBox(height: 15),
+                      // Register Link
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/');
+                      },
+                      child: const Text(
+                        "Already have an account? Log in",
+                        style: TextStyle(color: Color.fromRGBO(255, 204, 0, 1)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextField(
-                  controller: lNameController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Last Name',
-                  ),
-                ),
-              ),
-            ),
-            // Username input
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextField(
-                  controller: userController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Username',
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Email',
-                  ),
-                ),
-              ),
-            ),
-            // Password input
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: TextField(
-                  controller: passController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Password',
-                  ),
-                ),
-              ),
-            ),
-            // Login Btn
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(35),
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  registerUser(
-                      context: context,
-                      username: 'exampleUser',
-                      email: 'test',
-                      password: 'examplePassword',
-                      firstName: 'fnamedd',
-                      lastName: 'lnameaa');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        12), // Change this value as needed
-                  ),
-                ),
-                child: const Text(
-                  'Register',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-            //Password Forget btn
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                "Already Have an account",
-                style: TextStyle(fontSize: 15, color: Colors.black),
-              ),
-            ),
-          ],
-        ));
+            )
+        );
+  }
+
+  Widget _buildTextField(
+      TextEditingController controller, String hint, bool obscure) {
+    return TextFormField(
+      cursorColor: const Color.fromRGBO(186, 155, 55, 1),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter some text';
+        }
+        return null;
+      },
+      controller: controller,
+      obscureText: obscure,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            borderSide:
+                BorderSide(color: Color.fromRGBO(186, 155, 55, 1), width: 2)),
+        filled: true,
+        fillColor: Colors.white10,
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white54),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
   }
 }

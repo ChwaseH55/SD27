@@ -1,6 +1,8 @@
 import 'package:coffee_card/models/user_model.dart';
 import 'package:coffee_card/providers/user_provider.dart';
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 class UserList extends StatefulWidget {
@@ -18,31 +20,34 @@ class _UserList extends State<UserList> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    userProvider =
-        Provider.of<UserProvider>(context, listen: false);
-    userProvider.getUsers();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.getUsers();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Users',
-            style: TextStyle(fontWeight: FontWeight.w900)),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-      ),
+      appBar: const CustomAppBar(title: 'Users', showBackButton: true),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: searchController,
+              cursorColor: Colors.black,
               decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.black, width: 2.0),
+                  borderRadius: BorderRadius.circular(40.0),
+                ),
+                fillColor: Colors.white,
+                filled: true,
                 focusedBorder: OutlineInputBorder(
                   borderSide: const BorderSide(
                       color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
-                  borderRadius: BorderRadius.circular(25.0),
+                  borderRadius: BorderRadius.circular(40.0),
                 ),
                 labelText: 'Search Users',
                 labelStyle: const TextStyle(color: Colors.black),
@@ -60,19 +65,17 @@ class _UserList extends State<UserList> {
             child: Consumer<UserProvider>(
               builder: (context, userprovider, child) {
                 if (userprovider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return  Center(
+                      child: LoadingAnimationWidget.threeArchedCircle(
+                          color: Colors.black, size: 70));
                 }
 
-                final filteredUsers =
-                    userprovider.users.where((user) {
-                  return user.username
-                      .toLowerCase()
-                      .contains(searchQuery);
+                final filteredUsers = userprovider.users.where((user) {
+                  return user.username.toLowerCase().contains(searchQuery);
                 }).toList();
 
                 if (filteredUsers.isEmpty) {
-                  return const Center(
-                      child: Text('No matching users found.'));
+                  return const Center(child: Text('No matching users found.'));
                 }
 
                 return ListView.builder(
@@ -80,13 +83,11 @@ class _UserList extends State<UserList> {
                   itemBuilder: (context, index) {
                     final user = filteredUsers[index];
                     return InkWell(
-                      onTap: () {
-                        
-                      },
+                      onTap: () {},
                       child: Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: UserWidget(
-                        user: user ,
+                          user: user,
                         ),
                       ),
                     );
@@ -121,8 +122,8 @@ class _UserWidget extends State<UserWidget> {
       'Executive Board',
       'President'
     ];
-   
-    String role = roles[widget.user.roleid - 1];
+
+    
 
     return Padding(
         padding: const EdgeInsets.only(bottom: 8, left: 5, right: 5),
@@ -156,14 +157,13 @@ class _UserWidget extends State<UserWidget> {
                       ),
                     ),
 
-                    const SizedBox(width: 0),
 
                     // Right: Dropdown
                     Expanded(
                       flex: 1,
                       child: DropdownButtonFormField<String>(
                         isExpanded: true,
-                        value: role,
+                        value: roles[2],
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           contentPadding:
@@ -177,7 +177,7 @@ class _UserWidget extends State<UserWidget> {
                         }).toList(),
                         onChanged: (String? newValue) {
                           setState(() {
-                            role = newValue!;
+                            //role = newValue!;
                           });
                         },
                       ),
@@ -188,6 +188,3 @@ class _UserWidget extends State<UserWidget> {
             )));
   }
 }
-
-
-

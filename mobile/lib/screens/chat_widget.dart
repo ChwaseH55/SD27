@@ -11,7 +11,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
-import 'dart:async'; // Import for StreamSubscription
+import 'dart:async';
+
+import 'package:loading_animation_widget/loading_animation_widget.dart'; // Import for StreamSubscription
 
 class ChatScreen extends StatefulWidget {
   final String currentUserId;
@@ -45,6 +47,8 @@ class _ChatScreenState extends State<ChatScreen> {
   List<UserModel> users = [];
   UserModel? _selectedUser;
   Message? _selectedMsg;
+  Chat? _selectedChat;
+  Offset? _tapPosition;
 
   StreamSubscription? _chatSubscription;
   StreamSubscription? _messageSubscription;
@@ -183,7 +187,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _createNewChat(bool isGroupChat) async {
     Map<String, bool> participants = {};
-    final chat;
+    final Map<String, Object> chat;
     if (_selectedUser == null && _selectedUsers == []) return;
     if (isGroupChat) {
       for (var user in _selectedUsers) {
@@ -264,15 +268,32 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildChatList() {
+    double width = MediaQuery.sizeOf(context).width;
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromRGBO(186, 155, 55, 1),
+                  Color.fromARGB(255, 240, 219, 130),
+                ],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+              ),
+            ),
+          ),
+          backgroundColor: Colors.transparent,
           title: Text(_activeChat?.name ?? 'Chats'),
           actions: [
             Padding(
                 padding: const EdgeInsets.only(right: 20),
                 child: GestureDetector(
-                  child: const Icon(Icons.add),
+                  child: const Icon(
+                    Icons.create_rounded,
+                    color: Colors.black,
+                    size: 16,
+                  ),
                   onTap: () {
                     // setState(() {
                     //   _showUserModal = true;
@@ -294,25 +315,79 @@ class _ChatScreenState extends State<ChatScreen> {
             itemCount: _chats.length,
             itemBuilder: (context, index) {
               final chat = _chats[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: const Color.fromRGBO(229, 191, 69, 1),
-                  child: Text(
-                    chat.name[0],
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                ),
-                title: Text(chat.name),
-                subtitle: Text(chat.lastMessage ?? 'No messages yet'),
-                onTap: () async {
-                  setState(() {
-                    _activeChat = chat;
-                    _messages = [];
-                    _isLoadingMessages = true;
-                  });
-                  await _loadMessages();
-                },
-              );
+              // Convert milliseconds to DateTime
+              DateTime date =
+                  DateTime.fromMillisecondsSinceEpoch(chat.lastMessageDate!);
+
+              // Format to mm/dd/yy
+              String formattedDate = DateFormat('MM/dd/yy').format(date);
+              return Column(
+                children: [ GestureDetector(
+                    onTapDown: (details) {
+                      _tapPosition = details.globalPosition;
+                    },
+                    onLongPress: () {
+                      _selectedChat = chat;
+                      _showChatMenu(_tapPosition!);
+                    },
+                    child: ListTile(
+                      leading: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              Color.fromRGBO(229, 191, 69, 1),
+                              Color.fromRGBO(137, 108, 14, 1)
+                            ],
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.transparent,
+                          child: Text(
+                            chat.name[0].toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              chat.name,
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Text(
+                            formattedDate,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                      subtitle: Text(chat.lastMessage ?? 'No messages yet'),
+                      onTap: () async {
+                        setState(() {
+                          _activeChat = chat;
+                          _messages = [];
+                          _isLoadingMessages = true;
+                        });
+                        await _loadMessages();
+                      },
+                    )),
+                    
+              ]);
             },
           ),
         ));
@@ -360,10 +435,56 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  void _showChatMenu(Offset offset) async {
+    double left = offset.dx;
+    double top = offset.dy;
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+      items: [
+        // PopupMenuItem(
+        //   onTap: () {
+        //     _messageController.text = _selectedMsg!.text!;
+        //     isEditMessage = true;
+        //     log(isEditMessage.toString());
+        //   },
+        //   value: 1,
+        //   child: const Row(children: <Widget>[
+        //     Icon(Icons.person_add),
+        //     SizedBox(
+        //       width: 5,
+        //     ),
+        //     Text("Edit Chat")
+        //   ]),
+        // ),
+        PopupMenuItem(
+          onTap: () {
+            _deleteChat();
+          },
+          value: 2,
+          child: const Row(children: <Widget>[
+            Icon(Icons.group_add_outlined),
+            SizedBox(
+              width: 5,
+            ),
+            Text("Delete Chat")
+          ]),
+        )
+      ],
+      elevation: 8.0,
+    ).then((value) {
+      setState(() {});
+    });
+  }
+
   void _deleteMsg() async {
     await _database
         .child('messages/${_activeChat!.id}/${_selectedMsg!.id}')
         .remove();
+  }
+
+  void _deleteChat() async {
+    await _database.child('chats/${_selectedChat!.id}').remove();
   }
 
   void _showPopupMenu(Offset offset) async {
@@ -574,12 +695,24 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+          centerTitle: true,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromRGBO(186, 155, 55, 1),
+                  Color.fromARGB(255, 240, 219, 130),
+                ],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+              ),
+            ),
+          ),
+          backgroundColor: Colors.transparent,
           leading: GestureDetector(
             onTap: () {
               setState(() {
                 _activeChat = null;
-
                 _messages = []; // 🧹 Clear messages instantly
               });
               _loadChats();
@@ -602,7 +735,10 @@ class _ChatScreenState extends State<ChatScreen> {
               child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
                   child: _isLoadingMessages
-                      ? const Center(child: CircularProgressIndicator())
+                      ? Center(
+                      child: LoadingAnimationWidget.threeArchedCircle(
+                          color: Colors.black, size: 70))
+                
                       : ListView.builder(
                           controller: _scrollController,
                           itemCount: _messages.length,
@@ -630,9 +766,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                           horizontal: 0, vertical: 2),
                                       color: Colors
                                           .transparent, // make bubble itself transparent
-                                      nip: isMe
-                                          ? BubbleNip.rightBottom
-                                          : BubbleNip.leftBottom,
+                                      
                                       child: Container(
                                         padding: const EdgeInsets.all(11),
                                         decoration: BoxDecoration(

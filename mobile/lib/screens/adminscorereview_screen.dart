@@ -6,6 +6,7 @@ import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/models/user_model.dart';
 import 'package:coffee_card/providers/scores_approval_provider.dart';
@@ -88,9 +89,14 @@ class _ScoresWidget extends State<ScoresWidget> {
           child: _inputDecoration(),
         ),
         if (scoreProvider.isLoading)
-          const Center(child: CircularProgressIndicator())
-        else
-          Expanded(
+          Center(
+              child: LoadingAnimationWidget.threeArchedCircle(
+                  color: Colors.black, size: 70))
+        else if(scoreProvider.custScore.isEmpty)
+        const Center(
+              child:  Center(
+                            child: Text('No scores found.')))
+         else Expanded(
             child: Column(
               children: [
                 _buildFilterButtons(context, height, scoreProvider),
@@ -102,18 +108,21 @@ class _ScoresWidget extends State<ScoresWidget> {
                             .contains(searchQuery))
                         .length,
                     itemBuilder: (context, index) {
+                      
                       final filteredScores = scoreProvider.custScore
                           .where((score) => score.user.username
                               .toLowerCase()
                               .contains(searchQuery))
                           .toList();
+
                       if (isRecent != null && isRecent == false) {
                         filteredScores.sort((a, b) => a.score.submissionDate!
                             .compareTo(b.score.submissionDate!));
                       }
+
                       if (filteredScores.isEmpty) {
                         return const Center(
-                            child: Text('No matching events found.'));
+                            child: Text('No matching scores found.'));
                       }
                       return ScoreCardWidget(score: filteredScores[index]);
                     },
@@ -127,67 +136,64 @@ class _ScoresWidget extends State<ScoresWidget> {
   }
 
   Widget _inputDecoration() {
-    return Expanded(
-      flex: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          controller: searchController,
-          cursorColor: Colors.black,
-          decoration: InputDecoration(
-            suffixIcon: Align(
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: PopupMenuButton<String>(
-                icon: const Icon(Icons.filter_list),
-                onSelected: (String result) {
-                  setState(() {
-                    switch (result) {
-                      case 'recent':
-                        isRecent = null;
-                        break;
-                      case 'old':
-                        isRecent = false;
-                        break;
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: searchController,
+        cursorColor: Colors.black,
+        decoration: InputDecoration(
+          suffixIcon: Align(
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+            child: PopupMenuButton<String>(
+              icon: const Icon(Icons.filter_list),
+              onSelected: (String result) {
+                setState(() {
+                  switch (result) {
+                    case 'recent':
+                      isRecent = null;
+                      break;
+                    case 'old':
+                      isRecent = false;
+                      break;
 
-                      default:
-                    }
-                  });
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'recent',
-                    child: Text('Latest'),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: 'old',
-                    child: Text('Oldest'),
-                  ),
-                ],
-              ),
+                    default:
+                  }
+                });
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'recent',
+                  child: Text('Latest'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'old',
+                  child: Text('Oldest'),
+                ),
+              ],
             ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.black, width: 2.0),
-              borderRadius: BorderRadius.circular(40.0),
-            ),
-            fillColor: Colors.white,
-            filled: true,
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
-              borderRadius: BorderRadius.circular(40.0),
-            ),
-            labelText: 'Search Posts',
-            labelStyle: const TextStyle(color: Colors.black),
-            prefixIcon: const Icon(Icons.search),
-            border: const OutlineInputBorder(),
           ),
-          onChanged: (value) {
-            setState(() {
-              searchQuery = value.toLowerCase();
-            });
-          },
+          enabledBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.black, width: 2.0),
+            borderRadius: BorderRadius.circular(40.0),
+          ),
+          fillColor: Colors.white,
+          filled: true,
+          focusedBorder: OutlineInputBorder(
+            borderSide: const BorderSide(
+                color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+            borderRadius: BorderRadius.circular(40.0),
+          ),
+          labelText: 'Search Posts',
+          labelStyle: const TextStyle(color: Colors.black),
+          prefixIcon: const Icon(Icons.search),
+          border: const OutlineInputBorder(),
         ),
+        onChanged: (value) {
+          setState(() {
+            searchQuery = value.toLowerCase();
+          });
+        },
       ),
     );
   }
@@ -232,7 +238,7 @@ class _ScoresWidget extends State<ScoresWidget> {
       String label, String state) {
     bool isSelected = parentState?.scoreType == state;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5),
+      padding: const EdgeInsets.only(left: 5, right: 5, bottom: 7),
       child: ElevatedButton.icon(
         icon: isSelected
             ? const Icon(Icons.check, color: Colors.black)
@@ -251,6 +257,7 @@ class _ScoresWidget extends State<ScoresWidget> {
       ),
     );
   }
+  
 
   Widget _buildDropdownMenu(BuildContext context, String label,
       List<UserModel> users, Function(String) onSelected) {
@@ -497,13 +504,20 @@ void _showImageDialog(BuildContext context, String picture) {
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                  color: Colors.transparent, borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.all(8.0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image(
-                  image: NetworkImage(picture),
+                child: Image.network(
+                  picture,
                   fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child; // Fully loaded
+
+                    return Center(
+                        child: LoadingAnimationWidget.waveDots(
+                            color: Colors.white, size: 50));
+                  },
                   errorBuilder: (context, error, stackTrace) {
                     return const Icon(Icons.broken_image,
                         size: 50, color: Colors.red);

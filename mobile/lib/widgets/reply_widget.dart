@@ -8,6 +8,7 @@ import 'package:coffee_card/widgets/commentchange_widget.dart';
 import 'package:coffee_card/widgets/likebutton_widget.dart';
 
 class ReplyWidget extends StatelessWidget {
+  final String? picture;
   final String userName;
   final String? createDate;
   final String? content;
@@ -20,6 +21,7 @@ class ReplyWidget extends StatelessWidget {
 
   const ReplyWidget({
     super.key,
+    required this.picture,
     required this.userName,
     required this.createDate,
     required this.content,
@@ -59,18 +61,22 @@ class ReplyWidget extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Colors.grey[300],
-                  child: Text(
-                    userName[0].toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
+                picture == null
+                    ? CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.transparent,
+                        child: Text(
+                          userName[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ))
+                    : CircleAvatar(
+                        radius: 20,
+                        backgroundImage: NetworkImage(picture!),
+                      ),
                 const SizedBox(width: 8),
                 Text(
                   userName,

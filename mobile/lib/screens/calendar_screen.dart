@@ -2,6 +2,7 @@ import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/screens/event_info.dart';
 import 'package:coffee_card/utils.dart';
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -40,36 +41,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
     final eventProvider = Provider.of<EventProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Row(
-              mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
-              children: [
-                SizedBox(width: 14),
-                Icon(Icons.arrow_back_ios,
-                    color: Colors.black, size: 16), // Reduce size if needed
-          
-                Text(
-                  'Back',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-        ),
-        title: const Text(
-          'UCF Golf Calendar',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-      ),
+      appBar: const CustomAppBar(title: 'Calendar', showBackButton: true,),
       body: Column(
         children: [
           TableCalendar<Event>(

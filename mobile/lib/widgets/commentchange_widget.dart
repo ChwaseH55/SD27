@@ -43,71 +43,70 @@ class _AddCommentSheet extends State<AddCommentSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 16,
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            "Add a Comment",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller:
-                commentController, // Always use the initialized controller
-            decoration: const InputDecoration(
-              hintText: "Enter your comment here",
-              border: OutlineInputBorder(),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: Color.fromRGBO(186, 155, 55, 1),
-                    width: 2.0), // Highlight color
+Widget build(BuildContext context) {
+  return AnimatedPadding(
+    duration: const Duration(milliseconds: 550),
+    curve: Curves.easeOut,
+    padding: EdgeInsets.only(
+      bottom: MediaQuery.of(context).viewInsets.bottom * 0.0, // 👈 this handles keyboard space
+    ),
+    child: SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: Colors.white,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: commentController,
+                cursorColor: const Color.fromRGBO(186, 155, 55, 1),
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    borderSide: BorderSide(
+                      color: Color.fromRGBO(186, 155, 55, 1),
+                      width: 2,
+                    ),
+                  ),
+                  hintText: 'Add a Comment',
+                  border: OutlineInputBorder(),
+                ),
               ),
             ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () async {
-              final replyProvider =
-                  Provider.of<PostProvider>(context, listen: false);
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.send),
+              onPressed: () async {
+                final replyProvider =
+                    Provider.of<PostProvider>(context, listen: false);
 
-              if (widget.isUpdate) {
-               await replyProvider.editReplyAndRefresh(
-                    widget.replyId, commentController.text, widget.postId);
-              } else {
-                if (commentController.text.trim().isEmpty) {
-                  return;
+                if (widget.isUpdate) {
+                  await replyProvider.editReplyAndRefresh(
+                    widget.replyId,
+                    commentController.text,
+                    widget.postId,
+                  );
+                } else {
+                  if (commentController.text.trim().isEmpty) return;
+                  await replyProvider.addReplyAndRefresh(
+                    widget.postId,
+                    commentController.text,
+                    widget.userId,
+                  );
                 }
-                await replyProvider.addReplyAndRefresh(
-                    widget.postId, commentController.text, widget.userId);
-              }
 
-              if (context.mounted) {
-                Navigator.of(context).pop();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+                if (context.mounted) Navigator.of(context).pop();
+              },
             ),
-            child: const Text(
-              "Submit",
-              style: TextStyle(color: Colors.black),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+
+
 }

@@ -6,6 +6,7 @@ import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/providers/forum_reply_provider.dart';
+import 'package:coffee_card/providers/leaderboard_provider.dart';
 import 'package:coffee_card/providers/scores_provider.dart';
 import 'package:coffee_card/providers/shop_provider.dart';
 import 'package:coffee_card/providers/user_provider.dart';
@@ -20,7 +21,7 @@ import 'package:coffee_card/screens/announcement_list.dart';
 import 'package:coffee_card/screens/scores_screen.dart';
 import 'package:coffee_card/screens/register_screen.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
-import 'package:coffee_card/screens/forumcreation_screen.dart';
+
 import 'package:coffee_card/screens/userprofile_screen.dart';
 import 'package:coffee_card/screens/users_list.dart';
 import 'package:coffee_card/utils.dart';
@@ -59,6 +60,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (context) => ShopProvider(context.read<UserProvider>()),
         ),
+        ChangeNotifierProvider(create: (_) => LeaderboardProvider()),
       ],
       child: const MyApp(),
     ),
@@ -83,12 +85,11 @@ class MyApp extends StatelessWidget {
         '/': (context) => const LoginScreen(),
         '/reg': (context) => const RegisterScreen(),
         '/mainMenu': (context) => const MainMenu(),
-        '/createFor': (context) => const CreateForum(),
+       
         '/pos': (context) => const ForumpostScreen(),
         '/annc': (context) => const AnnouncementListScreen(),
         '/shop': (context) => const ShopScreen(),
         '/pro': (context) => const UserProfileScreen(),
-        '/calendar': (context) => const TableEventsExample(),
         '/createEvent': (context) => const CreateEvent(),
         '/scores': (context) => const GolfScoreScreen(),
         '/users': (context) => const UserList(),

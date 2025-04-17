@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 import 'package:coffee_card/api_request/notifications.dart';
 import 'package:coffee_card/models/announcement_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
-import 'package:http_status/http_status.dart';
 
 String homeAddress = "http://11.22.13.70:5000/api/announcements";
 String urlAddress = "https://sd27-87d55.web.app/api/announcements";

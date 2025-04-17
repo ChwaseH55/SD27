@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:coffee_card/api_request/forum_request.dart';
 import 'package:coffee_card/main.dart';
 import 'package:coffee_card/models/post_model.dart';
@@ -29,23 +30,34 @@ class _ForumpostScreenState extends State<ForumpostScreen> {
   bool _isInit = true;
   bool _isLoading = false;
   bool? isRecent;
+  String? role;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_isInit) {
-      _isLoading = true;
-      forumProvider = Provider.of<ForumProvider>(context, listen: false);
-      forumProvider!.fetchPosts().then((_) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      });
-      _isInit = false;
-    }
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  if (_isInit) {
+    _isLoading = true;
+
+    getRoleId().then((fetchedRole) {
+      if (mounted) {
+        setState(() {
+          role = fetchedRole;
+        });
+      }
+    });
+
+    forumProvider = Provider.of<ForumProvider>(context, listen: false);
+    forumProvider!.fetchPosts().then((_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+
+    _isInit = false;
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -364,9 +376,9 @@ class PostWidget extends StatelessWidget {
                     ),
                   ),
 
-                  /// Right-side actions
+                  
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       LikeButton(

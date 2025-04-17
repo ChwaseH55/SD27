@@ -5,7 +5,9 @@ import 'package:coffee_card/api_request/scores_request.dart';
 import 'package:coffee_card/providers/announcement_provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/providers/scores_provider.dart';
+import 'package:coffee_card/screens/leaderboard.dart';
 import 'package:coffee_card/widgets/appBar_widget.dart';
+import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -18,7 +20,11 @@ class GolfScoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: CustomAppBar(title: 'Score Upload', showBackButton: true,),
+        resizeToAvoidBottomInset: false,
+        appBar: const CustomAppBar(
+          title: 'Score Upload',
+          showBackButton: true,
+        ),
         backgroundColor: Colors.grey[100], // Light background
         body: const TournamentList());
   }
@@ -62,7 +68,6 @@ class _TournamentList extends State<TournamentList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       body: Column(
         children: [
           Padding(
@@ -173,35 +178,76 @@ class _PostWidget extends State<PostWidget> {
                 const SizedBox(width: 7),
               ]),
               const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () async {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20)),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (context) {
+                            return FractionallySizedBox(
+                              heightFactor: 0.8,
+                              child: DialogWid(eventid: widget.eventid),
+                            );
+                          },
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.black,
+                      ),
+                      label: const Text(
+                        'Submit Scores',
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                      ),
                     ),
-                    builder: (context) {
-                      return DialogWid(eventid: widget.eventid);
-                    },
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        12), // Change this value as needed
                   ),
-                ),
-                child: const Text(
-                  'Submit Scores',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.black,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          slideRightRoute(
+                              StepLeaderboardScreen(event: widget.postName)),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(
+                            width: 2.0,
+                            color: Color.fromRGBO(186, 155, 55, 1),
+                          ),
+                        ),
+                      ),
+                      icon: const Icon(
+                        Icons.bar_chart,
+                        color: Color.fromRGBO(186, 155, 55, 1),
+                      ),
+                      label: const Text(
+                        'Leaderboard',
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Color.fromRGBO(186, 155, 55, 1)),
+                      ),
+                    ),
                   ),
-                ),
-              )
+                ],
+              ),
 
               // /// **Like Button & Actions Row**
             ],
@@ -223,14 +269,29 @@ class DialogWid extends StatefulWidget {
 class _DialogWid extends State<DialogWid> {
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.sizeOf(context).width;
     return Dialog(
       insetPadding: const EdgeInsets.all(20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: ScoresForm(eventid: widget.eventid),
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight:
+                  MediaQuery.of(context).size.height * 0.85, // Limit height
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom +
+                      20, // adjust for keyboard
+                ),
+                child: ScoresForm(eventid: widget.eventid),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -328,15 +389,19 @@ class _ScoresFormState extends State<ScoresForm> {
                       color: uploadedImage ? Colors.green : Colors.grey),
                   const SizedBox(height: 8),
                   uploadedImage
-                      ? const Text('Successful Upload', style: TextStyle(color: Colors.green),)
+                      ? const Text(
+                          'Successful Upload',
+                          style: TextStyle(color: Colors.green),
+                        )
                       : const Text('Click here to upload score card'),
-                   Text('Maximum file size: 5MB',
-                      style: TextStyle(fontSize: 12, color: uploadedImage ?Colors.green : Colors.black)),
+                  Text('Maximum file size: 5MB',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: uploadedImage ? Colors.green : Colors.black)),
                 ],
               )),
         ));
   }
-
 
   Widget _buildPlayerFormCard() {
     return Container(
@@ -367,10 +432,15 @@ class _ScoresFormState extends State<ScoresForm> {
                           hintText: 'Score',
                           isDense: true,
                           border: OutlineInputBorder(),
-                          focusColor: Color.fromRGBO(186, 155, 55, 1)
+                          focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5.0)),
+                              borderSide: BorderSide(
+                                  color: Color.fromRGBO(186, 155, 55, 1),
+                                  width: 2)),
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ],
@@ -383,8 +453,6 @@ class _ScoresFormState extends State<ScoresForm> {
 
   Widget _buildDropdown(int index) {
     return DropdownButtonFormField<String>(
-   
-    
       isExpanded: true,
       value: selectedUserIds[index].isNotEmpty ? selectedUserIds[index] : null,
       items: scoreProvider.users.map((user) {
@@ -397,10 +465,13 @@ class _ScoresFormState extends State<ScoresForm> {
         setState(() => selectedUserIds[index] = value ?? '');
       },
       decoration: const InputDecoration(
-        focusColor: Color.fromRGBO(186, 155, 55, 1),
         hintText: 'Select Player',
         isDense: true,
         border: OutlineInputBorder(),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            borderSide:
+                BorderSide(color: Color.fromRGBO(186, 155, 55, 1), width: 2)),
       ),
     );
   }
@@ -465,17 +536,17 @@ class _ScoresFormState extends State<ScoresForm> {
     log('${resScores}');
     log('$resIds');
     log('$downloadUrl');
-    // final success = await uploadScore(
-    //   eventId: widget.eventid.toString(),
-    //   scores: resScores,
-    //   userIds: resIds,
-    //   scoreImage: downloadUrl,
-    // );
+    final success = await uploadScore(
+      eventId: widget.eventid.toString(),
+      scores: resScores,
+      userIds: resIds,
+      scoreImage: downloadUrl,
+    );
 
-    // if (success && context.mounted) {
-    //   ScaffoldMessenger.of(context)
-    //       .showSnackBar(const SnackBar(content: Text('Scores uploaded')));
-    //   Navigator.pop(context);
-    // }
+    if (success && context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Scores uploaded')));
+      Navigator.pop(context);
+    }
   }
 }

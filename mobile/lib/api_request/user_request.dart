@@ -64,19 +64,25 @@ Future<bool> updateUserInfo(String? username, String? firstName,
         log(element.name);
       }
     }
-    File file = File(profilePicture!.files.single.path!);
+    String? downloadUrl;
+    if (profilePicture != null) {
+      File file = File(profilePicture.files.single.path!);
 
-    String fileName =
-        "${DateTime.now().millisecondsSinceEpoch}_${profilePicture.files.single.name}";
+      String fileName =
+          "${DateTime.now().millisecondsSinceEpoch}_${profilePicture.files.single.name}";
 
-    Reference storageRef =
-        FirebaseStorage.instance.ref().child("profile_pictures/$id/$fileName");
+      Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child("profile_pictures/$id/$fileName");
 
-    UploadTask uploadTask = storageRef.putFile(file);
-    TaskSnapshot snapshot = await uploadTask;
+      UploadTask uploadTask = storageRef.putFile(file);
+      TaskSnapshot snapshot = await uploadTask;
 
-    String downloadUrl = await snapshot.ref.getDownloadURL();
-    log("File uploaded! Download URL: $downloadUrl");
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      log("File uploaded! Download URL: $downloadUrl");
+    } else {
+      downloadUrl = null;
+    }
 
     final response = await put(
       url,

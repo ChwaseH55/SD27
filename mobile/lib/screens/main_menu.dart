@@ -15,6 +15,7 @@ import 'package:coffee_card/screens/users_list.dart';
 import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
@@ -23,18 +24,21 @@ class MainMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
-        appBar: CustomAppBar(title: 'UCF Main', showBackButton: false, actions: <Widget>[
-        IconButton(
-          icon: const Icon(
-            Icons.account_circle_rounded,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.pushNamed(context, '/pro');
-          },
-        )
-      ]),
-        body:  const HomePage());
+        appBar: CustomAppBar(
+            title: 'UCF Main',
+            showBackButton: false,
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(
+                  Icons.account_circle_rounded,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/pro');
+                },
+              )
+            ]),
+        body: const HomePage());
   }
 }
 
@@ -71,8 +75,32 @@ class GridTile extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePage();
+}
+
+class _HomePage extends State<HomePage> {
+  bool _isInit = true;
+  bool _isLoading = false;
+  bool? isRecent = true;
+  String? role;
+
+  @override
+  void initState() {
+    super.initState();
+    getRole();
+  }
+
+  void getRole() async {
+    final fetchRole = await getRoleId();
+
+    setState(() {
+      role = fetchRole;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +140,10 @@ class HomePage extends StatelessWidget {
         // Content
         SingleChildScrollView(
           child: Center(
-            child: Column(
+            child: role == null ? Center(
+                      child: LoadingAnimationWidget.threeArchedCircle(
+                          color: Colors.black, size: 70)) :
+                Column(
               children: <Widget>[
                 const SizedBox(height: 5),
                 // Golf Logo
@@ -161,7 +192,7 @@ class HomePage extends StatelessWidget {
                                     const AnnouncementListScreen()));
                           }),
                       GridTile(
-                          icon: Icons.score,
+                          icon: Icons.bar_chart,
                           title: "Scores",
                           onTap: () {
                             Navigator.push(context,
@@ -178,20 +209,22 @@ class HomePage extends StatelessWidget {
                                       true)), // replace with your constructor
                             );
                           }),
-                      GridTile(
-                          icon: Icons.people,
-                          title: "Users",
-                          onTap: () {
-                            Navigator.push(
-                                context, slideRightRoute(const UserList()));
-                          }),
-                      GridTile(
-                          icon: Icons.nature_people,
-                          title: "Score Approval",
-                          onTap: () {
-                            Navigator.push(context,
-                                slideRightRoute(const ScoreListScreen()));
-                          }),
+                      if (int.parse(role!) >= 5)
+                        GridTile(
+                            icon: Icons.people,
+                            title: "Users",
+                            onTap: () {
+                              Navigator.push(
+                                  context, slideRightRoute(const UserList()));
+                            }),
+                      if (int.parse(role!) >= 5)
+                        GridTile(
+                            icon: Icons.approval,
+                            title: "Score Approval",
+                            onTap: () {
+                              Navigator.push(context,
+                                  slideRightRoute(const ScoreListScreen()));
+                            }),
                       GridTile(
                           icon: Icons.forum_rounded,
                           title: "Chat",
@@ -199,15 +232,13 @@ class HomePage extends StatelessWidget {
                             Navigator.push(
                                 context, slideRightRoute(const ChatDisplay()));
                           }),
-                          GridTile(
-                        icon: Icons.shopping_cart,
-                        title: "Shop",
-                        onTap: () {
-                          Navigator.push(
+                      GridTile(
+                          icon: Icons.shopping_cart,
+                          title: "Shop",
+                          onTap: () {
+                            Navigator.push(
                                 context, slideRightRoute(const ShopScreen()));
                           }),
-                         
-                        
                     ],
                   ),
                 ),

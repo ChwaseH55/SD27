@@ -1,6 +1,4 @@
-import 'dart:developer';
-
-import 'package:coffee_card/arguments/regOrAllargument.dart';
+import 'package:coffee_card/api_request/auth_request.dart';
 import 'package:coffee_card/models/events_model.dart';
 import 'package:coffee_card/utils.dart';
 import 'package:coffee_card/widgets/appBar_widget.dart';
@@ -11,7 +9,6 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:coffee_card/providers/events_provider.dart';
 import 'package:coffee_card/screens/event_info.dart';
-import 'package:coffee_card/arguments/eventsargument.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';
 import 'package:coffee_card/screens/eventcreation.dart';
 import 'package:coffee_card/arguments/eventcreateargument.dart';
@@ -26,14 +23,15 @@ class EventsListScreen extends StatefulWidget {
 }
 
 class _EventsListScreenState extends State<EventsListScreen> {
+  static final Set<String> _addedToCalendarEventIds = {}; // Track by event id or route
   EventsProvider? eventsProvider;
   TextEditingController searchController = TextEditingController();
   String searchQuery = "";
   bool? isAll;
   bool _isInit = true;
   bool _isLoading = false;
-  bool? isRecent = true;
-  bool addToCal = true;
+  String? eventSort = '';
+  String? role;
 
   @override
   void didChangeDependencies() {
@@ -41,27 +39,33 @@ class _EventsListScreenState extends State<EventsListScreen> {
     if (_isInit) {
       _isLoading = true;
       isAll = widget.isAllEvents;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        eventsProvider = Provider.of<EventsProvider>(context, listen: false);
-        eventsProvider!.fetchEvents(context);
-        if (eventsProvider != null && addToCal) {
-          _addToCalendar(context, eventsProvider!.events);
-          
+
+      getRoleId().then((fetchedRole) {
+        if (mounted) {
+          setState(() {
+            role = fetchedRole;
+          });
         }
       });
-      if (mounted) {
-        setState(() {
-          addToCal = false;
-          _isLoading = false;
-        });
-      }
+
+      eventsProvider = Provider.of<EventsProvider>(context, listen: false);
+      eventsProvider!.fetchEvents(context).then((_) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          // ✅ Only add to calendar if not already added for this screen
+          final screenId = widget.key?.toString() ?? widget.hashCode.toString();
+          if (!_addedToCalendarEventIds.contains(screenId)) {
+            _addToCalendar(context, eventsProvider!.events);
+            _addedToCalendarEventIds.add(screenId);
+          }
+        }
+      });
+
       _isInit = false;
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   void _addToCalendar(BuildContext context, List<EventsModel> events) {
@@ -74,6 +78,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
     }
   }
 
+
   void _toggleEventView(bool showAll) {
     setState(() => isAll = showAll);
     eventsProvider!.fetchEvents(context);
@@ -81,23 +86,25 @@ class _EventsListScreenState extends State<EventsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Golf Events',
         showBackButton: true,
         actions: [
-          IconButton(
-              onPressed: () async {
-                await Navigator.pushNamed(context, CreateEvent.routeName,
-                    arguments: EventCreateArgument(
-                        false, 1, '', '', '', '', false, ''));
-                eventsProvider!.fetchEvents(context);
-              },
-              icon: const Icon(
-                Icons.add,
-                size: 35,
-                color: Colors.black,
-              )),
+          if (role == '5')
+            IconButton(
+                onPressed: () async {
+                  await Navigator.pushNamed(context, CreateEvent.routeName,
+                      arguments: EventCreateArgument(
+                          false, 1, '', '', '', '', false, ''));
+                  eventsProvider!.fetchEvents(context);
+                },
+                icon: const Icon(
+                  Icons.add,
+                  size: 35,
+                  color: Colors.black,
+                )),
         ],
       ),
       floatingActionButton: const FloatingBtn(),
@@ -109,6 +116,44 @@ class _EventsListScreenState extends State<EventsListScreen> {
               controller: searchController,
               cursorColor: Colors.black,
               decoration: InputDecoration(
+                suffixIcon: Align(
+                  widthFactor: 1.0,
+                  heightFactor: 1.0,
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(Icons.filter_list),
+                    onSelected: (String result) {
+                      setState(() {
+                        switch (result) {
+                          case 'recent':
+                            eventSort = 'recent';
+                            break;
+                          case 'old':
+                            eventSort = 'old';
+                            break;
+                          case 'clear':
+                            eventSort = 'clear';
+
+                          default:
+                        }
+                      });
+                    },
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'recent',
+                        child: Text('Upcoming Events'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'old',
+                        child: Text('Older Events'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'clear',
+                        child: Text('Clear'),
+                      ),
+                    ],
+                  ),
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderSide: const BorderSide(color: Colors.black, width: 2.0),
                   borderRadius: BorderRadius.circular(40.0),
@@ -140,7 +185,7 @@ class _EventsListScreenState extends State<EventsListScreen> {
               child: EventsWidgetBase(
             isAllEvents: isAll!,
             search: searchQuery,
-            isRecent: isRecent!,
+            eventSort: eventSort!,
           )),
         ],
       ),
@@ -190,11 +235,11 @@ class ToggleButtons extends StatelessWidget {
 class EventsWidgetBase extends StatelessWidget {
   final bool isAllEvents;
   final String search;
-  final bool isRecent;
+  final String eventSort;
   const EventsWidgetBase(
       {required this.isAllEvents,
       required this.search,
-      required this.isRecent,
+      required this.eventSort,
       super.key});
 
   @override
@@ -207,6 +252,33 @@ class EventsWidgetBase extends StatelessWidget {
       builder: (context, filteredEvents, child) {
         final eventsProvider =
             Provider.of<EventsProvider>(context, listen: false);
+
+        if (eventsProvider.isLoading) {
+          return Center(
+            child: LoadingAnimationWidget.threeArchedCircle(
+                color: Colors.black, size: 100),
+          );
+        }
+
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day); // strips off time
+
+        if (eventSort == 'recent') {
+          filteredEvents = eventsProvider.events
+              .where((event) => DateTime.parse(event.eventdate!).isAfter(today))
+              .toList();
+          filteredEvents.sort((a, b) => a.eventdate!.compareTo(b.eventdate!));
+        } else if (eventSort == 'old') {
+          filteredEvents = eventsProvider.events
+              .where(
+                  (event) => DateTime.parse(event.eventdate!).isBefore(today))
+              .toList();
+          filteredEvents.sort((a, b) => b.eventdate!
+              .compareTo(a.eventdate!)); // optional: most recent old first
+        } else if (eventSort == 'clear') {
+          filteredEvents = List.from(eventsProvider.events); // restore original
+        }
+
         if (filteredEvents.isEmpty) {
           return const Center(child: Text('No matching events found.'));
         }

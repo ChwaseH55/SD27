@@ -59,6 +59,8 @@ Future<String?> createStripeCheckoutSession({
         'name': item['name'],
       }).toList(),
       'userId': userId,
+      'success_url': null,
+      'cancel_url': null,
     };
 
     // Add this log to see the full request payload

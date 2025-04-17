@@ -6,6 +6,7 @@ import 'package:coffee_card/providers/forum_info_provider.dart';
 import 'package:coffee_card/providers/forum_provider.dart';
 import 'package:coffee_card/screens/postcreation_screen.dart';
 import 'package:coffee_card/widgets/likebutton_widget.dart';
+import 'package:coffee_card/widgets/slidedown.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -20,9 +21,11 @@ class PostinfoWidget extends StatelessWidget {
   final Map<int, int> likes;
   final String? createDate;
   final String? roleNum;
+  final String? picture;
 
   const PostinfoWidget({
     super.key,
+    required this.picture,
     required this.postId,
     required this.userId,
     required this.likes,
@@ -63,10 +66,22 @@ class PostinfoWidget extends StatelessWidget {
             /// User Info Row
             Row(
               children: [
-                const CircleAvatar(
-                  radius: 20,
-                  // replace with actual image if needed
-                ),
+                picture == null
+                    ? CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.transparent,
+                        child: Text(
+                          username![0].toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ))
+                    : CircleAvatar(
+                        radius: 20,
+                        backgroundImage: NetworkImage(picture!),
+                      ),
                 const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,15 +122,22 @@ class PostinfoWidget extends StatelessWidget {
                             final forumListProvider =
                                 Provider.of<ForumProvider>(context,
                                     listen: false);
-                            await Navigator.pushNamed(
+                            final res = await Navigator.push(
                               context,
-                              PostCreationForm.routeName,
-                              arguments: CreateArgument(true,
-                                  int.parse(postId!), posttitle!, postContent!),
+                              SlideDownRoute(
+                                  page: PostCreationForm(
+                                isUpdate: true,
+                                postId: int.parse(postId!),
+                                content: postContent!,
+                                title: posttitle!,
+                              )), // your destination
                             );
+
                             if (context.mounted) Navigator.of(context).pop();
-                            forumInfoProvider.fetchPostDetails(postId!);
-                            forumListProvider.fetchPosts();
+                            if (res == true) {
+                              forumInfoProvider.fetchPostDetails(postId!);
+                              forumListProvider.fetchPosts();
+                            }
                           },
                           child: const Text("Update Post"),
                         ),

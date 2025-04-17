@@ -6,8 +6,10 @@ import 'package:coffee_card/providers/announcement_info_provider.dart';
 import 'package:coffee_card/providers/announcement_provider.dart';
 import 'package:coffee_card/providers/user_provider.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 class AnnouncementInfo extends StatefulWidget {
@@ -43,40 +45,17 @@ class _AnnouncementInfo extends State<AnnouncementInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Row(
-            mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
-            children: [
-              SizedBox(width: 14),
-              Icon(Icons.arrow_back_ios,
-                  color: Colors.black, size: 16), // Reduce size if needed
-
-              Text(
-                'Back',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        title: const Text(
-          'Announcement',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
+      appBar: const CustomAppBar(
+        title: 'Announcement Details',
+        showBackButton: true,
       ),
       body: Consumer<AnnouncementInfoProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+            child: LoadingAnimationWidget.threeArchedCircle(
+                color: Colors.black, size: 100),
+          );
           }
           return Column(
             children: <Widget>[
@@ -117,25 +96,41 @@ class AnnouncementDetailsWidget extends StatelessWidget {
     bool match = cachedUser == user?.id && roleid == 5;
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(14.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           // Event Title
-          
+
           const SizedBox(height: 10),
           // User Info Row
           Row(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.grey[300],
-                child: Text(
-                  user!.username[0].toUpperCase(),
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
+             Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          Color.fromRGBO(229, 191, 69, 1),
+                          Color.fromRGBO(137, 108, 14, 1)
+                        ],
+                      ),
+                    ),
+                    child:  CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.transparent,
+                            child: Text(
+                              user!.username[0].toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )),
+                        
+                  ),
               const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,8 +183,7 @@ class AnnouncementDetailsWidget extends StatelessWidget {
                                 arguments:
                                     AnnouncementCreateArg(true, announcement!));
                             if (context.mounted) Navigator.of(context).pop();
-                            ancInfoProvider
-                                .fetchAnnouncementDetails(id!);
+                            ancInfoProvider.fetchAnnouncementDetails(id!);
                           },
                           child: const Text("Update Announcement"),
                         ),

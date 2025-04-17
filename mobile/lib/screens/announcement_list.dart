@@ -4,6 +4,7 @@ import 'package:coffee_card/models/announcement_model.dart';
 import 'package:coffee_card/providers/announcement_provider.dart';
 import 'package:coffee_card/screens/announcement_creation.dart';
 import 'package:coffee_card/screens/announcement_info.dart';
+import 'package:coffee_card/widgets/appBar_widget.dart';
 import 'package:coffee_card/widgets/events_widgets.dart';
 import 'package:coffee_card/widgets/slideRightTransition.dart';
 import 'package:flutter/material.dart';
@@ -32,14 +33,16 @@ class _AnnouncementListScreen extends State<AnnouncementListScreen> {
     super.didChangeDependencies();
     if (_isInit) {
       _isLoading = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-    Provider.of<AnnouncementProvider>(context, listen: false).fetchAnnouncements();
-  });
-  if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        announcementProvider =
+            Provider.of<AnnouncementProvider>(context, listen: false);
+        announcementProvider!.fetchAnnouncements();
+      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
       _isInit = false;
     }
   }
@@ -47,34 +50,7 @@ class _AnnouncementListScreen extends State<AnnouncementListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Row(
-            mainAxisSize: MainAxisSize.min, // Ensures minimal spacing
-            children: [
-              SizedBox(width: 14),
-              Icon(Icons.arrow_back_ios,
-                  color: Colors.black, size: 16), // Reduce size if needed
-
-              Text(
-                'Back',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        title: const Text('Golf Announcements',
-            style: TextStyle(fontWeight: FontWeight.w900)),
-        centerTitle: true,
-        backgroundColor: const Color.fromRGBO(186, 155, 55, 1),
-        actions: [
+      appBar: CustomAppBar(title: 'Announcements', showBackButton: true, actions: [
           Visibility(
               //visible: announcementProvider!.roleid == '5',
               child: TextButton(
@@ -92,81 +68,81 @@ class _AnnouncementListScreen extends State<AnnouncementListScreen> {
             },
             child: const Text('+ Create'),
           )),
-        ],
-      ),
+        ],),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child:  Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: searchController,
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    suffixIcon: Align(
-                      widthFactor: 1.0,
-                      heightFactor: 1.0,
-                      child: PopupMenuButton<String>(
-                        icon: const Icon(Icons.filter_list),
-                        onSelected: (String result) {
-                          setState(() {
-                            switch (result) {
-                              case 'recent':
-                                isRecent = null;
-                                break;
-                              case 'old':
-                                isRecent = false;
-                                break;
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: searchController,
+                cursorColor: Colors.black,
+                decoration: InputDecoration(
+                  suffixIcon: Align(
+                    widthFactor: 1.0,
+                    heightFactor: 1.0,
+                    child: PopupMenuButton<String>(
+                      icon: const Icon(Icons.filter_list),
+                      onSelected: (String result) {
+                        setState(() {
+                          switch (result) {
+                            case 'recent':
+                              isRecent = null;
+                              break;
+                            case 'old':
+                              isRecent = false;
+                              break;
 
-                              default:
-                            }
-                          });
-                        },
-                        itemBuilder: (BuildContext context) =>
-                            <PopupMenuEntry<String>>[
-                          const PopupMenuItem<String>(
-                            value: 'recent',
-                            child: Text('Newest Posts'),
-                          ),
-                          const PopupMenuItem<String>(
-                            value: 'old',
-                            child: Text('Oldest Posts'),
-                          ),
-                        ],
-                      ),
+                            default:
+                          }
+                        });
+                      },
+                      itemBuilder: (BuildContext context) =>
+                          <PopupMenuEntry<String>>[
+                        const PopupMenuItem<String>(
+                          value: 'recent',
+                          child: Text('Newest Posts'),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'old',
+                          child: Text('Oldest Posts'),
+                        ),
+                      ],
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.black, width: 2.0),
-                      borderRadius: BorderRadius.circular(40.0),
-                    ),
-                    fillColor: Colors.white,
-                    filled: true,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                          color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
-                      borderRadius: BorderRadius.circular(40.0),
-                    ),
-                    labelText: 'Search Posts',
-                    labelStyle: const TextStyle(color: Colors.black),
-                    prefixIcon: const Icon(Icons.search),
-                    border: const OutlineInputBorder(),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      searchQuery = value.toLowerCase();
-                    });
-                  },
+                  enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.black, width: 2.0),
+                    borderRadius: BorderRadius.circular(40.0),
+                  ),
+                  fillColor: Colors.white,
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: Color.fromRGBO(186, 155, 55, 1), width: 2.0),
+                    borderRadius: BorderRadius.circular(40.0),
+                  ),
+                  labelText: 'Search Posts',
+                  labelStyle: const TextStyle(color: Colors.black),
+                  prefixIcon: const Icon(Icons.search),
+                  border: const OutlineInputBorder(),
                 ),
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value.toLowerCase();
+                  });
+                },
               ),
             ),
-          
+          ),
           Expanded(
             child: Consumer<AnnouncementProvider>(
               builder: (context, announcementProvider, child) {
                 if (announcementProvider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return  Center(
+                      child: LoadingAnimationWidget.threeArchedCircle(
+                          color: Colors.black, size: 70));
                 }
 
                 final filteredAnnouncements =
@@ -221,16 +197,9 @@ class AnncListView extends StatelessWidget {
             },
             child: Padding(
               padding: const EdgeInsets.only(top: 0),
-              child: Container(
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Colors.black),
-                  ),
-                ),
-                child: AnnouncementWidget(
-                  announcement: announcement,
-                  username: annc.postUsers[announcement.announcementid],
-                ),
+              child: AnnouncementWidget(
+                announcement: announcement,
+                username: annc.postUsers[announcement.announcementid],
               ),
             ),
           );
