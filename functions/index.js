@@ -75,7 +75,7 @@ app.use((err, req, res, next) => {
 });
 
 // Gen 2 API function
-exports.api = onRequest(
+exports.app = onRequest(
   {
     region: "us-central1",
     timeoutSeconds: 60,
