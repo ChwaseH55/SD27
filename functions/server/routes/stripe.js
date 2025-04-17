@@ -175,7 +175,7 @@ const handleWebhook = async (req, res) => {
                 console.log(`🔹 Membership payment received for User ID: ${userId}`);
 
                 try {
-                    await pool.query("UPDATE users SET paymentstatus = true WHERE id = $1", [userId]);
+                    await pool.query("UPDATE users SET paymentstatus = true, roleid = 3 WHERE id = $1", [userId]);
                     console.log(`✅ Membership status updated for user ID ${userId}`);
                 } catch (error) {
                     console.error("❌ Database update failed:", error);
